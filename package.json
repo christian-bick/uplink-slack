@@ -7,7 +7,7 @@
     "e2e": "ENV=local mocha --require esm --recursive test/e2e/",
     "ut": "ENV=local mocha --require esm \"main/**/*.ut.js\"",
     "test": "npm run ut && npm run e2e",
-    "lint": "eslint main/**/* --ext js",
+    "lint": "eslint main/**/* test/**/* --ext js",
     "start": "node -r esm index.js",
     "dev": "ENV=local nodemon -r esm index.js | bunyan -o short --no-color"
   },
