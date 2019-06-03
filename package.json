@@ -1,0 +1,50 @@
+{
+  "name": "open-convo-slack",
+  "version": "0.1.0",
+  "description": "A Slack Integration for cross platform chats",
+  "main": "index.js",
+  "scripts": {
+    "e2e": "ENV=local mocha --require esm --recursive test/e2e/",
+    "ut": "ENV=local mocha --require esm \"main/**/*.ut.js\"",
+    "test": "npm run ut && npm run e2e",
+    "lint": "eslint main/**/* --ext js",
+    "start": "node -r esm index.js",
+    "dev": "ENV=local nodemon -r esm index.js | bunyan -o short --no-color"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/christian-bick/open-convo-slack.git"
+  },
+  "dependencies": {
+    "aws-sdk": "^2.466.0",
+    "bunyan": "^1.8.12",
+    "co": "^4.6.0",
+    "co-request": "^1.0.0",
+    "dotenv": "^8.0.0",
+    "esm": "^3.2.25",
+    "express": "^4.14.0",
+    "ioredis": "^4.9.5",
+    "moment": "^2.24.0",
+    "moment-timezone": "^0.5.25",
+    "node-uuid": "^1.4.7",
+    "redis-mock": "^0.44.0",
+    "@slack/bolt": "^1.2.0"
+  },
+  "devDependencies": {
+    "chai": "^4.2.0",
+    "chai-as-promised": "^7.1.1",
+    "chai-http": "^4.3.0",
+    "eslint": "^5.16.0",
+    "eslint-config-standard": "^12.0.0",
+    "eslint-module-utils": "^2.4.0",
+    "eslint-plugin-import": "^2.17.3",
+    "eslint-plugin-no-only-tests": "^2.3.0",
+    "eslint-plugin-node": "^9.1.0",
+    "eslint-plugin-promise": "^4.1.1",
+    "eslint-plugin-standard": "^4.0.0",
+    "mocha": "^6.1.4",
+    "nodemon": "^1.19.1",
+    "sinon": "^7.3.2",
+    "sinon-chai": "^3.3.0"
+  }
+}
