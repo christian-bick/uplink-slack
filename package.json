@@ -4,10 +4,10 @@
   "description": "A Slack Integration for cross platform chats",
   "main": "index.js",
   "scripts": {
-    "e2e": "ENV=local mocha --require esm --recursive test/e2e/",
-    "ut": "ENV=local mocha --require esm \"main/**/*.ut.js\"",
+    "e2e": "ENV=local mocha -r esm -r chai/register-expect --recursive test/e2e/",
+    "ut": "ENV=local mocha -r esm -r chai/register-expect \"main/**/*.ut.js\"",
     "test": "npm run ut && npm run e2e",
-    "lint": "eslint main/**/* test/**/* --ext js",
+    "lint": "eslint \"main/**/*\" \"test/**/*\"",
     "start": "node -r esm index.js",
     "dev": "ENV=local nodemon -r esm index.js | bunyan -o short --no-color"
   },
@@ -37,6 +37,7 @@
     "eslint": "^5.16.0",
     "eslint-config-standard": "^12.0.0",
     "eslint-module-utils": "^2.4.0",
+    "eslint-plugin-chai-expect": "^2.0.1",
     "eslint-plugin-import": "^2.17.3",
     "eslint-plugin-no-only-tests": "^2.3.0",
     "eslint-plugin-node": "^9.1.0",

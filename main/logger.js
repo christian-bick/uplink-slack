@@ -1,6 +1,6 @@
 import bunyan from 'bunyan'
-const statusLog = bunyan.createLogger({name: 'Status'});
+const statusLog = bunyan.createLogger({ name: 'Status' })
 
 export {
-  statusLog,
+  statusLog
 }
