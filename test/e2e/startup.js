@@ -1,4 +1,4 @@
-import { run } from '../../main/server'
+import { run } from '../../src/server'
 
 describe('Server lifecycle', () => {
   it('should start and stop server', async () => {
