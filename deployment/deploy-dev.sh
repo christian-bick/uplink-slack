@@ -1,4 +1,8 @@
 #!/usr/bin/env bash
 source $(dirname "$0")/./deploy.sh
 
-deploy open-convo-slack dev
+image="open-convo-slack"
+tag="dev"
+cluster="dev"
+
+deploy ${image} ${tag} ${cluster}
