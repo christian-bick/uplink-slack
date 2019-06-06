@@ -5,7 +5,7 @@
   "main": "src/index.js",
   "scripts": {
     "e2e": "ENV=local mocha -r esm -r chai/register-expect --recursive test/e2e/",
-    "ut": "ENV=local mocha -r esm -r chai/register-expect \"src/**/*.ut.js\"",
+    "ut": "ENV=local mocha -r esm -r chai/register-expect \"src/**/*.spec.js\"",
     "test": "npm run ut && npm run e2e",
     "lint": "eslint \"src/**/*\" \"test/**/*\"",
     "start": "node -r esm src/index.js | bunyan -o short --no-color",
