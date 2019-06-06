@@ -12,7 +12,8 @@ export {
   SERVER_ADDRESS
 }
 
-// The following will start a test server before all tests are run and stop it when all tests have finished
+// The following will start a test server before all tests are run and stop it when all tests have finished.
+// This code is parsed and executed by mocha, it does not require to be imported.
 let app
 
 before(async () => {
