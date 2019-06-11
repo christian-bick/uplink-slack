@@ -1,7 +1,7 @@
 import sinon from 'sinon'
-import { receiveContacts } from './add'
 import redis from '../redis'
 import { activeTeamOfUser, contactsOfUser, installedTeamsOfUser } from '../redis-keys'
+import { receiveContacts, buildContactBlock } from './add'
 
 describe('contacts', () => {
   const sandbox = sinon.createSandbox()
@@ -33,6 +33,11 @@ describe('contacts', () => {
         text: `<mailto:${contactEmail}|${contactEmail}>`
       }
     })
+
+    const expectReplyWithEmails = (expectedEmails) => {
+      const generatedBlocks = expectedEmails.map(buildContactBlock)
+      expect(say).to.have.been.calledWith({ blocks: generatedBlocks })
+    }
 
     it('should create user entries for a fresh user', async () => {
       await receiveContacts(app)({ message, context, body, say })
@@ -73,15 +78,22 @@ describe('contacts', () => {
       expect(contactEntries).to.eql([contactEmail, contactEmail2])
     })
 
-    it('should return the block of emails for a single email', async () => {
+    it('should return contact block for an inactive contact', async () => {
       await receiveContacts(app)({ message, context, body, say })
-      expect(say).to.have.been.calledWith({ blocks: [{
-        'type': 'section',
-        'text': {
-          'type': 'mrkdwn',
-          'text': contactEmail
-        }
-      }] })
+      expectReplyWithEmails([{ email: contactEmail, installed: false }])
+    })
+
+    it('should return email block for active single contact', async () => {
+      await redis.setAsync(activeTeamOfUser(contactEmail), 'team-2')
+      await receiveContacts(app)({ message, context, body, say })
+      expectReplyWithEmails([{ email: contactEmail, installed: true }])
+    })
+
+    it('should return contact block for active and inactive contacts', async () => {
+      await redis.setAsync(activeTeamOfUser(contactEmail), 'team-2')
+      message.text += `<mailto:${contactEmail2}|${contactEmail2}>`
+      await receiveContacts(app)({ message, context, body, say })
+      expectReplyWithEmails([{ email: contactEmail, installed: true }, { email: contactEmail2, installed: false }])
     })
   })
 })
