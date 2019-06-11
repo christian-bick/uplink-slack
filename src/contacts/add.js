@@ -1,6 +1,7 @@
 import { promisify } from 'util'
 import { findEmailLinks, EMAIL_PATTERN, reduceEmailLinks } from './email'
 import redis from '../redis'
+import { activeTeamOfUser, contactsOfUser, installedTeamsOfUser } from '../redis-keys'
 
 export const receiveContacts = (app) => async ({ message, context, body, say }) => {
   const userInfo = await app.client.users.info({
@@ -12,9 +13,9 @@ export const receiveContacts = (app) => async ({ message, context, body, say }) 
 
   const emailLinkList = findEmailLinks(message.text)
   const emailAddressList = reduceEmailLinks(emailLinkList)
-  await redis.setAsync(`active-${userEmail}`, body.team_id)
-  await redis.saddAsync(`install-${userEmail}`, body.team_id)
-  await redis.saddAsync(`contact-${userEmail}`, ...emailAddressList)
+  await redis.setnxAsync(activeTeamOfUser(userEmail), body.team_id)
+  await redis.saddAsync(installedTeamsOfUser(userEmail), body.team_id)
+  await redis.saddAsync(contactsOfUser(userEmail), ...emailAddressList)
 
   const installKeys = emailAddressList.map(email => `active-${email}`)
 
