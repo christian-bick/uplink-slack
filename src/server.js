@@ -2,6 +2,7 @@ import { App, LogLevel } from '@slack/bolt'
 import dotEnv from 'dotenv'
 import { statusLog } from './logger'
 import ping from './ping'
+import contacts from './contacts'
 
 const run = async (port) => {
   // Load .env file when available
@@ -16,9 +17,11 @@ const run = async (port) => {
 
   // Register modules
   ping(app)
+  contacts(app)
 
   // Startup Slack App
-  await app.start(port || process.env.SLACK_PORT || 3000)
+  port = port || process.env.SLACK_PORT || 3000
+  await app.start(port)
   statusLog.info(`App is running on port ${port}`)
   return app
 }
