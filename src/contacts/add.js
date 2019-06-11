@@ -11,7 +11,7 @@ export const buildContactBlock = ({ email, installed }) => ({
   },
   'accessory': installed ? {
     'type': 'button',
-    'action_id': 'open-conversation',
+    'action_id': 'open-chat',
     'text': {
       'type': 'plain_text',
       'text': 'Message',
@@ -20,10 +20,10 @@ export const buildContactBlock = ({ email, installed }) => ({
     'value': email
   } : {
     'type': 'button',
+    'url': `mailto:${email}`,
     'text': {
       'type': 'plain_text',
       'text': 'Invite',
-      'url': `mailto:${email}`,
       'emoji': false
     }
   }
@@ -57,6 +57,7 @@ export const receiveContacts = (app) => async ({ message, context, body, say }) 
   }))
 
   const emailBlocks = augmentedEmailAddressList.map(buildContactBlock)
+  console.log(JSON.stringify(emailBlocks))
 
   say({
     blocks: emailBlocks

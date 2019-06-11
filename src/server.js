@@ -3,6 +3,7 @@ import dotEnv from 'dotenv'
 import { statusLog } from './logger'
 import ping from './ping'
 import contacts from './contacts'
+import chats from './chats'
 
 const run = async (port) => {
   // Load .env file when available
@@ -11,11 +12,18 @@ const run = async (port) => {
   // Configure Slack App
   const app = new App({
     signingSecret: process.env.SLACK_SIGNING_SECRET,
-    token: process.env.SLACK_BOT_TOKEN,
-    logLevel: process.env.SLACK_LOG_LEVEL || LogLevel.INFO
+    logLevel: process.env.SLACK_LOG_LEVEL || LogLevel.INFO,
+    authorize: async () => ({
+      teamId: 'T12345',
+      botId: 'BK9HWFACU',
+      userToken: 'xoxp-470302301987-471454174487-655608513380-a7d4144889dfae6ea7cdf8c45b988f6a',
+      botToken: 'xoxb-470302301987-655608521924-Eyl6s19RBGr76y8xMtE6S4xa',
+      botUserId: 'UK9HWFBT6'
+    })
   })
 
   // Register modules
+  chats(app)
   ping(app)
   contacts(app)
 
