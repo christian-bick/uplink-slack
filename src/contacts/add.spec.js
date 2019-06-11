@@ -1,20 +1,13 @@
-import sinon from 'sinon'
 import redis from '../redis'
 import { activeTeamOfUser, contactsOfUser, installedTeamsOfUser } from '../redis-keys'
 import { receiveContacts, buildContactBlock } from './add'
 
 describe('contacts', () => {
-  const sandbox = sinon.createSandbox()
   let app = { client: { users: { } } }
   let say
 
   beforeEach('set up', () => {
     say = sandbox.fake()
-  })
-
-  afterEach('clean up', async () => {
-    sandbox.restore()
-    await redis.flushdbAsync()
   })
 
   describe('receiveContacts', () => {

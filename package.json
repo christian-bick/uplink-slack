@@ -4,8 +4,8 @@
   "description": "A Slack Integration for cross platform chats",
   "main": "src/index.js",
   "scripts": {
-    "e2e": "ENV=local mocha -r esm -r test-setup.js -r chai/register-expect --recursive test/e2e/",
-    "ut": "ENV=local mocha -r esm -r test-setup.js -r chai/register-expect \"src/**/*.spec.js\"",
+    "e2e": "ENV=local mocha -r esm -r test/test-setup.js -r chai/register-expect --recursive test/e2e/",
+    "ut": "ENV=local mocha -r esm -r test/test-setup.js test/helpers-ut.js src/**/*.spec.js",
     "watch": "npm run ut  -- --watch -- --reporter=min",
     "test": "npm run ut && npm run e2e",
     "lint": "eslint \"src/**/*\" \"test/**/*\"",
