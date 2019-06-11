@@ -4,8 +4,9 @@
   "description": "A Slack Integration for cross platform chats",
   "main": "src/index.js",
   "scripts": {
-    "e2e": "ENV=local mocha -r esm -r chai/register-expect --recursive test/e2e/",
-    "ut": "ENV=local mocha -r esm -r chai/register-expect \"src/**/*.spec.js\"",
+    "e2e": "ENV=local mocha -r esm -r test-setup.js -r chai/register-expect --recursive test/e2e/",
+    "ut": "ENV=local mocha -r esm -r test-setup.js -r chai/register-expect \"src/**/*.spec.js\"",
+    "watch": "npm run ut  -- --watch -- --reporter=min",
     "test": "npm run ut && npm run e2e",
     "lint": "eslint \"src/**/*\" \"test/**/*\"",
     "start": "node -r esm src/index.js | bunyan -o short --no-color",
@@ -17,6 +18,7 @@
   },
   "dependencies": {
     "aws-sdk": "^2.466.0",
+    "bluebird": "^3.5.5",
     "bunyan": "^1.8.12",
     "co": "^4.6.0",
     "co-request": "^1.0.0",
