@@ -99,7 +99,6 @@ export const grantForTeam = (app) => async (req, resp) => {
     const { code, state: stateToken } = req.query
     const { successUri, redirectUri } = await verifyStateToken(stateToken)
     const authInfo = await verifyAuthCode(app, code, redirectUri)
-    console.log(authInfo)
     const team = extractTeam(authInfo)
     const user = extractUser(authInfo)
     await store.slackTeam.set(team.teamId, team)
