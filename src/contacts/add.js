@@ -57,7 +57,6 @@ export const receiveContacts = (app) => async ({ message, context, body, say }) 
   }))
 
   const emailBlocks = augmentedEmailAddressList.map(buildContactBlock)
-  console.log(JSON.stringify(emailBlocks))
 
   say({
     blocks: emailBlocks
