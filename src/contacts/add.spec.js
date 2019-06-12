@@ -1,5 +1,5 @@
 import redis from '../redis'
-import { activeTeamOfUser, contactsOfUser, installedTeamsOfUser } from '../redis-keys'
+import { activeTeamOfUser, contactsOfUser, usedTeamsOfUser } from '../redis-keys'
 import { receiveContacts, buildContactBlock } from './add'
 
 describe('contacts', () => {
@@ -36,18 +36,18 @@ describe('contacts', () => {
       await receiveContacts(app)({ message, context, body, say })
       const activeEntry = await redis.getAsync(activeTeamOfUser(userEmail))
       expect(activeEntry).to.eql(userTeamId)
-      const installEntries = await redis.smembersAsync(installedTeamsOfUser(userEmail))
+      const installEntries = await redis.smembersAsync(usedTeamsOfUser(userEmail))
       expect(installEntries).to.eql([userTeamId])
     })
 
     it('should only update installs for an existing user', async () => {
       const otherTeamId = 'other-team-id'
       redis.setAsync(activeTeamOfUser(userEmail), otherTeamId)
-      redis.saddAsync(installedTeamsOfUser(userEmail), otherTeamId)
+      redis.saddAsync(usedTeamsOfUser(userEmail), otherTeamId)
       await receiveContacts(app)({ message, context, body, say })
       const activeEntry = await redis.getAsync(activeTeamOfUser(userEmail))
       expect(activeEntry).to.eql(otherTeamId)
-      const installEntries = await redis.smembersAsync(installedTeamsOfUser(userEmail))
+      const installEntries = await redis.smembersAsync(usedTeamsOfUser(userEmail))
       expect(installEntries).to.eql([otherTeamId, userTeamId])
     })
 

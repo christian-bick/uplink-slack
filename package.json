@@ -4,19 +4,20 @@
   "description": "A Slack Integration for cross platform chats",
   "main": "src/index.js",
   "scripts": {
-    "e2e": "ENV=local mocha -r esm -r test/test-setup.js -r chai/register-expect --recursive test/e2e/",
-    "ut": "ENV=local mocha -r esm -r test/test-setup.js test/helpers-ut.js src/**/*.spec.js",
+    "e2e": "mocha -r esm -r dotenv/config -r test/test-setup.js -r chai/register-expect --recursive test/e2e/",
+    "ut": "mocha -r esm -r dotenv/config -r test/test-setup.js test/helpers-ut.js src/**/*.spec.js",
     "watch": "npm run ut  -- --watch -- --reporter=min",
     "test": "npm run ut && npm run e2e",
     "lint": "eslint \"src/**/*\" \"test/**/*\"",
     "start": "node -r esm src/index.js | bunyan -o short --no-color",
-    "dev": "ENV=local nodemon -r esm src/index.js | bunyan -o short --no-color"
+    "dev": "nodemon -r esm -r dotenv/config src/index.js | bunyan -o short --no-color"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/christian-bick/open-convo-slack.git"
   },
   "dependencies": {
+    "@slack/bolt": "^1.2.0",
     "aws-sdk": "^2.466.0",
     "bluebird": "^3.5.5",
     "bunyan": "^1.8.12",
@@ -26,11 +27,12 @@
     "esm": "^3.2.25",
     "express": "^4.14.0",
     "ioredis": "^4.9.5",
+    "jsonwebtoken": "^8.5.1",
     "moment": "^2.24.0",
     "moment-timezone": "^0.5.25",
     "node-uuid": "^1.4.7",
     "redis-mock": "^0.44.0",
-    "@slack/bolt": "^1.2.0"
+    "uuid": "^3.3.2"
   },
   "devDependencies": {
     "chai": "^4.2.0",
