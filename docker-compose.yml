@@ -17,6 +17,8 @@ services:
       - .env
     depends_on:
       - redis
+    links:
+      - redis
   localtunnel:
     image: efrecon/localtunnel
     command:

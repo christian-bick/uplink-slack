@@ -4,8 +4,8 @@
   "description": "A Slack Integration for cross platform chats",
   "main": "src/index.js",
   "scripts": {
-    "e2e": "mocha -r esm -r dotenv/config -r test/test-setup.js -r chai/register-expect --recursive test/e2e/",
-    "ut": "mocha -r esm -r dotenv/config -r test/test-setup.js test/helpers-ut.js src/**/*.spec.js",
+    "e2e": "REDIS_MOCK=true mocha -r esm -r dotenv/config -r test/test-setup.js -r chai/register-expect --recursive test/e2e/",
+    "ut": "REDIS_MOCK=true mocha -r esm -r dotenv/config -r test/test-setup.js test/helpers-ut.js src/**/*.spec.js",
     "watch": "npm run ut  -- --watch -- --reporter=min",
     "test": "npm run ut && npm run e2e",
     "lint": "eslint \"src/**/*\" \"test/**/*\"",
@@ -31,6 +31,7 @@
     "moment": "^2.24.0",
     "moment-timezone": "^0.5.25",
     "node-uuid": "^1.4.7",
+    "redis": "^2.8.0",
     "redis-mock": "^0.44.0",
     "uuid": "^3.3.2"
   },

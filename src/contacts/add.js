@@ -50,7 +50,7 @@ export const receiveContacts = (app) => async ({ message, context, body, say }) 
   activeContactKeys.forEach((key) => {
     multi = multi.get(key)
   })
-  const activeContacts = await promisify(multi.exec).bind(multi)()
+  const activeContacts = await multi.execAsync()
 
   const augmentedEmailAddressList = emailAddressList.map((email, index) => ({
     email, installed: !!activeContacts[index]

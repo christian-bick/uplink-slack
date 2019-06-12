@@ -1,7 +1,16 @@
-import redisMock from 'redis-mock'
 import Promise from 'bluebird'
 
-let redis = redisMock.createClient()
+let redis
+if (process.env.REDIS_MOCK === 'true') {
+  redis = require('redis-mock')
+} else {
+  redis = require('redis')
+}
+
 Promise.promisifyAll(redis)
 
-export default redis
+const client = redis.createClient({
+  host: process.env.REDIS_HOST
+})
+
+export default client
