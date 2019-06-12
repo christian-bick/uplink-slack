@@ -1,7 +1,7 @@
-import greetings from './greetings'
-import health from './health'
+import { replyToGreetings } from './greetings'
+import { respondToHealthCheck } from './health'
 
 export default (app) => {
-  greetings(app)
-  health(app)
+  app.receiver.app.get('/', respondToHealthCheck)
+  app.message('hi', replyToGreetings)
 }

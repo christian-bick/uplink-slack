@@ -42,8 +42,8 @@ const extractUser = ({ team_id: teamId, user_id: userId, access_token: userToken
   teamId, userId, userToken, scope
 })
 
-const extractTeam = ({ team_id: teamId, bot: { bot_user_id: botUserId, bot_access_token: botToken } }) => ({
-  teamId, botUserId, botToken
+const extractTeam = ({ team_id: teamId, bot: { bot_user_id: botId, bot_access_token: botToken } }) => ({
+  teamId, botId, botToken
 })
 
 export const requestForTeam = (req, resp) => {

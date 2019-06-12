@@ -1,5 +1,5 @@
 import { promisify } from 'util'
-import { findEmailLinks, EMAIL_PATTERN, reduceEmailLinks } from './email'
+import { findEmailLinks, reduceEmailLinks } from './email'
 import redis from '../redis'
 import { activeTeamOfUser, contactsOfUser, usedTeamsOfUser } from '../redis-keys'
 
@@ -61,8 +61,4 @@ export const receiveContacts = (app) => async ({ message, context, body, say }) 
   say({
     blocks: emailBlocks
   })
-}
-
-export default (app) => {
-  app.message(EMAIL_PATTERN, receiveContacts(app))
 }
