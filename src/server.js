@@ -4,7 +4,7 @@ import ping from './ping'
 import contacts from './contacts'
 import chats from './chats'
 import auth from './auth'
-import boarding from './boarding'
+import entry from './entry'
 import authorize from './auth/authorize'
 
 const SLACK_SIGNING_SECRET = process.env.SLACK_SIGNING_SECRET
@@ -24,7 +24,7 @@ const run = async (port) => {
   chats(app)
   ping(app)
   contacts(app)
-  boarding(app)
+  entry(app)
 
   // Startup Slack App
   port = port || SLACK_PORT || 3000

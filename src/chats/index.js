@@ -1,17 +1,5 @@
-import redis from '../redis'
-import { activeTeamOfUser } from '../redis-keys'
+import { openChat } from './chat'
 
 export default (app) => {
-  app.action('open-chat', async ({ action, context, ack, say }) => {
-    ack()
-    const teamId = redis.getAsync(activeTeamOfUser(action.value))
-    if (!teamId) {
-      say('No user with this email address')
-    } else {
-      await app.client.groups.create({
-        token: context.userToken,
-        name: action.value
-      })
-    }
-  })
+  app.action({ callback_id: 'open-chat' }, openChat(app))
 }

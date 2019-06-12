@@ -1,7 +1,7 @@
-import { promisify } from 'util'
 import { findEmailLinks, reduceEmailLinks } from './email'
 import redis from '../redis'
-import { activeTeamOfUser, contactsOfUser, usedTeamsOfUser } from '../redis-keys'
+import { userRegistration } from '../redis-keys'
+import store from '../store'
 
 export const buildContactBlock = ({ email, installed }) => ({
   'type': 'section',
@@ -37,13 +37,16 @@ export const receiveContacts = (app) => async ({ message, context, body, say }) 
 
   const userEmail = userInfo.user.profile.email
 
-  const emailLinkList = findEmailLinks(message.text)
-  const emailAddressList = reduceEmailLinks(emailLinkList)
-  await redis.setnxAsync(activeTeamOfUser(userEmail), body.team_id)
-  await redis.saddAsync(usedTeamsOfUser(userEmail), body.team_id)
-  await redis.saddAsync(contactsOfUser(userEmail), ...emailAddressList)
+  const contactLinkList = findEmailLinks(message.text)
+  const contactEmailList = reduceEmailLinks(contactLinkList)
+  await store.user.registration.setnx(userEmail, {
+    platform: 'slack',
+    teamId: body.team_id,
+    userId: body.user_id,
+  })
+  await store.user.contacts.sadd(userEmail, contactEmailList)
 
-  const activeContactKeys = emailAddressList.map(email => activeTeamOfUser(email))
+  const activeContactKeys = contactEmailList.map(email => userRegistration(email))
 
   // Get active contacts
   let multi = redis.multi()
@@ -52,7 +55,7 @@ export const receiveContacts = (app) => async ({ message, context, body, say }) 
   })
   const activeContacts = await multi.execAsync()
 
-  const augmentedEmailAddressList = emailAddressList.map((email, index) => ({
+  const augmentedEmailAddressList = contactEmailList.map((email, index) => ({
     email, installed: !!activeContacts[index]
   }))
 
