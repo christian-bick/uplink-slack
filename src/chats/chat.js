@@ -1,6 +1,10 @@
 import store from '../store'
 import { slackLog } from '../logger'
 
+export const buildCannotConnectToYourselfMessage = (contactEmail) => {
+  return `Looks like this your own email address: ${contactEmail}`
+}
+
 export const buildContactNotFoundMessage = (contactEmail) => {
   return `I don't know a user with this email address: ${contactEmail}`
 }
@@ -44,40 +48,48 @@ export const openChat = (app) => async ({ body, context, ack, say }) => {
     token: context.botToken,
     user: context.userId
   })
+
   const userEmail = userInfo.user.profile.email
+  if (userEmail === contactEmail) {
+    say(buildCannotConnectToYourselfMessage(contactEmail))
+    return
+  }
+
   const contactRegistration = await store.user.registration.get(contactEmail)
   if (!contactRegistration) {
     say(buildContactNotFoundMessage(contactEmail))
-  } else {
-    const existingGroupId = await store.slackGroup.get(userEmail, contactEmail)
-    if (existingGroupId) {
-      say(buildGroupAlreadyExistsMessage(existingGroupId))
-    } else {
-      const chatName = generateChatName(contactEmail)
-      let created = null
-      let retryAttempt = 0
-      while (!created && retryAttempt < 10) {
-        const chatNameCandidate = generateNextCandidate(chatName, retryAttempt)
-        try {
-          created = await app.client.groups.create({
-            token: context.userToken,
-            name: chatNameCandidate
-          })
-          say(buildGroupCreatedMessage(created.group.id))
-          await store.slackGroup.set(userEmail, contactEmail, created.group.id)
-          return
-        } catch (err) {
-          if (err.message === 'name_taken') {
-            retryAttempt++
-          } else {
-            say(buildFailedToCreateGroup(err.message))
-            slackLog.error(err)
-            return
-          }
-        }
+    return
+  }
+
+  const existingGroupId = await store.slackGroup.get(userEmail, contactEmail)
+  if (existingGroupId) {
+    say(buildGroupAlreadyExistsMessage(existingGroupId))
+    return
+  }
+
+  const chatName = generateChatName(contactEmail)
+  let created = null
+  let retryAttempt = 0
+  while (!created && retryAttempt < 10) {
+    const chatNameCandidate = generateNextCandidate(chatName, retryAttempt)
+    try {
+      created = await app.client.groups.create({
+        token: context.userToken,
+        name: chatNameCandidate
+      })
+      say(buildGroupCreatedMessage(created.group.id))
+      await store.slackGroup.set(userEmail, contactEmail, created.group.id)
+      return
+    } catch (err) {
+      if (err.message === 'name_taken') {
+        retryAttempt++
+      } else {
+        say(buildFailedToCreateGroup(err.message))
+        slackLog.error(err)
+        return
       }
-      say(buildFailedToCreateGroup('name_taken'))
-      slackLog.error('Failed to create a group after 10 attempts.')
     }
   }
+  say(buildFailedToCreateGroup('name_taken'))
+  slackLog.error('Failed to create a group after 10 attempts.')
 }

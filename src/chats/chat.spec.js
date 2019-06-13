@@ -1,4 +1,5 @@
 import {
+  buildCannotConnectToYourselfMessage,
   buildContactNotFoundMessage, buildFailedToCreateGroup, buildGroupAlreadyExistsMessage, buildGroupCreatedMessage,
   generateChatName,
   generateNextCandidate,
@@ -81,6 +82,15 @@ describe('chat', () => {
       }
     })
 
+    describe('current user is same as contact', () => {
+      it('should reply with cannot-connect-to-yourself message', async () => {
+        params.body.submission.email = currentUserEmail
+        await openChat(app)(params)
+        expect(params.ack, 'ack').to.be.calledOnce
+        expect(params.say, 'say').to.be.calledOnceWith(buildCannotConnectToYourselfMessage(params.body.submission.email))
+      })
+    })
+
     describe('contact not registered', () => {
       it('should reply with contact-not-found message', async () => {
         await openChat(app)(params)
@@ -98,9 +108,9 @@ describe('chat', () => {
         })
       })
 
-      describe('name available', () => {
+      describe('group name available', () => {
         beforeEach('prepare groups.create', () => {
-          app.client.groups.create.returns({ group: { id: groupId, name: 'group-name' }})
+          app.client.groups.create.returns({ group: { id: groupId, name: 'group-name' } })
         })
 
         it('should reply with group created message when group does not exist', async () => {
@@ -116,29 +126,28 @@ describe('chat', () => {
 
         it('should reply with group already exists message when group already exists', async () => {
           await store.slackGroup.set(currentUserEmail, contactEmail, groupId)
-          app.client.groups.create.returns({ group: { id: groupId, name: 'group-name' }})
+          app.client.groups.create.returns({ group: { id: groupId, name: 'group-name' } })
           await openChat(app)(params)
           expect(params.say, 'say').to.be.calledOnceWith(buildGroupAlreadyExistsMessage(groupId))
         })
       })
 
-      describe('name taken', () => {
+      describe('group name taken', () => {
         beforeEach('prepare groups.create', () => {
           app.client.groups.create.throws(new Error('name_taken'))
         })
 
         it('should reply with group created message when second call succeeds', async () => {
-          app.client.groups.create.onSecondCall().returns({ group: { id: groupId, name: 'group-name' }})
+          app.client.groups.create.onSecondCall().returns({ group: { id: groupId, name: 'group-name' } })
           await openChat(app)(params)
           expect(params.say, 'say').to.be.calledOnceWith(buildGroupCreatedMessage(groupId))
         })
 
         it('should reply with group created message when third call succeeds', async () => {
-          app.client.groups.create.onThirdCall().returns({ group: { id: groupId, name: 'group-name' }})
+          app.client.groups.create.onThirdCall().returns({ group: { id: groupId, name: 'group-name' } })
           await openChat(app)(params)
           expect(params.say, 'say').to.be.calledOnceWith(buildGroupCreatedMessage(groupId))
         })
-
 
         it('should reply with failure message when name is taken', async () => {
           await openChat(app)(params)
