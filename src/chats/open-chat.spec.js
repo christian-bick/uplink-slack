@@ -78,12 +78,13 @@ describe('chat', () => {
       app.client.conversations.info = sandbox.fake.returns({
         channel: { id: existingGroupId, name: existingGroupName }
       })
+      app.client.conversations.invite = sandbox.fake()
     })
 
     beforeEach('prepare params', () => {
       params = {
         body: { submission: { email: contactEmail } },
-        context: { teamId: currentTeamId, userId: currentUserId, botToken: 'bot-token' },
+        context: { teamId: currentTeamId, userId: currentUserId, botToken: 'bot-token', userToken: 'user-token', botId: 'bot-id' },
         ack: sandbox.fake(),
         say: sandbox.fake()
       }
@@ -116,8 +117,18 @@ describe('chat', () => {
       })
 
       describe('group name available', () => {
-        beforeEach('prepare groups.create', () => {
+        beforeEach('prepare conversations.create', () => {
           app.client.conversations.create.returns({ channel: { id: groupId, name: 'group-name' } })
+        })
+
+        it('should create a conversation and invite bot', async () => {
+          await openChat(app)(params)
+          expect(app.client.conversations.create).to.be.calledOnce
+          expect(app.client.conversations.invite).to.be.calledOnceWith({
+            token: params.context.userToken,
+            channel: groupId,
+            users: params.context.botId
+          })
         })
 
         it('should reply with group created message when group does not exist', async () => {

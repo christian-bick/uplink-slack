@@ -81,8 +81,12 @@ export const openChat = (app) => async ({ body, context, ack, say }) => {
       created = await app.client.conversations.create({
         token: context.userToken,
         name: chatNameCandidate,
-        is_private: true,
-        user_ids: [ context.botId ]
+        is_private: true
+      })
+      await app.client.conversations.invite({
+        token: context.userToken,
+        channel: created.channel.id,
+        users: context.botId
       })
       say(buildGroupCreatedMessage(created.channel.name))
       await store.slackLink.set(userEmail, contactEmail, created.channel.id)
