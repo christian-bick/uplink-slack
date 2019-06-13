@@ -7,15 +7,15 @@ import auth from './auth'
 import entry from './entry'
 import authorize from './auth/authorize'
 
+const PORT = process.env.PORT
+const LOG_LEVEL = process.env.LOG_LEVEL
 const SLACK_SIGNING_SECRET = process.env.SLACK_SIGNING_SECRET
-const SLACK_LOG_LEVEL = process.env.SLACK_LOG_LEVEL
-const SLACK_PORT = process.env.SLACK_PORT
 
 const run = async (port) => {
   // Configure Slack App
   const app = new App({
     signingSecret: SLACK_SIGNING_SECRET,
-    logLevel: SLACK_LOG_LEVEL || LogLevel.INFO,
+    logLevel: LOG_LEVEL || LogLevel.INFO,
     authorize
   })
 
@@ -27,7 +27,7 @@ const run = async (port) => {
   entry(app)
 
   // Startup Slack App
-  port = port || SLACK_PORT || 3000
+  port = port || PORT || 3000
   await app.start(port)
   statusLog.info(`App is running on port ${port}`)
   return app

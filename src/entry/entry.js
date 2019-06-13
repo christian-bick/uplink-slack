@@ -16,7 +16,7 @@ export const buildPermissionMessage = () => ({
       },
       'accessory': {
         'type': 'button',
-        'url': `https://${process.env.SLACK_HOST}/oauth/user/request`,
+        'url': `https://${process.env.HOST}/oauth/user/request`,
         'text': {
           'type': 'plain_text',
           'text': 'Give Permission',
