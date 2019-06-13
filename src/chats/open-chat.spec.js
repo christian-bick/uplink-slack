@@ -5,7 +5,7 @@ import {
   generateNextCandidate,
   generateNextIterator,
   openChat
-} from './chat'
+} from './open-chat'
 import store from '../store'
 
 describe('chat', () => {
@@ -63,14 +63,14 @@ describe('chat', () => {
     const contactEmail = 'contact@x.com'
     const groupId = 'group-id'
 
-    let app = { client: { users: { profile: {}}, groups: {} } }
+    let app = { client: { users: { profile: {}}, conversations: {} } }
     let params
 
     beforeEach('prepare app', () => {
       app.client.users.profile.get = sandbox.fake.returns({
         profile: { email: currentUserEmail }
       })
-      app.client.groups.create = sandbox.stub()
+      app.client.conversations.create = sandbox.stub()
     })
 
     beforeEach('prepare params', () => {
@@ -110,7 +110,7 @@ describe('chat', () => {
 
       describe('group name available', () => {
         beforeEach('prepare groups.create', () => {
-          app.client.groups.create.returns({ group: { id: groupId, name: 'group-name' } })
+          app.client.conversations.create.returns({ group: { id: groupId, name: 'group-name' } })
         })
 
         it('should reply with group created message when group does not exist', async () => {
@@ -126,7 +126,7 @@ describe('chat', () => {
 
         it('should reply with group already exists message when group already exists', async () => {
           await store.slackGroup.set(currentUserEmail, contactEmail, groupId)
-          app.client.groups.create.returns({ group: { id: groupId, name: 'group-name' } })
+          app.client.conversations.create.returns({ group: { id: groupId, name: 'group-name' } })
           await openChat(app)(params)
           expect(params.say, 'say').to.be.calledOnceWith(buildGroupAlreadyExistsMessage(groupId))
         })
@@ -134,17 +134,17 @@ describe('chat', () => {
 
       describe('group name taken', () => {
         beforeEach('prepare groups.create', () => {
-          app.client.groups.create.throws(new Error('name_taken'))
+          app.client.conversations.create.throws(new Error('name_taken'))
         })
 
         it('should reply with group created message when second call succeeds', async () => {
-          app.client.groups.create.onSecondCall().returns({ group: { id: groupId, name: 'group-name' } })
+          app.client.conversations.create.onSecondCall().returns({ group: { id: groupId, name: 'group-name' } })
           await openChat(app)(params)
           expect(params.say, 'say').to.be.calledOnceWith(buildGroupCreatedMessage(groupId))
         })
 
         it('should reply with group created message when third call succeeds', async () => {
-          app.client.groups.create.onThirdCall().returns({ group: { id: groupId, name: 'group-name' } })
+          app.client.conversations.create.onThirdCall().returns({ group: { id: groupId, name: 'group-name' } })
           await openChat(app)(params)
           expect(params.say, 'say').to.be.calledOnceWith(buildGroupCreatedMessage(groupId))
         })
@@ -157,7 +157,7 @@ describe('chat', () => {
 
       describe('error scenarios', () => {
         it('should reply with failure message when slack request fails', async () => {
-          app.client.groups.create.throws(new Error('not_allowed'))
+          app.client.conversations.create.throws(new Error('not_allowed'))
           await openChat(app)(params)
           expect(params.say, 'say').to.be.calledOnceWith(buildFailedToCreateGroup('not_allowed'))
         })

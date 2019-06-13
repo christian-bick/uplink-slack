@@ -74,9 +74,11 @@ export const openChat = (app) => async ({ body, context, ack, say }) => {
   while (!created && retryAttempt < 10) {
     const chatNameCandidate = generateNextCandidate(chatName, retryAttempt)
     try {
-      created = await app.client.groups.create({
+      created = await app.client.conversations.create({
         token: context.userToken,
-        name: chatNameCandidate
+        name: chatNameCandidate,
+        is_private: true,
+        user_ids: [ context.botId ]
       })
       say(buildGroupCreatedMessage(created.group.id))
       await store.slackGroup.set(userEmail, contactEmail, created.group.id)
