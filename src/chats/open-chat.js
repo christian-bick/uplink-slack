@@ -62,7 +62,7 @@ export const openChat = (app) => async ({ body, context, ack, say }) => {
     return
   }
 
-  const existingGroupId = await store.slackGroup.get(userEmail, contactEmail)
+  const existingGroupId = await store.slackLink.get(userEmail, contactEmail)
   if (existingGroupId) {
     say(buildGroupAlreadyExistsMessage(existingGroupId))
     return
@@ -81,7 +81,11 @@ export const openChat = (app) => async ({ body, context, ack, say }) => {
         user_ids: [ context.botId ]
       })
       say(buildGroupCreatedMessage(created.group.id))
-      await store.slackGroup.set(userEmail, contactEmail, created.group.id)
+      await store.slackLink.set(userEmail, contactEmail, created.group.id)
+      await store.slackLink.set(created.group.id, {
+        userId: context.userId,
+        contactEmail: context.contactEmail,
+      })
       return
     } catch (err) {
       if (err.message === 'name_taken') {

@@ -120,12 +120,12 @@ describe('chat', () => {
 
         it('should create a record when group does not exist yet', async () => {
           await openChat(app)(params)
-          const createdGroupId = await store.slackGroup.get(currentUserEmail, contactEmail)
+          const createdGroupId = await store.slackLink.get(currentUserEmail, contactEmail)
           expect(createdGroupId).to.equal(groupId)
         })
 
         it('should reply with group already exists message when group already exists', async () => {
-          await store.slackGroup.set(currentUserEmail, contactEmail, groupId)
+          await store.slackLink.set(currentUserEmail, contactEmail, groupId)
           app.client.conversations.create.returns({ group: { id: groupId, name: 'group-name' } })
           await openChat(app)(params)
           expect(params.say, 'say').to.be.calledOnceWith(buildGroupAlreadyExistsMessage(groupId))
