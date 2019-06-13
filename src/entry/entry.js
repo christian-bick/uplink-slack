@@ -52,8 +52,8 @@ export const buildEntryMessage = () => ({
   ]
 })
 
-export const reactToAppHomeOpened = ({ context, say }) => {
-  const user = store.slackUser.get(context.userId)
+export const reactToAppHomeOpened = async ({ context, say }) => {
+  const user = await store.slackUser.get(context.userId)
   if (user) {
     say(buildEntryMessage())
   } else {

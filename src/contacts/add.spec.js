@@ -46,12 +46,6 @@ describe('contacts', () => {
       expect(say).to.have.been.calledWith({ blocks: generatedBlocks })
     }
 
-    it('should create user entries for a fresh user', async () => {
-      await receiveContacts(app)({ message, context, body, say })
-      const registration = await store.user.registration.get(userEmail)
-      expect(registration).to.eql(currentUserRegistration)
-    })
-
     it('should only update installs for an existing user', async () => {
       const otherTeamId = 'other-team-id'
       redis.setAsync(userRegistration(userEmail), JSON.stringify({

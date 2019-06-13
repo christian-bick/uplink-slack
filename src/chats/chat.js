@@ -43,7 +43,9 @@ export const generateNextIterator = (attempt) => {
 
 export const openChat = (app) => async ({ body, context, ack, say }) => {
   ack()
+
   const contactEmail = body.submission.email
+
   const userInfo = await app.client.users.info({
     token: context.botToken,
     user: context.userId
@@ -54,7 +56,6 @@ export const openChat = (app) => async ({ body, context, ack, say }) => {
     say(buildCannotConnectToYourselfMessage(contactEmail))
     return
   }
-
   const contactRegistration = await store.user.registration.get(contactEmail)
   if (!contactRegistration) {
     say(buildContactNotFoundMessage(contactEmail))

@@ -8,7 +8,7 @@ const SLACK_SIGNING_SECRET = process.env.SLACK_SIGNING_SECRET
 const SLACK_CLIENT_ID = process.env.SLACK_CLIENT_ID
 const SLACK_CLIENT_SECRET = process.env.SLACK_CLIENT_SECRET
 
-const SLACK_USER_SCOPES = ['groups:write']
+const SLACK_USER_SCOPES = ['groups:write', 'users.profile:read']
 const SLACK_USER_SCOPES_ENCODED = SLACK_USER_SCOPES.join('%20')
 const SLACK_TEAM_SCOPES = ['bot', ...SLACK_USER_SCOPES]
 const SLACK_TEAM_SCOPES_ENCODED = SLACK_TEAM_SCOPES.join('%20')
@@ -45,6 +45,19 @@ const extractUser = ({ team_id: teamId, user_id: userId, access_token: userToken
 const extractTeam = ({ team_id: teamId, bot: { bot_user_id: botId, bot_access_token: botToken } }) => ({
   teamId, botId, botToken
 })
+
+const registerUser = async (app, user) => {
+  const profileInfo = await app.client.users.profile.get({
+    token: user.userToken,
+    user: user.userId,
+  })
+  const userEmail = profileInfo.profile.email
+  await store.user.registration.setnx(userEmail, {
+    platform: 'slack',
+    teamId: user.teamId,
+    userId: user.userId,
+  })
+}
 
 export const requestForTeam = (req, resp) => {
   try {
@@ -103,6 +116,7 @@ export const grantForTeam = (app) => async (req, resp) => {
     const user = extractUser(authInfo)
     await store.slackTeam.set(team.teamId, team)
     await store.slackUser.set(user.userId, user)
+    await registerUser(app, user)
     resp.redirect(successUri)
     oauthLog.info('Team auth granted')
   } catch (err) {
@@ -118,6 +132,7 @@ export const grantForUser = (app) => async (req, resp) => {
     const authInfo = await verifyAuthCode(app, code, redirectUri)
     const user = extractUser(authInfo)
     await store.slackUser.set(user.userId, user)
+    await registerUser(app, user)
     resp.redirect(successUri)
     oauthLog.info('User auth granted')
   } catch (err) {

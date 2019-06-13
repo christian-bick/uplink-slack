@@ -39,11 +39,6 @@ export const receiveContacts = (app) => async ({ message, context, body, say }) 
 
   const contactLinkList = findEmailLinks(message.text)
   const contactEmailList = reduceEmailLinks(contactLinkList)
-  await store.user.registration.setnx(userEmail, {
-    platform: 'slack',
-    teamId: body.team_id,
-    userId: body.user_id,
-  })
   await store.user.contacts.sadd(userEmail, contactEmailList)
 
   const activeContactKeys = contactEmailList.map(email => userRegistration(email))
