@@ -44,7 +44,7 @@ export const generateNextIterator = (attempt) => {
 export const openChat = (app) => async ({ body, context, ack, say }) => {
   ack()
   const contactEmail = body.submission.email
-  const userInfo = await app.client.user.userInfo({
+  const userInfo = await app.client.users.info({
     token: context.botToken,
     user: context.userId
   })
