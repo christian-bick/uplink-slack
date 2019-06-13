@@ -9,12 +9,12 @@ export const buildContactNotFoundMessage = (contactEmail) => {
   return `I don't know a user with this email address: ${contactEmail}`
 }
 
-export const buildGroupAlreadyExistsMessage = (groupId) => {
-  return `You are already in a group with this person: <#${groupId}>`
+export const buildGroupAlreadyExistsMessage = (groupName) => {
+  return `We found an existing group with a conversation with this contact: ${groupName}`
 }
 
-export const buildGroupCreatedMessage = (groupId) => {
-  return `We created a new group for your conversations with this person: <#${groupId}>`
+export const buildGroupCreatedMessage = (groupName) => {
+  return `We created a new group for your conversation with this contact: ${groupName}`
 }
 
 export const buildFailedToCreateGroup = (reason) => `Failed to create a group (${reason})`
@@ -64,7 +64,11 @@ export const openChat = (app) => async ({ body, context, ack, say }) => {
 
   const existingGroupId = await store.slackLink.get(userEmail, contactEmail)
   if (existingGroupId) {
-    say(buildGroupAlreadyExistsMessage(existingGroupId))
+    const { channel: existingGroup } = await app.client.conversations.info({
+      token: context.userToken,
+      channel: existingGroupId,
+    })
+    say(buildGroupAlreadyExistsMessage(existingGroup.name))
     return
   }
 
@@ -80,15 +84,21 @@ export const openChat = (app) => async ({ body, context, ack, say }) => {
         is_private: true,
         user_ids: [ context.botId ]
       })
-      say(buildGroupCreatedMessage(created.group.id))
-      await store.slackLink.set(userEmail, contactEmail, created.group.id)
-      await store.slackLink.set(created.group.id, {
-        userId: context.userId,
-        contactEmail: context.contactEmail,
+      say(buildGroupCreatedMessage(created.channel.name))
+      await store.slackLink.set(userEmail, contactEmail, created.channel.id)
+      await store.slackGroup.set(created.channel.id, {
+        source: {
+          teamId: context.teamId,
+          userId: context.userId,
+          email: userEmail,
+        },
+        sink: {
+          email: contactEmail,
+        },
       })
       return
     } catch (err) {
-      if (err.message === 'name_taken') {
+      if (err.data && err.data.error === 'name_taken') {
         retryAttempt++
       } else {
         say(buildFailedToCreateGroup(err.message))

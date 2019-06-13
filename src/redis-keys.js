@@ -5,4 +5,5 @@ export const userContacts = (userEmail) => key(['contacts'], [userEmail])
 
 export const slackUser = (userId) => key(['slack', 'user'], [userId])
 export const slackTeam = (teamId) => key(['slack', 'team'], [teamId])
-export const slackLink = (userEmail, contactEmail) => key(['slack', 'group'], [userEmail, contactEmail])
+export const slackLink = (sourceEmail, sinkEmail) => key(['slack', 'link'], [sourceEmail, sinkEmail])
+export const slackGroup = (groupId) => key(['slack', 'group'], [groupId])
