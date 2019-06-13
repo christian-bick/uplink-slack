@@ -1,10 +1,10 @@
 import redis from '../redis'
 import { userRegistration, userContacts } from '../redis-keys'
 import { receiveContacts, buildContactBlock } from './add'
-import store from "../store"
+import store from '../store'
 
 describe('contacts', () => {
-  let app = { client: { users: { } } }
+  let app = { client: { users: { profile: {} } } }
   let say
 
   beforeEach('set up', () => {
@@ -21,20 +21,15 @@ describe('contacts', () => {
     const contactEmail2 = 'contact-2@b.com'
     const context = { botToken: 'bot-token' }
     const body = { team_id: teamId, user_id: userId }
-    const currentUserRegistration = {
-      platform: 'slack',
-      teamId: teamId,
-      userId: userId,
-    }
     const contactRegistration = {
       platform: 'slack',
       teamId: contactTeamId,
-      userId: contactUserId,
+      userId: contactUserId
     }
     let message
 
     beforeEach('set up', () => {
-      app.client.users.info = sandbox.fake.returns({ user: { profile: { email: userEmail } } })
+      app.client.users.profile.get = sandbox.fake.returns({ profile: { email: userEmail } })
       message = {
         user: 'user-1',
         text: `<mailto:${contactEmail}|${contactEmail}>`
@@ -51,7 +46,7 @@ describe('contacts', () => {
       redis.setAsync(userRegistration(userEmail), JSON.stringify({
         platform: 'slack',
         userId: 'other-user-id',
-        teamId: otherTeamId,
+        teamId: otherTeamId
       }))
       await receiveContacts(app)({ message, context, body, say })
       const registration = await store.user.registration.get(userEmail)

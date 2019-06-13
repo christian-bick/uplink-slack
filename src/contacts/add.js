@@ -30,12 +30,12 @@ export const buildContactBlock = ({ email, installed }) => ({
 })
 
 export const receiveContacts = (app) => async ({ message, context, body, say }) => {
-  const userInfo = await app.client.users.info({
-    token: context.botToken,
+  const profileInfo = await app.client.users.profile.get({
+    token: context.userToken,
     user: message.user
   })
 
-  const userEmail = userInfo.user.profile.email
+  const userEmail = profileInfo.profile.email
 
   const contactLinkList = findEmailLinks(message.text)
   const contactEmailList = reduceEmailLinks(contactLinkList)

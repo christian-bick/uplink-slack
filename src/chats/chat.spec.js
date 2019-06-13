@@ -63,12 +63,12 @@ describe('chat', () => {
     const contactEmail = 'contact@x.com'
     const groupId = 'group-id'
 
-    let app = { client: { users: {}, groups: {} } }
+    let app = { client: { users: { profile: {}}, groups: {} } }
     let params
 
     beforeEach('prepare app', () => {
-      app.client.users.info = sandbox.fake.returns({
-        user: { profile: { email: currentUserEmail } }
+      app.client.users.profile.get = sandbox.fake.returns({
+        profile: { email: currentUserEmail }
       })
       app.client.groups.create = sandbox.stub()
     })

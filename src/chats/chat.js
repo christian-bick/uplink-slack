@@ -46,12 +46,12 @@ export const openChat = (app) => async ({ body, context, ack, say }) => {
 
   const contactEmail = body.submission.email
 
-  const userInfo = await app.client.users.info({
-    token: context.botToken,
+  const profileInfo = await app.client.users.profile.get({
+    token: context.userToken,
     user: context.userId
   })
 
-  const userEmail = userInfo.user.profile.email
+  const userEmail = profileInfo.profile.email
   if (userEmail === contactEmail) {
     say(buildCannotConnectToYourselfMessage(contactEmail))
     return
