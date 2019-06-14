@@ -26,7 +26,7 @@ describe('chat', () => {
     const existingGroupId = 'existing-group-id'
     const existingGroupName = 'existing-group-name'
 
-    let app = { client: { users: { profile: {}}, conversations: {} } }
+    let app = { client: { users: { profile: {}}, conversations: {}, chat: {} } }
     let params
 
     beforeEach('prepare app', () => {
@@ -38,6 +38,7 @@ describe('chat', () => {
         channel: { id: existingGroupId, name: existingGroupName }
       })
       app.client.conversations.invite = sandbox.fake()
+      app.client.chat.postMessage = sandbox.fake()
     })
 
     beforeEach('prepare params', () => {
@@ -68,7 +69,7 @@ describe('chat', () => {
 
     describe('current user is registered', () => {
       beforeEach('create current user registration', async () => {
-        await store.user.registration.setnx(currentUserEmail, {
+        await store.user.registration.set(currentUserEmail, {
           platform: 'slack',
           userId: currentUserId,
           teamId: currentTeamId,
@@ -84,13 +85,13 @@ describe('chat', () => {
 
     describe('current user and contact are registered', () => {
       beforeEach('create registrations', async () => {
-        await store.user.registration.setnx(currentUserEmail, {
+        await store.user.registration.set(currentUserEmail, {
           platform: 'slack',
           userId: currentUserId,
           teamId: currentTeamId,
           email: currentUserEmail,
         })
-        await store.user.registration.setnx(contactEmail, {
+        await store.user.registration.set(contactEmail, {
           platform: 'slack',
           userId: contactUserId,
           teamId: contactTeamId,

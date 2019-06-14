@@ -4,7 +4,7 @@ import {
   generateChatName,
   generateNextCandidate,
   generateNextIterator,
-  createSlackLink
+  createSlackLink, buildWelcomeMessage
 } from './create-slack-link'
 import store from '../store'
 
@@ -77,7 +77,7 @@ describe('chat', () => {
       name: existingGroupName
     }
 
-    let app = { client: {conversations: {} } }
+    let app = { client: {conversations: {}, chat: {} } }
     let params
 
     beforeEach('prepare app', () => {
@@ -86,19 +86,20 @@ describe('chat', () => {
         channel: { id: existingGroupId, name: existingGroupName }
       })
       app.client.conversations.invite = sandbox.fake()
+      app.client.chat.postMessage = sandbox.fake()
     })
 
     beforeEach('prepare params', () => {
       params = {
         app,
         context: { botToken: 'bot-token', userToken: 'user-token', botId: 'bot-id' },
-        sourceRegistration: {
+        source: {
           platform: 'slack',
           userId: userId,
           teamId: teamId,
           email: userEmail
         },
-        sinkRegistration: {
+        sink: {
           platform: 'slack',
           userId: contactUserId,
           teamId: contactTeamId,
@@ -119,6 +120,11 @@ describe('chat', () => {
           token: params.context.userToken,
           channel: groupId,
           users: params.context.botId
+        })
+        expect(app.client.chat.postMessage).to.be.calledOnceWith({
+          token: params.context.botToken,
+          channel: groupId,
+          text: buildWelcomeMessage(contactEmail)
         })
       })
 

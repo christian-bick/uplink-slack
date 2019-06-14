@@ -4,6 +4,8 @@ export const buildCannotCreateGroupInfo = (contactEmail, reason) => `Failed to c
 
 export const buildFailedToFindFreeNameInfo = (attempts) => `Failed to find a free group name after ${attempts} attempts`
 
+export const buildWelcomeMessage = (contactEmail) => `This is the start of your conversation with ${contactEmail}. I will forward your messages and reply on your contact's behalf.`
+
 export const generateChatName = (email) => {
   const withoutEmail = email.split('@')[0]
   const hyphened = withoutEmail.replace(/[._]/g, '-')
@@ -66,6 +68,11 @@ export const createSlackLink = async ({ app, context, source, sink }) => {
         token: context.userToken,
         channel: created.channel.id,
         users: context.botId
+      })
+      await app.client.chat.postMessage({
+        token: context.botToken,
+        channel: created.channel.id,
+        text: buildWelcomeMessage(sink.email),
       })
       await store.slackLink.set(source.email, sink.email, {
         platform: 'slack',
