@@ -9,15 +9,17 @@ export const buildContactNotFoundMessage = (contactEmail) => {
   return `I don't know a user with this email address: ${contactEmail}`
 }
 
-export const buildGroupAlreadyExistsMessage = (groupName) => {
-  return `We found an existing group with a conversation with this contact: ${groupName}`
+export const buildGroupAlreadyExistsMessage = (contactEmail, groupName) => {
+  return `Found an existing group for your conversation with ${contactEmail}: ${groupName}`
 }
 
-export const buildGroupCreatedMessage = (groupName) => {
-  return `We created a new group for your conversation with this contact: ${groupName}`
+export const buildGroupCreatedMessage = (contactEmail, groupName) => {
+  return `Created a new group for your conversation with ${contactEmail}: ${groupName}`
 }
 
-export const buildFailedToCreateGroup = (reason) => `Failed to create a group (${reason})`
+export const buildCannotCreateGroupInfo = (contactEmail, reason) => `Failed to create a group for your conversation with ${contactEmail} (${reason || 'for unknown reasons'})`
+
+export const buildFailedToFindFreeNameInfo = (attempts) => `Failed to find a free group name after ${attempts} attempts`
 
 export const generateChatName = (email) => {
   const withoutEmail = email.split('@')[0]
@@ -41,41 +43,36 @@ export const generateNextIterator = (attempt) => {
   return Math.floor(randomNumber)
 }
 
-export const openChat = (app) => async ({ body, context, ack, say }) => {
-  ack()
-
-  const contactEmail = body.submission.email
-
-  const profileInfo = await app.client.users.profile.get({
-    token: context.userToken,
-    user: context.userId
-  })
-
-  const userEmail = profileInfo.profile.email
-  if (userEmail === contactEmail) {
-    say(buildCannotConnectToYourselfMessage(contactEmail))
-    return
+export class LinkResult {
+  static existing (group) {
+    return {
+      alreadyExisted: true,
+      group
+    }
   }
-  const contactRegistration = await store.user.registration.get(contactEmail)
-  if (!contactRegistration) {
-    say(buildContactNotFoundMessage(contactEmail))
-    return
+  static created (group) {
+    return {
+      alreadyExisted: false,
+      group
+    }
   }
+}
 
+export const createSlackLink = async ({ app, userEmail, contactEmail, context }) => {
   const existingGroupId = await store.slackLink.get(userEmail, contactEmail)
   if (existingGroupId) {
     const { channel: existingGroup } = await app.client.conversations.info({
       token: context.userToken,
-      channel: existingGroupId,
+      channel: existingGroupId
     })
-    say(buildGroupAlreadyExistsMessage(existingGroup.name))
-    return
+    return LinkResult.existing(existingGroup)
   }
 
   const chatName = generateChatName(contactEmail)
   let created = null
   let retryAttempt = 0
-  while (!created && retryAttempt < 10) {
+  const maxAttempts = 10
+  while (!created && retryAttempt < maxAttempts) {
     const chatNameCandidate = generateNextCandidate(chatName, retryAttempt)
     try {
       created = await app.client.conversations.create({
@@ -88,29 +85,59 @@ export const openChat = (app) => async ({ body, context, ack, say }) => {
         channel: created.channel.id,
         users: context.botId
       })
-      say(buildGroupCreatedMessage(created.channel.name))
       await store.slackLink.set(userEmail, contactEmail, created.channel.id)
       await store.slackGroup.set(created.channel.id, {
         source: {
           teamId: context.teamId,
           userId: context.userId,
-          email: userEmail,
+          email: userEmail
         },
         sink: {
-          email: contactEmail,
-        },
+          email: contactEmail
+        }
       })
-      return
+      return LinkResult.created(created.channel)
     } catch (err) {
       if (err.data && err.data.error === 'name_taken') {
         retryAttempt++
       } else {
-        say(buildFailedToCreateGroup(err.message))
-        slackLog.error(err)
-        return
+        throw new Error(buildCannotCreateGroupInfo(contactEmail, err.message))
       }
     }
   }
-  say(buildFailedToCreateGroup('name_taken'))
-  slackLog.error('Failed to create a group after 10 attempts.')
+  throw new Error(buildFailedToFindFreeNameInfo(maxAttempts))
+}
+
+export const openChat = (app) => async ({ body, context, ack, say }) => {
+  try {
+    ack()
+
+    const contactEmail = body.submission.email
+
+    const profileInfo = await app.client.users.profile.get({
+      token: context.userToken,
+      user: context.userId
+    })
+
+    const userEmail = profileInfo.profile.email
+    if (userEmail === contactEmail) {
+      say(buildCannotConnectToYourselfMessage(contactEmail))
+      return
+    }
+
+    const contactRegistration = await store.user.registration.get(contactEmail)
+    if (!contactRegistration) {
+      say(buildContactNotFoundMessage(contactEmail))
+      return
+    }
+
+    const result = await createSlackLink({ app, userEmail, contactEmail, context })
+    if (result.alreadyExisted) {
+      say(buildGroupAlreadyExistsMessage(contactEmail, result.group.name))
+    } else {
+      say(buildGroupCreatedMessage(contactEmail, result.group.name))
+    }
+  } catch (err) {
+    say(err.message)
+  }
 }
