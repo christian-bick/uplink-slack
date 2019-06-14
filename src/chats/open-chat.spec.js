@@ -1,66 +1,19 @@
 import {
   buildCannotConnectToYourselfMessage,
   buildContactNotFoundMessage,
-  buildCannotCreateGroupInfo,
-  buildFailedToFindFreeNameInfo,
   buildGroupAlreadyExistsMessage,
   buildGroupCreatedMessage,
-  generateChatName,
-  generateNextCandidate,
-  generateNextIterator,
   openChat
 } from './open-chat'
+
+import {
+  buildCannotCreateGroupInfo,
+  buildFailedToFindFreeNameInfo,
+} from './create-slack-link'
+
 import store from '../store'
 
 describe('chat', () => {
-  describe('generateChatName', () => {
-    it('should remove host part', () => {
-      const name = generateChatName('x@y.com')
-      expect(name).to.eql('x')
-    })
-
-    it('should replace dots and lower dashes with hyphens', () => {
-      const name = generateChatName('x.y_z')
-      expect(name).to.eql('x-y-z')
-    })
-
-    it('should shorten to 21 characters', () => {
-      const name = generateChatName('123456789012345678901234567890')
-      expect(name).to.eql('123456789012345678901')
-    })
-
-    it('should apply everything in right order', () => {
-      const name = generateChatName('1.3_56789012345678901234567890@abcdefg.com')
-      expect(name).to.eql('1-3-56789012345678901')
-    })
-  })
-
-  describe('generateNextIterator', () => {
-    it('should return an integer between 100 (incl) and 1000 (excl)', () => {
-      const iterator = generateNextIterator()
-      expect(iterator).to.be.above(99)
-      expect(iterator).to.be.below(1000)
-      expect(iterator).to.satisfy(Number.isInteger)
-    })
-  })
-
-  describe('generateNextCandidate', () => {
-    it('should append no iterator on first attempt', () => {
-      const next = generateNextCandidate('x', 0)
-      expect(next).to.equal('x')
-    })
-
-    it('should append an iterator on any attempt but first', () => {
-      const next = generateNextCandidate('x', 1)
-      expect(next).matches(/x-[0-9]{3}/)
-    })
-
-    it('should trim long name to 17 characters before appending iterator', () => {
-      const next = generateNextCandidate('12345678901234567890', 1)
-      expect(next).matches(/12345678901234567-[0-9]{3}/)
-    })
-  })
-
   describe('openChat', () => {
     const currentTeamId = 'current-team-id'
     const currentUserId = 'current-user-id'
