@@ -1,5 +1,5 @@
 import store from '../store'
-import { slackLog } from '../logger'
+import { appLog } from '../logger'
 import { createSlackLink } from './create-slack-link'
 
 export const buildCannotConnectToYourselfMessage = (contactEmail) => {
@@ -64,7 +64,7 @@ export const openChat = (app) => async ({ body, context, ack, say }) => {
       say(buildGroupCreatedMessage(contactEmail, result.group.name))
     }
   } catch (err) {
-    slackLog.error(err)
+    appLog.error(err)
     say(err.message)
   }
 }
