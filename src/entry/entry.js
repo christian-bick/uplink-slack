@@ -1,4 +1,5 @@
 import store from '../store'
+import moment from 'moment'
 
 export const buildPermissionMessage = () => ({
   blocks: [
@@ -52,12 +53,32 @@ export const buildEntryMessage = () => ({
   ]
 })
 
-export const reactToAppHomeOpened = async ({ context, say }) => {
+export const reactToAppHomeOpened = (app) => async ({ context, event, say }) => {
   const user = await store.slackUser.get(context.userId)
-  if (user) {
-    say(buildEntryMessage())
+
+  const sendHomeMessage = async (message) => {
+    const { messages: oldMessages } = await app.client.conversations.history({
+      token: context.botToken,
+      channel: event.channel
+    })
+    const firstMessage = oldMessages && oldMessages[0]
+
+    if (firstMessage && !firstMessage.user) {
+      return app.client.chat.update({
+        ts: firstMessage.ts,
+        channel: event.channel,
+        token: context.botToken,
+        ...message,
+      })
+    } else {
+      return say(message)
+    }
+  }
+
+  if (!user) {
+    await sendHomeMessage(buildPermissionMessage())
   } else {
-    say(buildPermissionMessage())
+    await sendHomeMessage(buildEntryMessage())
   }
 }
 

@@ -21,11 +21,11 @@ const run = async (port) => {
   })
 
   // Register
+  entry(app)
   auth(app)
-  chats(app)
   ping(app)
   contacts(app)
-  entry(app)
+  chats(app)
 
   app.receiver.app.use(express.static('public'))
 
