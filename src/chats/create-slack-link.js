@@ -84,7 +84,6 @@ export const createSlackLink = async ({ app, userEmail, contactEmail, context })
       if (err.data && err.data.error === 'name_taken') {
         retryAttempt++
       } else {
-        console.log(err)
         throw new Error(buildCannotCreateGroupInfo(contactEmail, err.message))
       }
     }
