@@ -41,17 +41,16 @@ export class LinkResult {
   }
 }
 
-export const createSlackLink = async ({ app, userEmail, contactEmail, context }) => {
-  const existingGroupId = await store.slackLink.get(userEmail, contactEmail)
-  if (existingGroupId) {
+export const createSlackLink = async ({ app, context, source, sink }) => {
+  const existingLink = await store.slackLink.get(source.email, sink.email)
+  if (existingLink) {
     const { channel: existingGroup } = await app.client.conversations.info({
       token: context.userToken,
-      channel: existingGroupId
+      channel: existingLink.channelId
     })
     return LinkResult.existing(existingGroup)
   }
-
-  const chatName = generateChatName(contactEmail)
+  const chatName = generateChatName(sink.email)
   let created = null
   let retryAttempt = 0
   const maxAttempts = 10
@@ -68,15 +67,19 @@ export const createSlackLink = async ({ app, userEmail, contactEmail, context })
         channel: created.channel.id,
         users: context.botId
       })
-      await store.slackLink.set(userEmail, contactEmail, created.channel.id)
+      await store.slackLink.set(source.email, sink.email, {
+        platform: 'slack',
+        type: 'group',
+        channelId: created.channel.id
+      })
       await store.slackGroup.set(created.channel.id, {
         source: {
-          teamId: context.teamId,
-          userId: context.userId,
-          email: userEmail
+          userId: source.userId,
+          teamId: source.teamId,
+          email: source.email
         },
         sink: {
-          email: contactEmail
+          email: sink.email
         }
       })
       return LinkResult.created(created.channel)
@@ -84,10 +87,25 @@ export const createSlackLink = async ({ app, userEmail, contactEmail, context })
       if (err.data && err.data.error === 'name_taken') {
         retryAttempt++
       } else {
-        throw new Error(buildCannotCreateGroupInfo(contactEmail, err.message))
+        throw new Error(buildCannotCreateGroupInfo(sink.email, err.message))
       }
     }
   }
   throw new Error(buildFailedToFindFreeNameInfo(maxAttempts))
 }
 
+export const createReverseSlackLink = async ({ app, sourceSlackGroup }) => {
+  const contactRegistration = await store.user.registration.get(sourceSlackGroup.sink.email)
+  if (!contactRegistration) {
+    throw Error(`No registration found for contact ${sourceSlackGroup.sink.email}`)
+  }
+  const contactSlackTeam = await store.slackTeam.get(contactRegistration.teamId)
+  const contactSlackUser = await store.slackUser.get(contactRegistration.userId)
+  const context = { ...contactSlackTeam, ...contactSlackUser }
+  return createSlackLink({
+    app,
+    context,
+    source: contactRegistration,
+    sink: sourceSlackGroup.source
+  })
+}

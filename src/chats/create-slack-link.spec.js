@@ -57,11 +57,13 @@ describe('chat', () => {
     })
   })
 
-  describe('openChat', () => {
+  describe('createSlackLink', () => {
     const teamId = 'current-team-id'
     const userId = 'current-user-id'
     const userEmail = 'current-user@x.com'
     const contactEmail = 'contact@x.com'
+    const contactUserId = 'contact-user-id'
+    const contactTeamId = 'contact-team-id'
     const groupId = 'group-id'
     const groupName = 'group-name'
     const createdGroup = {
@@ -88,19 +90,21 @@ describe('chat', () => {
 
     beforeEach('prepare params', () => {
       params = {
-        userEmail,
-        contactEmail,
-        context: { teamId: teamId, userId: userId, botToken: 'bot-token', userToken: 'user-token', botId: 'bot-id' },
         app,
+        context: { botToken: 'bot-token', userToken: 'user-token', botId: 'bot-id' },
+        sourceRegistration: {
+          platform: 'slack',
+          userId: userId,
+          teamId: teamId,
+          email: userEmail
+        },
+        sinkRegistration: {
+          platform: 'slack',
+          userId: contactUserId,
+          teamId: contactTeamId,
+          email: contactEmail
+        },
       }
-    })
-
-    beforeEach('create registration', async () => {
-      await store.user.registration.setnx(contactEmail, {
-        platform: 'slack',
-        userId: 'contact-user-id',
-        teamId: 'contact-team-id'
-      })
     })
 
     describe('group name available', () => {
@@ -128,8 +132,12 @@ describe('chat', () => {
 
       it('should create a slack link when it does not exist yet', async () => {
         await createSlackLink(params)
-        const createdGroupId = await store.slackLink.get(userEmail, contactEmail)
-        expect(createdGroupId).to.equal(groupId)
+        const createdLink = await store.slackLink.get(userEmail, contactEmail)
+        expect(createdLink).to.eql({
+          platform: 'slack',
+          type: 'group',
+          channelId: groupId
+        })
       })
 
       it('should create a slack group when it does not exist yet', async () => {

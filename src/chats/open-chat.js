@@ -6,6 +6,10 @@ export const buildCannotConnectToYourselfMessage = (contactEmail) => {
   return `Looks like this your own email address: ${contactEmail}`
 }
 
+export const buildRegistrationNotFoundMessage = (contactEmail) => {
+  return `Looks like you are not registered with your email yet.`
+}
+
 export const buildContactNotFoundMessage = (contactEmail) => {
   return `I don't know a user with this email address: ${contactEmail}`
 }
@@ -35,13 +39,25 @@ export const openChat = (app) => async ({ body, context, ack, say }) => {
       return
     }
 
+    const userRegistration = await store.user.registration.get(userEmail)
+    if (!userRegistration) {
+      say(buildRegistrationNotFoundMessage(contactEmail))
+      return
+    }
+
     const contactRegistration = await store.user.registration.get(contactEmail)
     if (!contactRegistration) {
       say(buildContactNotFoundMessage(contactEmail))
       return
     }
 
-    const result = await createSlackLink({ app, userEmail, contactEmail, context })
+    const result = await createSlackLink({
+      app,
+      context,
+      source: userRegistration,
+      sink: contactRegistration
+    })
+
     if (result.alreadyExisted) {
       say(buildGroupAlreadyExistsMessage(contactEmail, result.group.name))
     } else {

@@ -52,10 +52,11 @@ const registerUser = async (app, user) => {
     user: user.userId,
   })
   const userEmail = profileInfo.profile.email
-  await store.user.registration.setnx(userEmail, {
+  await store.user.registration.set(userEmail, {
     platform: 'slack',
     teamId: user.teamId,
     userId: user.userId,
+    email: userEmail
   })
 }
 

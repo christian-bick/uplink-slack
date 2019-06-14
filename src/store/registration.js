@@ -1,7 +1,7 @@
 import { userRegistration } from '../redis-keys'
-import { getJson, setnxJson } from '../redis-ops'
+import { getJson, setJson } from '../redis-ops'
 
-const setnx = (email, registration) => setnxJson(userRegistration(email), registration)
+const set = (email, registration) => setJson(userRegistration(email), registration)
 const get = (email) => getJson(userRegistration(email))
 
-export default { setnx, get }
+export default { set, get }

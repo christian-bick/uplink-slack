@@ -2,7 +2,7 @@ import {
   buildCannotConnectToYourselfMessage,
   buildContactNotFoundMessage,
   buildGroupAlreadyExistsMessage,
-  buildGroupCreatedMessage,
+  buildGroupCreatedMessage, buildRegistrationNotFoundMessage,
   openChat
 } from './open-chat'
 
@@ -19,6 +19,8 @@ describe('chat', () => {
     const currentUserId = 'current-user-id'
     const currentUserEmail = 'current-user@x.com'
     const contactEmail = 'contact@x.com'
+    const contactUserId = 'contact-user-id'
+    const contactTeamId = 'contact-team-id'
     const groupId = 'group-id'
     const groupName = 'group-name'
     const existingGroupId = 'existing-group-id'
@@ -56,7 +58,23 @@ describe('chat', () => {
       })
     })
 
-    describe('contact not registered', () => {
+    describe('current user is not registered', () => {
+      it('should reply with contact-not-found message', async () => {
+        await openChat(app)(params)
+        expect(params.ack, 'ack').to.be.calledOnce
+        expect(params.say, 'say').to.be.calledOnceWith(buildRegistrationNotFoundMessage(contactEmail))
+      })
+    })
+
+    describe('current user is registered', () => {
+      beforeEach('create current user registration', async () => {
+        await store.user.registration.setnx(currentUserEmail, {
+          platform: 'slack',
+          userId: currentUserId,
+          teamId: currentTeamId,
+          email: currentUserEmail,
+        })
+      })
       it('should reply with contact-not-found message', async () => {
         await openChat(app)(params)
         expect(params.ack, 'ack').to.be.calledOnce
@@ -64,12 +82,19 @@ describe('chat', () => {
       })
     })
 
-    describe('contact registered', () => {
-      beforeEach('create registration', async () => {
+    describe('current user and contact are registered', () => {
+      beforeEach('create registrations', async () => {
+        await store.user.registration.setnx(currentUserEmail, {
+          platform: 'slack',
+          userId: currentUserId,
+          teamId: currentTeamId,
+          email: currentUserEmail,
+        })
         await store.user.registration.setnx(contactEmail, {
           platform: 'slack',
-          userId: 'contact-user-id',
-          teamId: 'contact-team-id'
+          userId: contactUserId,
+          teamId: contactTeamId,
+          email: contactEmail
         })
       })
 

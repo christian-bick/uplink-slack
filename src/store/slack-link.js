@@ -1,8 +1,8 @@
 import { slackLink } from '../redis-keys'
-import redis from '../redis'
+import { getJson, setJson } from '../redis-ops'
 
-const set = (sourceEmail, sinkEmail, groupId) => redis.setAsync(slackLink(sourceEmail, sinkEmail), groupId)
-const get = (sourceEmail, sinkEmail) => redis.getAsync(slackLink(sourceEmail, sinkEmail))
+const set = (sourceEmail, sinkEmail, link) => setJson(slackLink(sourceEmail, sinkEmail), link)
+const get = (sourceEmail, sinkEmail) => getJson(slackLink(sourceEmail, sinkEmail))
 
 export default {
   set, get
