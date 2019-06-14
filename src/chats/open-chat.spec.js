@@ -78,40 +78,9 @@ describe('chat', () => {
           app.client.conversations.create.returns({ channel: { id: groupId, name: 'group-name' } })
         })
 
-        it('should create a conversation and invite bot', async () => {
-          await openChat(app)(params)
-          expect(app.client.conversations.create).to.be.calledOnce
-          expect(app.client.conversations.invite).to.be.calledOnceWith({
-            token: params.context.userToken,
-            channel: groupId,
-            users: params.context.botId
-          })
-        })
-
         it('should reply with group created message when group does not exist', async () => {
           await openChat(app)(params)
           expect(params.say, 'say').to.be.calledOnceWith(buildGroupCreatedMessage(contactEmail, groupName))
-        })
-
-        it('should create a slack link when it does not exist yet', async () => {
-          await openChat(app)(params)
-          const createdGroupId = await store.slackLink.get(currentUserEmail, contactEmail)
-          expect(createdGroupId).to.equal(groupId)
-        })
-
-        it('should create a slack group when it does not exist yet', async () => {
-          await openChat(app)(params)
-          const createdGroup = await store.slackGroup.get(groupId)
-          expect(createdGroup).to.eql({
-            source: {
-              teamId: currentTeamId,
-              userId: currentUserId,
-              email: currentUserEmail,
-            },
-            sink: {
-              email: contactEmail,
-            },
-          })
         })
 
         it('should reply with group already exists message when group already exists', async () => {
@@ -121,30 +90,13 @@ describe('chat', () => {
         })
       })
 
-      describe('group name taken', () => {
-        beforeEach('prepare groups.create', () => {
-          app.client.conversations.create.throws({ data: { error: 'name_taken' } })
-        })
-
-        it('should reply with group created message when second call succeeds', async () => {
-          app.client.conversations.create.onSecondCall().returns({ channel: { id: groupId, name: 'group-name' } })
-          await openChat(app)(params)
-          expect(params.say, 'say').to.be.calledOnceWith(buildGroupCreatedMessage(contactEmail, groupName))
-        })
-
-        it('should reply with group created message when third call succeeds', async () => {
-          app.client.conversations.create.onThirdCall().returns({ channel: { id: groupId, name: 'group-name' } })
-          await openChat(app)(params)
-          expect(params.say, 'say').to.be.calledOnceWith(buildGroupCreatedMessage(contactEmail, groupName))
-        })
-
+      describe('error scenarios', () => {
         it('should reply with failure message when name is taken', async () => {
+          app.client.conversations.create.throws({ data: { error: 'name_taken' } })
           await openChat(app)(params)
           expect(params.say, 'say').to.be.calledOnceWith(buildFailedToFindFreeNameInfo(10))
         })
-      })
 
-      describe('error scenarios', () => {
         it('should reply with failure message when slack request fails', async () => {
           app.client.conversations.create.throws(new Error('not_allowed'))
           await openChat(app)(params)

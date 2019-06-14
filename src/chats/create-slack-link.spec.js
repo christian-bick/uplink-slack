@@ -75,13 +75,10 @@ describe('chat', () => {
       name: existingGroupName
     }
 
-    let app = { client: { users: { profile: {} }, conversations: {} } }
+    let app = { client: {conversations: {} } }
     let params
 
     beforeEach('prepare app', () => {
-      app.client.users.profile.get = sandbox.fake.returns({
-        profile: { email: userEmail }
-      })
       app.client.conversations.create = sandbox.stub()
       app.client.conversations.info = sandbox.fake.returns({
         channel: { id: existingGroupId, name: existingGroupName }
