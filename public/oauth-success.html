@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Authentication Completed</title>
+  <style>
+    @import url("/basic.css");
+  </style>
+  <script>
+    function executeSlackDeepLink() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const teamId = urlParams.get('teamId');
+      const botId = urlParams.get('botId');
+
+      if (teamId && botId) {
+        window.location.href = 'slack://user?team=' + teamId + '&id=' + botId
+      } else {
+        window.location.href = 'slack://open'
+      }
+    }
+  </script>
+</head>
+<body>
+<div class="main">
+  <div class="content">
+    <div class="content-lead">
+      <h1>Authentication completed</h1>
+      <button onclick="executeSlackDeepLink()">
+        <img src="slack-logo-for-buttons.png">
+        <span>Return to Slack</span>
+      </button>
+    </div>
+    <div class="content-extra">
+      <img src="checkmark.png">
+    </div>
+  </div>
+</div>
+</div>
+</body>
+</html>

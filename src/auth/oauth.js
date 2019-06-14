@@ -14,8 +14,8 @@ const SLACK_TEAM_SCOPES = ['bot', ...SLACK_USER_SCOPES]
 const SLACK_TEAM_SCOPES_ENCODED = SLACK_TEAM_SCOPES.join('%20')
 
 const baseUri = (req) => `https://${req.hostname}`
-const successUri = (req) => `${baseUri(req)}/oauth/success`
-const errorUri = (req) => `${baseUri(req)}/oauth/error`
+const successUri = (req) => `${baseUri(req)}/oauth-success.html`
+const errorUri = (req) => `${baseUri(req)}/oauth-error.html`
 
 const generateStateToken = (payload) => jwt.sign(payload, SLACK_SIGNING_SECRET, { expiresIn: '30 minutes' })
 
@@ -59,6 +59,8 @@ const registerUser = async (app, user) => {
     email: userEmail
   })
 }
+
+export const augmentSuccessUri = (successUri, team) => `${successUri}?teamId=${team.teamId}&botId=${team.botId}`
 
 export const requestForTeam = (req, resp) => {
   try {
@@ -118,7 +120,7 @@ export const grantForTeam = (app) => async (req, resp) => {
     await store.slackTeam.set(team.teamId, team)
     await store.slackUser.set(user.userId, user)
     await registerUser(app, user)
-    resp.redirect(successUri)
+    resp.redirect(augmentSuccessUri(successUri, team))
     oauthLog.info('Team auth granted')
   } catch (err) {
     oauthLog.error(err)
@@ -132,9 +134,10 @@ export const grantForUser = (app) => async (req, resp) => {
     const { successUri, redirectUri } = await verifyStateToken(stateToken)
     const authInfo = await verifyAuthCode(app, code, redirectUri)
     const user = extractUser(authInfo)
+    const team = await store.slackTeam.get(user.teamId)
     await store.slackUser.set(user.userId, user)
     await registerUser(app, user)
-    resp.redirect(successUri)
+    resp.redirect(augmentSuccessUri(successUri, team))
     oauthLog.info('User auth granted')
   } catch (err) {
     oauthLog.error(err)

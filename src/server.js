@@ -6,6 +6,7 @@ import chats from './chats'
 import auth from './auth'
 import entry from './entry'
 import authorize from './auth/authorize'
+import * as express from "express"
 
 const PORT = process.env.PORT
 const LOG_LEVEL = process.env.LOG_LEVEL
@@ -25,6 +26,8 @@ const run = async (port) => {
   ping(app)
   contacts(app)
   entry(app)
+
+  app.receiver.app.use(express.static('public'))
 
   // Startup Slack App
   port = port || PORT || 3000
