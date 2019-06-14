@@ -16,7 +16,7 @@ export const forwardMessage = (app) => async ({ context, message }) => {
     forwardLog.debug('Skipping forwarding (not a linked user)')
     return
   }
-  const reverseLink = await store.slackLink.get(userSlackGroup.sink.email, userSlackGroup.source.email)
+  const reverseLink = await store.link.get(userSlackGroup.sink.email, userSlackGroup.source.email)
   let contactSlackGroup
   if (reverseLink) {
     forwardLog.debug('Found reverse link', reverseLink)

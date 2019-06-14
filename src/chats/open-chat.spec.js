@@ -110,7 +110,7 @@ describe('chat', () => {
         })
 
         it('should reply with group already exists message when group already exists', async () => {
-          await store.slackLink.set(currentUserEmail, contactEmail, groupId)
+          await store.link.set(currentUserEmail, contactEmail, groupId)
           await openChat(app)(params)
           expect(params.say, 'say').to.be.calledOnceWith(buildGroupAlreadyExistsMessage(contactEmail, existingGroupName))
         })

@@ -136,9 +136,9 @@ describe('chat', () => {
         })
       })
 
-      it('should create a slack link when it does not exist yet', async () => {
+      it('should create a link when it does not exist yet', async () => {
         await createSlackLink(params)
-        const createdLink = await store.slackLink.get(userEmail, contactEmail)
+        const createdLink = await store.link.get(userEmail, contactEmail)
         expect(createdLink).to.eql({
           platform: 'slack',
           type: 'group',
@@ -162,7 +162,7 @@ describe('chat', () => {
       })
 
       it('should return existing group when group already exists', async () => {
-        await store.slackLink.set(userEmail, contactEmail, existingGroupId)
+        await store.link.set(userEmail, contactEmail, existingGroupId)
         await store.slackGroup.set(existingGroupId, existingGroup)
         const result = await createSlackLink(params)
         expect(result).to.eql({

@@ -44,7 +44,7 @@ export class LinkResult {
 }
 
 export const createSlackLink = async ({ app, context, source, sink }) => {
-  const existingLink = await store.slackLink.get(source.email, sink.email)
+  const existingLink = await store.link.get(source.email, sink.email)
   if (existingLink) {
     const { channel: existingGroup } = await app.client.conversations.info({
       token: context.userToken,
@@ -74,7 +74,7 @@ export const createSlackLink = async ({ app, context, source, sink }) => {
         channel: created.channel.id,
         text: buildWelcomeMessage(sink.email),
       })
-      await store.slackLink.set(source.email, sink.email, {
+      await store.link.set(source.email, sink.email, {
         platform: 'slack',
         type: 'group',
         channelId: created.channel.id
