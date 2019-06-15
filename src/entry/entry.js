@@ -43,9 +43,18 @@ export const buildEntryMessage = () => ({
       'elements': [{
         'type': 'button',
         'action_id': `select-chat`,
+        'style': 'primary',
         'text': {
           'type': 'plain_text',
-          'text': 'Start a Chat',
+          'text': 'Start a Conversation',
+          'emoji': true
+        }
+      }, {
+        'type': 'button',
+        'action_id': `add-contacts`,
+        'text': {
+          'type': 'plain_text',
+          'text': 'Add Contacts',
           'emoji': true
         }
       }]
@@ -103,7 +112,33 @@ export const buildFirstContactDialog = (token, triggerId) => {
   })
 }
 
+export const buildAddContactsDialog = (token, triggerId) => {
+  return ({
+    'token': token,
+    'trigger_id': triggerId,
+    'dialog': {
+      'callback_id': 'add-contacts',
+      'title': 'Add Contacts',
+      'submit_label': 'Add',
+      'elements': [
+        {
+          'type': 'textarea',
+          'label': 'List of email addresses',
+          'name': 'contacts',
+          'hint': 'You can basically copy paste everything here that contains email addresses.',
+          'placeholder': 'john.smith@example.com\nsophie.miller@example.com'
+        }
+      ]
+    }
+  })
+}
+
 export const showSelectChatDialog = (app) => async ({ body, context, ack }) => {
   ack()
   await app.client.dialog.open(buildFirstContactDialog(context.botToken, body.trigger_id))
+}
+
+export const showAddContactsDialog = (app) => async ({ body, context, ack}) => {
+  ack()
+  await app.client.dialog.open(buildAddContactsDialog(context.botToken, body.trigger_id))
 }

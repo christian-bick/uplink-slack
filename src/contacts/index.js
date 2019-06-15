@@ -1,6 +1,5 @@
-import { receiveContacts } from './add'
-import { EMAIL_PATTERN } from './email'
+import { addContacts } from './add'
 
 export default (app) => {
-  app.message(EMAIL_PATTERN, receiveContacts(app))
+  app.action({ callback_id: 'add-contacts' }, addContacts(app))
 }

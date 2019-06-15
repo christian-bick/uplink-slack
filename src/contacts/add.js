@@ -1,4 +1,4 @@
-import { findEmailLinks, reduceEmailLinks } from './email'
+import {extractEmails} from './email'
 import redis from '../redis'
 import { userRegistration } from '../redis-keys'
 import store from '../store'
@@ -29,16 +29,16 @@ export const buildContactBlock = ({ email, installed }) => ({
   }
 })
 
-export const receiveContacts = (app) => async ({ message, context, body, say }) => {
+export const addContacts = (app) => async ({ context, body, say, ack }) => {
+  ack()
   const profileInfo = await app.client.users.profile.get({
     token: context.userToken,
-    user: message.user
+    user: context.userId
   })
 
   const userEmail = profileInfo.profile.email
 
-  const contactLinkList = findEmailLinks(message.text)
-  const contactEmailList = reduceEmailLinks(contactLinkList)
+  const contactEmailList = extractEmails(body.submission.contacts)
   await store.user.contacts.sadd(userEmail, contactEmailList)
 
   const activeContactKeys = contactEmailList.map(email => userRegistration(email))
