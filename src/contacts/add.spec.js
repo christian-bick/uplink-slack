@@ -1,6 +1,6 @@
 import redis from '../redis'
 import { userRegistration, userContacts } from '../redis-keys'
-import { addContacts, buildContactBlock } from './add'
+import { addContacts, buildContactBlockList } from './add'
 import store from '../store'
 
 describe('contacts', () => {
@@ -22,6 +22,7 @@ describe('contacts', () => {
     const contactEmail = 'contact-1@b.com'
     const contactEmail2 = 'contact-2@b.com'
     const context = { botToken: 'bot-token' }
+    const profileInfo = { profile: { email: userEmail, real_name: 'Chris' } }
     const contactRegistration = {
       platform: 'slack',
       teamId: contactTeamId,
@@ -32,7 +33,7 @@ describe('contacts', () => {
     let body
 
     beforeEach('set up', () => {
-      app.client.users.profile.get = sandbox.fake.returns({ profile: { email: userEmail } })
+      app.client.users.profile.get = sandbox.fake.returns(profileInfo)
       body = {
         team_id: teamId,
         user_id: userId,
@@ -42,7 +43,7 @@ describe('contacts', () => {
     })
 
     const expectReplyWithEmails = (expectedEmails) => {
-      const generatedBlocks = expectedEmails.map(buildContactBlock)
+      const generatedBlocks = buildContactBlockList(expectedEmails, profileInfo.profile)
       expect(say).to.have.been.calledWith({ blocks: generatedBlocks })
     }
 

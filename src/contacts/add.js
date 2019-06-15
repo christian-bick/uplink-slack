@@ -1,9 +1,17 @@
-import {extractEmails} from './email'
+import { extractEmails } from './email'
 import redis from '../redis'
 import { userRegistration } from '../redis-keys'
 import store from '../store'
+import { APP_NAME, INVITE_LINK } from '../global'
 
-export const buildContactBlock = ({ email, installed }) => ({
+const INVITE_SUBJECT = 'We can talk through Slack now'
+const inviteBody = (sender) => 'Hi! How is it going?\n\n' +
+  `I just installed ${APP_NAME} on my Slack team to finally move away from emails.\n\n` +
+  'When you also install the app on your Slack team then we can write each other directly from Slack in the future.\n\n' +
+  `Here is the link: ${INVITE_LINK}\n\n` +
+  `Best ${sender.real_name}`
+
+export const buildContactBlockList = (augmentedEmailAddressList, userProfile) => augmentedEmailAddressList.map(({email, installed}) => ({
   'type': 'section',
   'text': {
     'type': 'mrkdwn',
@@ -20,23 +28,23 @@ export const buildContactBlock = ({ email, installed }) => ({
     'value': email
   } : {
     'type': 'button',
-    'url': `mailto:${email}`,
+    'url': encodeURI(`mailto:${email}?subject=${INVITE_SUBJECT}&body=${inviteBody(userProfile)}`),
     'text': {
       'type': 'plain_text',
       'text': 'Invite',
       'emoji': false
     }
   }
-})
+}))
 
 export const addContacts = (app) => async ({ context, body, say, ack }) => {
   ack()
-  const profileInfo = await app.client.users.profile.get({
+  const { profile } = await app.client.users.profile.get({
     token: context.userToken,
     user: context.userId
   })
 
-  const userEmail = profileInfo.profile.email
+  const userEmail = profile.email
 
   const contactEmailList = extractEmails(body.submission.contacts)
   await store.user.contacts.sadd(userEmail, contactEmailList)
@@ -54,8 +62,9 @@ export const addContacts = (app) => async ({ context, body, say, ack }) => {
     email, installed: !!activeContacts[index]
   }))
 
-  const emailBlocks = augmentedEmailAddressList.map(buildContactBlock)
-
+  console.log(profile)
+  const emailBlocks = buildContactBlockList(augmentedEmailAddressList, profile)
+  console.log(emailBlocks)
   say({
     blocks: emailBlocks
   })
