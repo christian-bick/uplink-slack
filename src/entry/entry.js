@@ -77,7 +77,7 @@ export const reactToAppHomeOpened = (app) => async ({ context, event, say }) => 
         ts: firstMessage.ts,
         channel: event.channel,
         token: context.botToken,
-        ...message,
+        ...message
       })
     } else {
       return say(message)
@@ -91,54 +91,50 @@ export const reactToAppHomeOpened = (app) => async ({ context, event, say }) => 
   }
 }
 
-export const buildFirstContactDialog = (token, triggerId) => {
-  return ({
-    'token': token,
-    'trigger_id': triggerId,
-    'dialog': {
-      'callback_id': 'open-chat',
-      'title': 'Start a Chat',
-      'submit_label': 'Start',
-      'elements': [
-        {
-          'type': 'text',
-          'subtype': 'email',
-          'label': 'Your contact\'s email address',
-          'name': 'email',
-          'placeholder': 'john.smith@example.com'
-        }
-      ]
-    }
-  })
-}
+export const buildFirstContactDialog = (token, triggerId) => ({
+  'token': token,
+  'trigger_id': triggerId,
+  'dialog': {
+    'callback_id': 'open-chat',
+    'title': 'Start a Chat',
+    'submit_label': 'Start',
+    'elements': [
+      {
+        'type': 'text',
+        'subtype': 'email',
+        'label': 'Your contact\'s email address',
+        'name': 'email',
+        'placeholder': 'john.smith@example.com'
+      }
+    ]
+  }
+})
 
-export const buildAddContactsDialog = (token, triggerId) => {
-  return ({
-    'token': token,
-    'trigger_id': triggerId,
-    'dialog': {
-      'callback_id': 'add-contacts',
-      'title': 'Add Contacts',
-      'submit_label': 'Add',
-      'elements': [
-        {
-          'type': 'textarea',
-          'label': 'List of email addresses',
-          'name': 'contacts',
-          'hint': 'You can basically copy paste everything here that contains email addresses.',
-          'placeholder': 'john.smith@example.com\nsophie.miller@example.com'
-        }
-      ]
-    }
-  })
-}
+export const buildAddContactsDialog = (token, triggerId) => ({
+  'token': token,
+  'trigger_id': triggerId,
+  'dialog': {
+    'callback_id': 'add-contacts',
+    'title': 'Add Contacts',
+    'submit_label': 'Add',
+    'elements': [
+      {
+        'type': 'textarea',
+        'label': 'List of email addresses',
+        'name': 'contacts',
+        'hint': 'You can basically copy paste everything here that contains email addresses.',
+        'placeholder': 'john.smith@example.com\nsophie.miller@example.com'
+      }
+    ]
+  }
+})
 
 export const showSelectChatDialog = (app) => async ({ body, context, ack }) => {
   ack()
   await app.client.dialog.open(buildFirstContactDialog(context.botToken, body.trigger_id))
 }
 
-export const showAddContactsDialog = (app) => async ({ body, context, ack}) => {
+export const showAddContactsDialog = (app) => async ({ body, context, ack }) => {
   ack()
   await app.client.dialog.open(buildAddContactsDialog(context.botToken, body.trigger_id))
 }
