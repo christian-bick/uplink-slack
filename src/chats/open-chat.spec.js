@@ -104,13 +104,21 @@ describe('chat', () => {
 
         it('should reply with group created message when group does not exist', async () => {
           await openChat(app)(params)
-          expect(params.say, 'say').to.be.calledOnceWith(buildGroupCreatedMessage(contactEmail, groupName))
+          expect(app.client.chat.postMessage).to.be.calledOnceWith({
+            channel: groupId,
+            text: buildGroupCreatedMessage(currentUserId, contactEmail),
+            token: params.context.botToken
+          })
         })
 
         it('should reply with group already exists message when group already exists', async () => {
           await store.link.set(currentUserEmail, contactEmail, groupId)
           await openChat(app)(params)
-          expect(params.say, 'say').to.be.calledOnceWith(buildGroupAlreadyExistsMessage(contactEmail, existingGroupName))
+          expect(app.client.chat.postMessage).to.be.calledOnceWith({
+            channel: existingGroupId,
+            text: buildGroupAlreadyExistsMessage(currentUserId, contactEmail),
+            token: params.context.botToken,
+          })
         })
       })
 

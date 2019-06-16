@@ -4,7 +4,7 @@ export const buildCannotCreateGroupInfo = (contactEmail, reason) => `Failed to c
 
 export const buildFailedToFindFreeNameInfo = (attempts) => `Failed to find a free group name after ${attempts} attempts`
 
-export const buildWelcomeMessage = (contactEmail) => `This is the start of your conversation with ${contactEmail}. I will forward your messages and reply on your contact's behalf.`
+export const buildReverseGroupCreatedMessage = (userId, contactEmail) => `<@${userId}> This is the start of your conversation with ${contactEmail}. I will forward messages between the two of you within this group.`
 
 export const generateChatName = (email) => {
   const withoutEmail = email.split('@')[0]
@@ -69,11 +69,6 @@ export const createSlackLink = async ({ app, context, source, sink }) => {
         channel: created.channel.id,
         users: context.botId
       })
-      await app.client.chat.postMessage({
-        token: context.botToken,
-        channel: created.channel.id,
-        text: buildWelcomeMessage(sink.email),
-      })
       await store.link.set(source.email, sink.email, {
         platform: 'slack',
         type: 'group',
@@ -109,10 +104,16 @@ export const createReverseSlackLink = async ({ app, sourceSlackGroup }) => {
   const contactSlackTeam = await store.slackTeam.get(contactRegistration.teamId)
   const contactSlackUser = await store.slackUser.get(contactRegistration.userId)
   const context = { ...contactSlackTeam, ...contactSlackUser }
-  return createSlackLink({
+  const group = createSlackLink({
     app,
     context,
     source: contactRegistration,
     sink: sourceSlackGroup.source
   })
+  await app.client.chat.postMessage({
+    token: context.botToken,
+    channel: group.id,
+    text: buildReverseGroupCreatedMessage(sourceSlackGroup.source.email),
+  })
+  return group
 }

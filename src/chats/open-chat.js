@@ -14,12 +14,12 @@ export const buildContactNotFoundMessage = (contactEmail) => {
   return `I don't know a user with this email address: ${contactEmail}`
 }
 
-export const buildGroupAlreadyExistsMessage = (contactEmail, groupName) => {
-  return `Found an existing group for your conversation with ${contactEmail}: ${groupName}`
+export const buildGroupAlreadyExistsMessage = (userId, contactEmail) => {
+  return `<@${userId}> Here is your ongoing conversation with ${contactEmail}`
 }
 
-export const buildGroupCreatedMessage = (contactEmail, groupName) => {
-  return `Created a new group for your conversation with ${contactEmail}: ${groupName}`
+export const buildGroupCreatedMessage = (userId, contactEmail) => {
+  return `<@${userId}> This is your new conversation with ${contactEmail}. I will forward messages between the two of you within this group.`
 }
 
 export const openChat = (app) => async ({ body, context, ack, say }) => {
@@ -54,9 +54,17 @@ export const openChat = (app) => async ({ body, context, ack, say }) => {
     })
 
     if (result.alreadyExisted) {
-      say(buildGroupAlreadyExistsMessage(contactEmail, result.group.name))
+      await app.client.chat.postMessage({
+        token: context.botToken,
+        channel: result.group.id,
+        text: buildGroupAlreadyExistsMessage(context.userId, contactEmail)
+      })
     } else {
-      say(buildGroupCreatedMessage(contactEmail, result.group.name))
+      await app.client.chat.postMessage({
+        token: context.botToken,
+        channel: result.group.id,
+        text: buildGroupCreatedMessage(context.userId, contactEmail)
+      })
     }
   } catch (err) {
     appLog.error(err)
