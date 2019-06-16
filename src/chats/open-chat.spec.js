@@ -22,7 +22,6 @@ describe('chat', () => {
     const contactUserId = 'contact-user-id'
     const contactTeamId = 'contact-team-id'
     const groupId = 'group-id'
-    const groupName = 'group-name'
     const existingGroupId = 'existing-group-id'
     const existingGroupName = 'existing-group-name'
 
@@ -30,7 +29,7 @@ describe('chat', () => {
     let params
 
     beforeEach('prepare app', async () => {
-      await store.slackUser.set(currentUserId, { email: currentUserEmail } )
+      await store.slackProfile.set(currentUserId, { email: currentUserEmail } )
       app.client.conversations.create = sandbox.stub()
       app.client.conversations.info = sandbox.fake.returns({
         channel: { id: existingGroupId, name: existingGroupName }
