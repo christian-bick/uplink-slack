@@ -90,7 +90,7 @@ export const reactToAppHomeOpened = (app) => async ({ context, event, say }) => 
   }
 }
 
-export const buildFirstContactDialog = (token, triggerId) => ({
+export const buildOpenChatWithoutContactsDialog = (token, triggerId) => ({
   'token': token,
   'trigger_id': triggerId,
   'dialog': {
@@ -109,7 +109,7 @@ export const buildFirstContactDialog = (token, triggerId) => ({
   }
 })
 
-export const buildContactSearchDialog = (token, triggerId) => ({
+export const buildOpenChatDialog = (token, triggerId) => ({
   'token': token,
   'trigger_id': triggerId,
   'dialog': {
@@ -121,7 +121,7 @@ export const buildContactSearchDialog = (token, triggerId) => ({
         'type': 'select',
         'label': 'Your contact\'s email address',
         'name': 'email',
-        // 'placeholder': 'john.smith@example.com',
+        'placeholder': 'john.smith@example.com',
         'data_source': 'external',
       }
     ]
@@ -147,9 +147,15 @@ export const buildAddContactsDialog = (token, triggerId) => ({
   }
 })
 
-export const showSelectChatDialog = (app) => async ({ body, context, ack }) => {
+export const showOpenChatDialog = (app) => async ({ body, context, ack }) => {
   ack()
-  await app.client.dialog.open(buildContactSearchDialog(context.botToken, body.trigger_id))
+  const { email: userEmail } = await store.slackUser.get(context.userId)
+  const contacts = await store.user.contacts.smembers(userEmail)
+  if (!contacts || contacts.length < 1) {
+    await app.client.dialog.open(buildOpenChatWithoutContactsDialog(context.botToken, body.trigger_id))
+  } else {
+    await app.client.dialog.open(buildOpenChatDialog(context.botToken, body.trigger_id))
+  }
 }
 
 export const showAddContactsDialog = (app) => async ({ body, context, ack }) => {

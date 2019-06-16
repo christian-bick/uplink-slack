@@ -6,11 +6,6 @@ describe('rateEmails', () => {
     expect(rating).to.equal(1)
   })
 
-  it('exact matches of tail and head parts should be rated 1', () => {
-    const rating = rateEmail(['x', 'y.com'], 'x@y.com')
-    expect(rating).to.equal(1)
-  })
-
   it('exact matches of head parts should be rated 1', () => {
     const rating = rateEmail(['very', 'nice'], 'very.nice@y.com')
     expect(rating).to.equal(1)
@@ -38,6 +33,16 @@ describe('rateEmails', () => {
 
   it('miss match should not be rated low', () => {
     const rating = rateEmail(['hello'], 'verynice@y.com')
+    expect(rating).to.be.below(0.5)
+  })
+
+  it('partial match should not be rated low', () => {
+    const rating = rateEmail(['very', 'hello'], 'very.shallow@gmail.com')
+    expect(rating).to.be.below(0.5)
+  })
+
+  it('tail match should not be rated low', () => {
+    const rating = rateEmail(['very', 'hello'], 'very.shallow@gmail.com')
     expect(rating).to.be.below(0.5)
   })
 })
