@@ -149,7 +149,7 @@ export const buildAddContactsDialog = (token, triggerId) => ({
 
 export const showOpenChatDialog = (app) => async ({ body, context, ack }) => {
   ack()
-  const { email: userEmail } = await store.slackUser.get(context.userId)
+  const { email: userEmail } = await store.slackProfile.get(context.userId)
   const contacts = await store.user.contacts.smembers(userEmail)
   if (!contacts || contacts.length < 1) {
     await app.client.dialog.open(buildOpenChatWithoutContactsDialog(context.botToken, body.trigger_id))

@@ -51,15 +51,21 @@ const registerUser = async (app, user) => {
     token: user.userToken,
     user: user.userId,
   })
+
   await store.user.registration.set(profile.email, {
     platform: 'slack',
     teamId: user.teamId,
     userId: user.userId,
-    email: profile.email
   })
+
   await store.slackUser.set(user.userId, {
     ...user,
     email: profile.email
+  })
+
+  await store.slackProfile.set(user.userId, {
+    email: profile.email,
+    name: profile.real_name || profile.display_name
   })
 }
 
