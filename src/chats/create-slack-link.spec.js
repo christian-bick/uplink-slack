@@ -4,19 +4,19 @@ import {
   generateChatName,
   generateNextCandidate,
   generateNextIterator,
-  createSlackLink, buildReverseGroupCreatedMessage
+  createSlackLink,
 } from './create-slack-link'
 import store from '../store'
 
 describe('chat', () => {
   describe('generateChatName', () => {
     it('should remove host part', () => {
-      const name = generateChatName('x@y.com')
-      expect(name).to.eql('x')
+      const name = generateChatName('x y')
+      expect(name).to.eql('x-y')
     })
 
     it('should replace dots and lower dashes with hyphens', () => {
-      const name = generateChatName('x.y_z')
+      const name = generateChatName('x y z')
       expect(name).to.eql('x-y-z')
     })
 
@@ -26,7 +26,7 @@ describe('chat', () => {
     })
 
     it('should apply everything in right order', () => {
-      const name = generateChatName('1.3_56789012345678901234567890@abcdefg.com')
+      const name = generateChatName('1 3 56789012345678901234567890')
       expect(name).to.eql('1-3-56789012345678901')
     })
   })
@@ -61,6 +61,7 @@ describe('chat', () => {
     const teamId = 'current-team-id'
     const userId = 'current-user-id'
     const userEmail = 'current-user@x.com'
+    const userName = 'user name'
     const contactEmail = 'contact@x.com'
     const contactUserId = 'contact-user-id'
     const contactTeamId = 'contact-team-id'
@@ -68,7 +69,7 @@ describe('chat', () => {
     const groupName = 'group-name'
     const createdGroup = {
       id: groupId,
-      name: groupName,
+      name: groupName
     }
     const existingGroupId = 'existing-group-id'
     const existingGroupName = 'existing-group-name'
@@ -77,15 +78,19 @@ describe('chat', () => {
       name: existingGroupName
     }
 
-    let app = { client: {conversations: {}, chat: {} } }
+    let app = { client: { conversations: {}, chat: {} } }
     let params
 
-    beforeEach('prepare app', () => {
+    beforeEach('prepare app', async () => {
       app.client.conversations.create = sandbox.stub()
       app.client.conversations.info = sandbox.fake.returns({
         channel: { id: existingGroupId, name: existingGroupName }
       })
       app.client.conversations.invite = sandbox.fake()
+      await store.slackProfile.set(userId, {
+        email: userEmail,
+        name: userName
+      })
     })
 
     beforeEach('prepare params', () => {
@@ -103,7 +108,7 @@ describe('chat', () => {
           userId: contactUserId,
           teamId: contactTeamId,
           email: contactEmail
-        },
+        }
       }
     })
 
@@ -126,7 +131,7 @@ describe('chat', () => {
         const result = await createSlackLink(params)
         expect(result).to.eql({
           alreadyExisted: false,
-          group: createdGroup,
+          group: createdGroup
         })
       })
 
@@ -161,7 +166,7 @@ describe('chat', () => {
         const result = await createSlackLink(params)
         expect(result).to.eql({
           alreadyExisted: true,
-          group: existingGroup,
+          group: existingGroup
         })
       })
     })
@@ -176,7 +181,7 @@ describe('chat', () => {
         const result = await createSlackLink(params)
         expect(result).to.eql({
           alreadyExisted: false,
-          group: createdGroup,
+          group: createdGroup
         })
       })
 
@@ -185,7 +190,7 @@ describe('chat', () => {
         const result = await createSlackLink(params)
         expect(result).to.eql({
           alreadyExisted: false,
-          group: createdGroup,
+          group: createdGroup
         })
       })
 

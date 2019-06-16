@@ -15,9 +15,10 @@ import store from '../store'
 
 describe('chat', () => {
   describe('openChat', () => {
-    const currentTeamId = 'current-team-id'
-    const currentUserId = 'current-user-id'
-    const currentUserEmail = 'current-user@x.com'
+    const teamId = 'current-team-id'
+    const userId = 'current-user-id'
+    const userEmail = 'current-user@x.com'
+    const userName = 'user name'
     const contactEmail = 'contact@x.com'
     const contactUserId = 'contact-user-id'
     const contactTeamId = 'contact-team-id'
@@ -29,19 +30,23 @@ describe('chat', () => {
     let params
 
     beforeEach('prepare app', async () => {
-      await store.slackProfile.set(currentUserId, { email: currentUserEmail } )
+      await store.slackProfile.set(userId, { email: userEmail } )
       app.client.conversations.create = sandbox.stub()
       app.client.conversations.info = sandbox.fake.returns({
         channel: { id: existingGroupId, name: existingGroupName }
       })
       app.client.conversations.invite = sandbox.fake()
       app.client.chat.postMessage = sandbox.fake()
+      await store.slackProfile.set(userId, {
+        email: userEmail,
+        name: userName
+      })
     })
 
     beforeEach('prepare params', () => {
       params = {
         body: { submission: { email: contactEmail } },
-        context: { teamId: currentTeamId, userId: currentUserId, botToken: 'bot-token', userToken: 'user-token', botId: 'bot-id' },
+        context: { teamId: teamId, userId: userId, botToken: 'bot-token', userToken: 'user-token', botId: 'bot-id' },
         ack: sandbox.fake(),
         say: sandbox.fake()
       }
@@ -49,7 +54,7 @@ describe('chat', () => {
 
     describe('current user is same as contact', () => {
       it('should reply with cannot-connect-to-yourself message', async () => {
-        params.body.submission.email = currentUserEmail
+        params.body.submission.email = userEmail
         await openChat(app)(params)
         expect(params.ack, 'ack').to.be.calledOnce
         expect(params.say, 'say').to.be.calledOnceWith(buildCannotConnectToYourselfMessage(params.body.submission.email))
@@ -66,11 +71,11 @@ describe('chat', () => {
 
     describe('current user is registered', () => {
       beforeEach('create current user registration', async () => {
-        await store.user.registration.set(currentUserEmail, {
+        await store.user.registration.set(userEmail, {
           platform: 'slack',
-          userId: currentUserId,
-          teamId: currentTeamId,
-          email: currentUserEmail,
+          userId: userId,
+          teamId: teamId,
+          email: userEmail,
         })
       })
       it('should reply with contact-not-found message', async () => {
@@ -82,11 +87,11 @@ describe('chat', () => {
 
     describe('current user and contact are registered', () => {
       beforeEach('create registrations', async () => {
-        await store.user.registration.set(currentUserEmail, {
+        await store.user.registration.set(userEmail, {
           platform: 'slack',
-          userId: currentUserId,
-          teamId: currentTeamId,
-          email: currentUserEmail,
+          userId: userId,
+          teamId: teamId,
+          email: userEmail,
         })
         await store.user.registration.set(contactEmail, {
           platform: 'slack',
@@ -105,17 +110,17 @@ describe('chat', () => {
           await openChat(app)(params)
           expect(app.client.chat.postMessage).to.be.calledOnceWith({
             channel: groupId,
-            text: buildGroupCreatedMessage(currentUserId, contactEmail),
+            text: buildGroupCreatedMessage(userId, contactEmail),
             token: params.context.botToken
           })
         })
 
         it('should reply with group already exists message when group already exists', async () => {
-          await store.link.set(currentUserEmail, contactEmail, groupId)
+          await store.link.set(userEmail, contactEmail, groupId)
           await openChat(app)(params)
           expect(app.client.chat.postMessage).to.be.calledOnceWith({
             channel: existingGroupId,
-            text: buildGroupAlreadyExistsMessage(currentUserId, contactEmail),
+            text: buildGroupAlreadyExistsMessage(userId, contactEmail),
             token: params.context.botToken,
           })
         })

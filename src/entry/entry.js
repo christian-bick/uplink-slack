@@ -1,12 +1,16 @@
 import store from '../store'
 
+export const PERMISSIONS_TEST = 'Let\'s get started!'
+export const ENTRY_TEXT = 'Message contacts outside of your organization.'
+
 export const buildPermissionMessage = () => ({
+  text: PERMISSIONS_TEST,
   blocks: [
     {
       'type': 'section',
       'text': {
         'type': 'mrkdwn',
-        'text': 'With Open Convo you can chat with others outside of your Slack team as if they were here!'
+        'text': 'Have conversations with contacts outside of your Slack team as if they were here!'
       }
     }, {
       'type': 'section',
@@ -28,12 +32,13 @@ export const buildPermissionMessage = () => ({
 })
 
 export const buildEntryMessage = () => ({
+  text: ENTRY_TEXT,
   blocks: [
     {
       'type': 'section',
       'text': {
         'type': 'mrkdwn',
-        'text': 'What are you up for?'
+        'text': ENTRY_TEXT
       }
     }, {
       'type': 'divider'
@@ -56,7 +61,15 @@ export const buildEntryMessage = () => ({
           'text': 'Add Contacts',
           'emoji': true
         }
-      }]
+      }, /* {
+        'type': 'button',
+        'url': `https://${process.env.HOST}/oauth/user/request`,
+        'text': {
+          'type': 'plain_text',
+          'text': 'Reinstall',
+          'emoji': true
+        }
+      } */]
     }
   ]
 })
@@ -70,8 +83,9 @@ export const reactToAppHomeOpened = (app) => async ({ context, event, say }) => 
       channel: event.channel
     })
     const firstMessage = oldMessages && oldMessages[0]
+    console.log(firstMessage)
 
-    if (firstMessage && !firstMessage.user) {
+    if (firstMessage && firstMessage.text === ENTRY_TEXT) {
       return app.client.chat.update({
         ts: firstMessage.ts,
         channel: event.channel,

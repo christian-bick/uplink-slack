@@ -6,9 +6,8 @@ export const buildFailedToFindFreeNameInfo = (attempts) => `Failed to find a fre
 
 export const buildReverseGroupCreatedMessage = (userId, contactEmail) => `<@${userId}> This is the start of your conversation with ${contactEmail}. I will forward messages between the two of you within this group.`
 
-export const generateChatName = (email) => {
-  const withoutEmail = email.split('@')[0]
-  const hyphened = withoutEmail.replace(/[._]/g, '-')
+export const generateChatName = (name) => {
+  const hyphened = name.split(' ').join('-')
   return hyphened.substr(0, 21)
 }
 
@@ -52,7 +51,8 @@ export const createSlackLink = async ({ app, context, source, sink }) => {
     })
     return LinkResult.existing(existingGroup)
   }
-  const chatName = generateChatName(sink.email)
+  const sourceProfile = await store.slackProfile.get(source.userId)
+  const chatName = generateChatName(sourceProfile.name)
   let created = null
   let retryAttempt = 0
   const maxAttempts = 10
