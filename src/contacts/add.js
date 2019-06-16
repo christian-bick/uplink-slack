@@ -62,9 +62,7 @@ export const addContacts = (app) => async ({ context, body, say, ack }) => {
     email, installed: !!activeContacts[index]
   }))
 
-  console.log(profile)
   const emailBlocks = buildContactBlockList(augmentedEmailAddressList, profile)
-  console.log(emailBlocks)
   say({
     blocks: emailBlocks
   })

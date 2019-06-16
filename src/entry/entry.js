@@ -1,5 +1,4 @@
 import store from '../store'
-import moment from 'moment'
 
 export const buildPermissionMessage = () => ({
   blocks: [
@@ -110,6 +109,25 @@ export const buildFirstContactDialog = (token, triggerId) => ({
   }
 })
 
+export const buildContactSearchDialog = (token, triggerId) => ({
+  'token': token,
+  'trigger_id': triggerId,
+  'dialog': {
+    'callback_id': 'open-chat',
+    'title': 'Start a Chat',
+    'submit_label': 'Start',
+    'elements': [
+      {
+        'type': 'select',
+        'label': 'Your contact\'s email address',
+        'name': 'email',
+        // 'placeholder': 'john.smith@example.com',
+        'data_source': 'external',
+      }
+    ]
+  }
+})
+
 export const buildAddContactsDialog = (token, triggerId) => ({
   'token': token,
   'trigger_id': triggerId,
@@ -131,7 +149,7 @@ export const buildAddContactsDialog = (token, triggerId) => ({
 
 export const showSelectChatDialog = (app) => async ({ body, context, ack }) => {
   ack()
-  await app.client.dialog.open(buildFirstContactDialog(context.botToken, body.trigger_id))
+  await app.client.dialog.open(buildContactSearchDialog(context.botToken, body.trigger_id))
 }
 
 export const showAddContactsDialog = (app) => async ({ body, context, ack }) => {
