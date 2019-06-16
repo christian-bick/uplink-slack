@@ -29,10 +29,8 @@ describe('chat', () => {
     let app = { client: { users: { profile: {}}, conversations: {}, chat: {} } }
     let params
 
-    beforeEach('prepare app', () => {
-      app.client.users.profile.get = sandbox.fake.returns({
-        profile: { email: currentUserEmail }
-      })
+    beforeEach('prepare app', async () => {
+      await store.slackUser.set(currentUserId, { email: currentUserEmail } )
       app.client.conversations.create = sandbox.stub()
       app.client.conversations.info = sandbox.fake.returns({
         channel: { id: existingGroupId, name: existingGroupName }

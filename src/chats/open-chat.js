@@ -28,12 +28,7 @@ export const openChat = (app) => async ({ body, context, ack, say }) => {
 
     const contactEmail = body.submission.email
 
-    const profileInfo = await app.client.users.profile.get({
-      token: context.userToken,
-      user: context.userId
-    })
-
-    const userEmail = profileInfo.profile.email
+    const { email: userEmail } = await store.slackUser.get(context.userId)
     if (userEmail === contactEmail) {
       say(buildCannotConnectToYourselfMessage(contactEmail))
       return
