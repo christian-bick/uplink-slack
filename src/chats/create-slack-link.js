@@ -4,7 +4,7 @@ export const buildCannotCreateGroupInfo = (contactEmail, reason) => `Failed to c
 
 export const buildFailedToFindFreeNameInfo = (attempts) => `Failed to find a free group name after ${attempts} attempts`
 
-export const buildReverseGroupCreatedMessage = (userId, contactEmail) => `<@${userId}> This is the start of your conversation with ${contactEmail}. I will forward messages between the two of you within this group.`
+export const buildReverseGroupCreatedMessage = (userId, contactName) => `<@${userId}> This is the start of your conversation with ${contactName}. I will forward messages between the two of you within this group.`
 
 export const generateChatName = (name) => {
   const hyphened = name.split(' ').join('-')
@@ -51,8 +51,8 @@ export const createSlackLink = async ({ app, context, source, sink }) => {
     })
     return LinkResult.existing(existingGroup)
   }
-  const sourceProfile = await store.slackProfile.get(source.userId)
-  const chatName = generateChatName(sourceProfile.name)
+  const sinkProfile = await store.slackProfile.get(sink.userId)
+  const chatName = generateChatName(sinkProfile.name)
   let created = null
   let retryAttempt = 0
   const maxAttempts = 10
@@ -98,9 +98,8 @@ export const createSlackLink = async ({ app, context, source, sink }) => {
 
 export const createReverseSlackLink = async ({ app, sourceSlackGroup }) => {
   const contactRegistration = await store.user.registration.get(sourceSlackGroup.sink.email)
-  if (!contactRegistration) {
-    throw Error(`No registration found for contact ${sourceSlackGroup.sink.email}`)
-  }
+  const userRegistration = await store.user.registration.get(sourceSlackGroup.source.email)
+  const userProfile = await store.slackProfile.get(sourceSlackGroup.source.userId)
   const contactSlackTeam = await store.slackTeam.get(contactRegistration.teamId)
   const contactSlackUser = await store.slackUser.get(contactRegistration.userId)
   const context = { ...contactSlackTeam, ...contactSlackUser }
@@ -108,12 +107,12 @@ export const createReverseSlackLink = async ({ app, sourceSlackGroup }) => {
     app,
     context,
     source: contactRegistration,
-    sink: sourceSlackGroup.source
+    sink: userRegistration
   })
   await app.client.chat.postMessage({
     token: context.botToken,
     channel: group.id,
-    text: buildReverseGroupCreatedMessage(sourceSlackGroup.source.email),
+    text: buildReverseGroupCreatedMessage(contactRegistration.userId, userProfile.name),
   })
   return group
 }

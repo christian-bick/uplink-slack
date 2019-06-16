@@ -18,7 +18,7 @@ describe('chat', () => {
     const teamId = 'current-team-id'
     const userId = 'current-user-id'
     const userEmail = 'current-user@x.com'
-    const userName = 'user name'
+    const contactName = 'user name'
     const contactEmail = 'contact@x.com'
     const contactUserId = 'contact-user-id'
     const contactTeamId = 'contact-team-id'
@@ -37,9 +37,9 @@ describe('chat', () => {
       })
       app.client.conversations.invite = sandbox.fake()
       app.client.chat.postMessage = sandbox.fake()
-      await store.slackProfile.set(userId, {
-        email: userEmail,
-        name: userName
+      await store.slackProfile.set(contactUserId, {
+        email: contactEmail,
+        name: contactName
       })
     })
 
