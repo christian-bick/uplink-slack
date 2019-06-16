@@ -29,7 +29,6 @@ export const forwardMessage = (app) => async ({ context, message }) => {
   const contactTeam = await store.slackTeam.get(contactSlackGroup.source.teamId)
   forwardLog.debug('Forwarding message', { channelId: reverseLink.channelId })
   const userProfile = await store.slackProfile.get(context.userId)
-  console.log(userProfile)
   await app.client.chat.postMessage({
     username: userProfile.name || userProfile.email,
     token: contactTeam.botToken,
