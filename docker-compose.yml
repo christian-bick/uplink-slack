@@ -30,7 +30,7 @@ services:
     links:
       - web
     environment:
-      - NGROK_SUBDOMAIN=open-convo-slack-chris
+      - NGROK_SUBDOMAIN=uplink-slack-chris
       - NGROK_REGION=eu
       - NGROK_PORT=web:3000
     env_file:

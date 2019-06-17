@@ -1,5 +1,5 @@
 {
-  "name": "open-convo-slack",
+  "name": "uplink-slack",
   "version": "1.0.0",
   "description": "A Slack Integration for cross platform chats",
   "main": "src/index.js",
@@ -14,7 +14,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/christian-bick/open-convo-slack.git"
+    "url": "git+https://github.com/christian-bick/uplink-slack.git"
   },
   "dependencies": {
     "@slack/bolt": "^1.2.0",

@@ -4,6 +4,7 @@ function deploy {
     image=$1
     tag=$2
     cluster=$3
+    service=$4
     repo="838547702205.dkr.ecr.eu-central-1.amazonaws.com/"${image}
 
     echo "Building ${image}:${tag}"
@@ -18,5 +19,5 @@ function deploy {
 
     echo "Deploying ${image}:${tag}"
 
-    aws ecs update-service --cluster ${cluster} --service open-convo-slack-${tag} --force-new-deployment
+    aws ecs update-service --cluster ${cluster} --service ${service} --force-new-deployment
 }
