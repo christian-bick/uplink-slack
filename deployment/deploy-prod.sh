@@ -3,7 +3,7 @@ source $(dirname "$0")/./deploy.sh
 
 image="uplink-slack"
 tag="released"
-cluster="production"
-service="uplink-slack-prod-service"
+cluster="uplink-prod"
+service="uplink-prod-service"
 
 deploy ${image} ${tag} ${cluster} ${service}
