@@ -20,7 +20,6 @@ export const rejoinLinkedGroup = (app) => async ({ event, context }) => {
 }
 
 export const informJoinedUser = (app) => async ({ event, context }) => {
-  console.log(event)
   const channelId = event.channel
   const slackGroup = await store.slackGroup.get(channelId)
   if (!slackGroup) {

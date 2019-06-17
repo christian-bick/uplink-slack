@@ -83,7 +83,6 @@ export const reactToAppHomeOpened = (app) => async ({ context, event, say }) => 
       channel: event.channel
     })
     const firstMessage = oldMessages && oldMessages[0]
-    console.log(firstMessage)
 
     if (firstMessage && firstMessage.text === ENTRY_TEXT) {
       return app.client.chat.update({
