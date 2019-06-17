@@ -33,6 +33,8 @@
     "node-uuid": "^1.4.7",
     "redis": "^2.8.0",
     "redis-mock": "^0.44.0",
+    "request": "^2.88.0",
+    "request-promise-native": "^1.0.7",
     "string-similarity": "^3.0.0",
     "uuid": "^3.3.2"
   },
