@@ -1,5 +1,5 @@
 import redis from '../redis'
-import { userRegistration, userContacts } from '../redis-keys'
+import { userRegistrationKey, userContactsKey } from '../redis-keys'
 import { addContacts, buildContactBlockList } from './add'
 import store from '../store'
 
@@ -49,7 +49,7 @@ describe('contacts', () => {
 
     it('should only update installs for an existing user', async () => {
       const otherTeamId = 'other-team-id'
-      redis.setAsync(userRegistration(userEmail), JSON.stringify({
+      redis.setAsync(userRegistrationKey(userEmail), JSON.stringify({
         platform: 'slack',
         userId: 'other-user-id',
         teamId: otherTeamId
@@ -61,7 +61,7 @@ describe('contacts', () => {
 
     it('should add a contact for one email and a fresh user', async () => {
       await addContacts(app)(params)
-      const contactEntries = await redis.smembersAsync(userContacts(userEmail))
+      const contactEntries = await redis.smembersAsync(userContactsKey(userEmail))
       expect(contactEntries).to.eql([contactEmail])
     })
 
@@ -85,13 +85,13 @@ describe('contacts', () => {
     })
 
     it('should return email block for active single contact', async () => {
-      await redis.setAsync(userRegistration(contactEmail), contactRegistration)
+      await redis.setAsync(userRegistrationKey(contactEmail), contactRegistration)
       await addContacts(app)(params)
       expectReplyWithEmails([{ email: contactEmail, installed: true }])
     })
 
     it('should return contact block for active and inactive contacts', async () => {
-      await redis.setAsync(userRegistration(contactEmail), contactRegistration)
+      await redis.setAsync(userRegistrationKey(contactEmail), contactRegistration)
       params.body.submission.contacts += `\n${contactEmail2}`
       await addContacts(app)(params)
       expectReplyWithEmails([{ email: contactEmail, installed: true }, { email: contactEmail2, installed: false }])

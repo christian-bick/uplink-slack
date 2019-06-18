@@ -1,7 +1,9 @@
-import { userContacts } from '../redis-keys'
+import { userContactsKey } from '../redis-keys'
 import redis from '../redis'
 
-const sadd = (email, contactEmailList) => redis.saddAsync(userContacts(email), ...contactEmailList)
-const smembers = (email) => redis.smembersAsync(userContacts(email))
+const userContacts = {
+  sadd: (email, contactEmailList) => redis.saddAsync(userContactsKey(email), ...contactEmailList),
+  smembers: (email) => redis.smembersAsync(userContactsKey(email))
+}
 
-export default { sadd, smembers }
+export default userContacts

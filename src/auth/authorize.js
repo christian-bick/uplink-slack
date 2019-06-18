@@ -1,10 +1,10 @@
 import store from '../store'
 
 export default async ({ teamId, userId }) => {
-  const { botId, botToken } = await store.slackTeam.get(teamId)
+  const { botId, botToken } = await store.slack.team.get(teamId)
   const context = { teamId, botId, botToken }
   if (userId) {
-    const user = await store.slackUser.get(userId)
+    const user = await store.slack.user.get([teamId, userId])
     if (user) {
       context.userToken = user.userToken
     }

@@ -7,11 +7,11 @@ export const buildJoinUserInfo = (joinedUserId, userProfile, contactProfile) => 
 
 export const rejoinLinkedGroup = (app) => async ({ event, context }) => {
   const channelId = event.channel
-  const slackGroup = await store.slackGroup.get(channelId)
+  const slackGroup = await store.slack.group.get([context.teamId, channelId])
   if (!slackGroup) {
     return
   }
-  const slackUser = await store.slackUser.get(slackGroup.source.userId)
+  const slackUser = await store.slack.user.get([slackGroup.source.teamId, slackGroup.source.userId])
   app.client.conversations.invite({
     token: slackUser.userToken,
     channel: channelId,
@@ -21,13 +21,13 @@ export const rejoinLinkedGroup = (app) => async ({ event, context }) => {
 
 export const informJoinedUser = (app) => async ({ event, context }) => {
   const channelId = event.channel
-  const slackGroup = await store.slackGroup.get(channelId)
-  if (!slackGroup) {
+  const slackGroup = await store.slack.group.get([context.teamId, channelId])
+  if (!slackGroup || event.user === slackGroup.source.userId || event.user === context.botId) {
     return
   }
-  const userProfile = await store.slackProfile.get(slackGroup.source.userId)
+  const userProfile = await store.slack.profile.get([slackGroup.source.teamId, slackGroup.source.userId])
   const contactRegistration = await store.user.registration.get(slackGroup.sink.email)
-  const contactProfile = await store.slackProfile.get(contactRegistration.userId)
+  const contactProfile = await store.slack.profile.get([contactRegistration.teamId, contactRegistration.userId])
   app.client.chat.postMessage({
     token: context.botToken,
     channel: channelId,

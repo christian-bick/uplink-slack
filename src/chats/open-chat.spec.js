@@ -23,21 +23,28 @@ describe('chat', () => {
     const contactUserId = 'contact-user-id'
     const contactTeamId = 'contact-team-id'
     const groupId = 'group-id'
+
     const existingGroupId = 'existing-group-id'
     const existingGroupName = 'existing-group-name'
+    const existingLink = {
+      platform: 'slack',
+      type: 'group',
+      teamId: teamId,
+      channelId: existingGroupId
+    }
 
     let app = { client: { users: { profile: {}}, conversations: {}, chat: {} } }
     let params
 
     beforeEach('prepare app', async () => {
-      await store.slackProfile.set(userId, { email: userEmail } )
+      await store.slack.profile.set([teamId, userId], { email: userEmail } )
       app.client.conversations.create = sandbox.stub()
       app.client.conversations.info = sandbox.fake.returns({
         channel: { id: existingGroupId, name: existingGroupName }
       })
       app.client.conversations.invite = sandbox.fake()
       app.client.chat.postMessage = sandbox.fake()
-      await store.slackProfile.set(contactUserId, {
+      await store.slack.profile.set([contactTeamId, contactUserId], {
         email: contactEmail,
         name: contactName
       })
@@ -116,7 +123,7 @@ describe('chat', () => {
         })
 
         it('should reply with group already exists message when group already exists', async () => {
-          await store.link.set(userEmail, contactEmail, groupId)
+          await store.link.set([userEmail, contactEmail], existingLink)
           await openChat(app)(params)
           expect(app.client.chat.postMessage).to.be.calledOnceWith({
             channel: existingGroupId,

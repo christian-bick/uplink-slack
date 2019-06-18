@@ -28,7 +28,7 @@ export const openChat = (app) => async ({ body, context, ack, say }) => {
 
     const contactEmail = body.submission.email
 
-    const { email: userEmail } = await store.slackProfile.get(context.userId)
+    const { email: userEmail } = await store.slack.profile.get([context.teamId, context.userId])
     if (userEmail === contactEmail) {
       say(buildCannotConnectToYourselfMessage(contactEmail))
       return
@@ -46,23 +46,23 @@ export const openChat = (app) => async ({ body, context, ack, say }) => {
       return
     }
 
-    const result = await createSlackLink({
+    const linkResult = await createSlackLink({
       app,
       context,
       source: userRegistration,
       sink: contactRegistration
     })
 
-    if (result.alreadyExisted) {
+    if (linkResult.alreadyExisted) {
       await app.client.chat.postMessage({
         token: context.botToken,
-        channel: result.group.id,
+        channel: linkResult.link.channelId,
         text: buildGroupAlreadyExistsMessage(context.userId, contactEmail)
       })
     } else {
       await app.client.chat.postMessage({
         token: context.botToken,
-        channel: result.group.id,
+        channel: linkResult.link.channelId,
         text: buildGroupCreatedMessage(context.userId, contactEmail)
       })
     }

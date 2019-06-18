@@ -1,9 +1,9 @@
-import { slackLink } from '../redis-keys'
+import { linkKey } from '../redis-keys'
 import { getJson, setJson } from '../redis-ops'
 
-const set = (sourceEmail, sinkEmail, link) => setJson(slackLink(sourceEmail, sinkEmail), link)
-const get = (sourceEmail, sinkEmail) => getJson(slackLink(sourceEmail, sinkEmail))
-
-export default {
-  set, get
+const link = {
+  set: ([sourceEmail, sinkEmail], link) => setJson(linkKey(sourceEmail, sinkEmail), link),
+  get: ([sourceEmail, sinkEmail]) => getJson(linkKey(sourceEmail, sinkEmail))
 }
+
+export default link

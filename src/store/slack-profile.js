@@ -1,7 +1,9 @@
-import { slackProfile } from '../redis-keys'
+import { slackProfileKey } from '../redis-keys'
 import { getJson, setJson } from '../redis-ops'
 
-const set = (userId, profile) => setJson(slackProfile(userId), profile)
-const get = (userId) => getJson(slackProfile(userId))
+const slackProfile = {
+  set: ([ teamId, userId ], profile) => setJson(slackProfileKey(teamId, userId), profile),
+  get: ([ teamId, userId ]) => getJson(slackProfileKey(teamId, userId))
+}
 
-export default { set, get }
+export default slackProfile

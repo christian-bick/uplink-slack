@@ -1,6 +1,6 @@
 import { extractEmails } from './email'
 import redis from '../redis'
-import { userRegistration } from '../redis-keys'
+import { userRegistrationKey } from '../redis-keys'
 import store from '../store'
 import { APP_NAME, INVITE_LINK } from '../global'
 
@@ -49,7 +49,7 @@ export const addContacts = (app) => async ({ context, body, say, ack }) => {
   const contactEmailList = extractEmails(body.submission.contacts)
   await store.user.contacts.sadd(userEmail, contactEmailList)
 
-  const activeContactKeys = contactEmailList.map(email => userRegistration(email))
+  const activeContactKeys = contactEmailList.map(email => userRegistrationKey(email))
 
   // Get active contacts
   let multi = redis.multi()

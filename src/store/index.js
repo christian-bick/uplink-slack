@@ -1,19 +1,23 @@
+import userRegistration from './registration'
+import userContacts from './contacts'
+
+import link from './link'
+
 import slackUser from './slack-user'
 import slackTeam from './slack-team'
-import link from './link'
 import slackGroup from './slack-group'
-import registration from './registration'
-import contacts from './contacts'
 import slackProfile from "./slack-profile"
 
 export default {
-  slackUser,
-  slackTeam,
-  slackGroup,
-  slackProfile,
   link,
+  slack: {
+    team: slackTeam,
+    user: slackUser,
+    profile: slackProfile,
+    group: slackGroup
+  },
   user: {
-    registration,
-    contacts
+    registration: userRegistration,
+    contacts: userContacts
   }
 }

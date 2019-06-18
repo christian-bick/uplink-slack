@@ -59,11 +59,11 @@ const registerUser = async (app, user) => {
     email: profile.email,
   })
 
-  await store.slackUser.set(user.userId, {
+  await store.slack.user.set([user.teamId, user.userId], {
     ...user,
   })
 
-  await store.slackProfile.set(user.userId, {
+  await store.slack.profile.set([user.teamId, user.userId], {
     email: profile.email,
     name: profile.real_name || profile.display_name
   })
@@ -126,7 +126,7 @@ export const grantForTeam = (app) => async (req, resp) => {
     const authInfo = await verifyAuthCode(app, code, redirectUri)
     const team = extractTeam(authInfo)
     const user = extractUser(authInfo)
-    await store.slackTeam.set(team.teamId, team)
+    await store.slack.team.set(team.teamId, team)
     await registerUser(app, user)
     resp.redirect(augmentSuccessUri(successUri, team))
     oauthLog.info('Team auth granted')
@@ -142,7 +142,7 @@ export const grantForUser = (app) => async (req, resp) => {
     const { successUri, redirectUri } = await verifyStateToken(stateToken)
     const authInfo = await verifyAuthCode(app, code, redirectUri)
     const user = extractUser(authInfo)
-    const team = await store.slackTeam.get(user.teamId)
+    const team = await store.slack.team.get(user.teamId)
     await registerUser(app, user)
     resp.redirect(augmentSuccessUri(successUri, team))
     oauthLog.info('User auth granted')

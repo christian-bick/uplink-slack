@@ -1,7 +1,9 @@
-import { userRegistration } from '../redis-keys'
+import { userRegistrationKey } from '../redis-keys'
 import { getJson, setJson } from '../redis-ops'
 
-const set = (email, registration) => setJson(userRegistration(email), registration)
-const get = (email) => getJson(userRegistration(email))
+const userRegistration = {
+  set: (email, registration) => setJson(userRegistrationKey(email), registration),
+  get: (email) => getJson(userRegistrationKey(email))
+}
 
-export default { set, get }
+export default userRegistration

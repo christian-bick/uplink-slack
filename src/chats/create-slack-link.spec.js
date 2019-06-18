@@ -1,33 +1,38 @@
 import {
   buildCannotCreateGroupInfo,
   buildFailedToFindFreeNameInfo,
-  generateChatName,
+  generateChannelName,
   generateNextCandidate,
   generateNextIterator,
-  createSlackLink,
+  createSlackLink
 } from './create-slack-link'
 import store from '../store'
 
 describe('chat', () => {
-  describe('generateChatName', () => {
-    it('should remove host part', () => {
-      const name = generateChatName('x y')
-      expect(name).to.eql('x-y')
+  describe('generateChannelName', () => {
+    it('should replace one empty space', () => {
+      const name = generateChannelName('x y')
+      expect(name).to.eql('ul-x-y')
     })
 
-    it('should replace dots and lower dashes with hyphens', () => {
-      const name = generateChatName('x y z')
-      expect(name).to.eql('x-y-z')
+    it('should replace various empty spaces', () => {
+      const name = generateChannelName('x y z')
+      expect(name).to.eql('ul-x-y-z')
+    })
+
+    it('should convert to lower case', () => {
+      const name = generateChannelName('X')
+      expect(name).to.eql('ul-x')
     })
 
     it('should shorten to 21 characters', () => {
-      const name = generateChatName('123456789012345678901234567890')
-      expect(name).to.eql('123456789012345678901')
+      const name = generateChannelName('123456789012345678901234567890')
+      expect(name).to.eql('ul-123456789012345678')
     })
 
     it('should apply everything in right order', () => {
-      const name = generateChatName('1 3 56789012345678901234567890')
-      expect(name).to.eql('1-3-56789012345678901')
+      const name = generateChannelName('1 3 56789012345678901234567890')
+      expect(name).to.eql('ul-1-3-56789012345678')
     })
   })
 
@@ -71,11 +76,23 @@ describe('chat', () => {
       id: groupId,
       name: groupName
     }
+    const createdLink = {
+      platform: 'slack',
+      type: 'group',
+      teamId: teamId,
+      channelId: groupId
+    }
     const existingGroupId = 'existing-group-id'
     const existingGroupName = 'existing-group-name'
     const existingGroup = {
       id: existingGroupId,
       name: existingGroupName
+    }
+    const existingLink = {
+      platform: 'slack',
+      type: 'group',
+      teamId: teamId,
+      channelId: existingGroupId
     }
 
     let app = { client: { conversations: {}, chat: {} } }
@@ -87,7 +104,7 @@ describe('chat', () => {
         channel: { id: existingGroupId, name: existingGroupName }
       })
       app.client.conversations.invite = sandbox.fake()
-      await store.slackProfile.set(contactUserId, {
+      await store.slack.profile.set([contactTeamId, contactUserId], {
         email: contactEmail,
         name: contactName
       })
@@ -131,23 +148,19 @@ describe('chat', () => {
         const result = await createSlackLink(params)
         expect(result).to.eql({
           alreadyExisted: false,
-          group: createdGroup
+          link: createdLink
         })
       })
 
       it('should create a link when it does not exist yet', async () => {
         await createSlackLink(params)
-        const createdLink = await store.link.get(userEmail, contactEmail)
-        expect(createdLink).to.eql({
-          platform: 'slack',
-          type: 'group',
-          channelId: groupId
-        })
+        const link = await store.link.get([userEmail, contactEmail])
+        expect(link).to.eql(createdLink)
       })
 
       it('should create a slack group when it does not exist yet', async () => {
         await createSlackLink(params)
-        const createdGroup = await store.slackGroup.get(groupId)
+        const createdGroup = await store.slack.group.get([teamId, groupId])
         expect(createdGroup).to.eql({
           source: {
             teamId: teamId,
@@ -160,13 +173,13 @@ describe('chat', () => {
         })
       })
 
-      it('should return existing group when group already exists', async () => {
-        await store.link.set(userEmail, contactEmail, existingGroupId)
-        await store.slackGroup.set(existingGroupId, existingGroup)
+      it('should return existing link when link already exists', async () => {
+        await store.link.set([userEmail, contactEmail], existingLink)
+        await store.slack.group.set([teamId, existingGroupId], existingGroup)
         const result = await createSlackLink(params)
         expect(result).to.eql({
           alreadyExisted: true,
-          group: existingGroup
+          link: existingLink
         })
       })
     })
@@ -181,7 +194,7 @@ describe('chat', () => {
         const result = await createSlackLink(params)
         expect(result).to.eql({
           alreadyExisted: false,
-          group: createdGroup
+          link: createdLink
         })
       })
 
@@ -190,7 +203,7 @@ describe('chat', () => {
         const result = await createSlackLink(params)
         expect(result).to.eql({
           alreadyExisted: false,
-          group: createdGroup
+          link: createdLink
         })
       })
 

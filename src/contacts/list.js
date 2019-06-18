@@ -33,7 +33,7 @@ export const filterEmails = (searchString, emailList) => {
 
 export const listContacts = (app) => async ({ body, context, ack }) => {
   const searchString = body.value
-  const { email: userEmail } = await store.slackProfile.get(context.userId)
+  const { email: userEmail } = await store.slack.profile.get([context.teamId, context.userId])
   const contacts = await store.user.contacts.smembers(userEmail)
   const filteredContacts = filterEmails(searchString, contacts)
 

@@ -75,7 +75,7 @@ export const buildEntryMessage = () => ({
 })
 
 export const reactToAppHomeOpened = (app) => async ({ context, event, say }) => {
-  const user = await store.slackUser.get(context.userId)
+  const user = await store.slack.user.get([context.teamId, context.userId])
 
   const sendHomeMessage = async (message) => {
     const { messages: oldMessages } = await app.client.conversations.history({
@@ -162,7 +162,7 @@ export const buildAddContactsDialog = (token, triggerId) => ({
 
 export const showOpenChatDialog = (app) => async ({ body, context, ack }) => {
   ack()
-  const { email: userEmail } = await store.slackProfile.get(context.userId)
+  const { email: userEmail } = await store.slack.profile.get([context.teamId, context.userId])
   const contacts = await store.user.contacts.smembers(userEmail)
   if (!contacts || contacts.length < 1) {
     await app.client.dialog.open(buildOpenChatWithoutContactsDialog(context.botToken, body.trigger_id))
