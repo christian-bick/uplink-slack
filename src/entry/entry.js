@@ -76,7 +76,6 @@ export const buildEntryMessage = () => ({
 })
 
 export const reactToAppHomeOpened = (app) => async ({ context, event, say }) => {
-  appLog.info('user opened app home', { teamId: context.teamId, userId: context.userId })
   const user = await store.slack.user.get([context.teamId, context.userId])
 
   const sendHomeMessage = async (message) => {
