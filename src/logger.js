@@ -3,11 +3,17 @@ import shortHash from 'short-hash'
 import _ from 'lodash'
 
 const LOG_LEVEL = process.env.LOG_LEVEL || INFO
+const HASH_SALT = process.env.HASH_SALT || ''
 
-const HASH_SALT = 'x1yc'
 const OMITTED_FIELDS = ['botToken', 'userToken']
 
-const obfuscateValue = (value) => value ? shortHash(`${HASH_SALT}${value}`) : value
+const obfuscateValue = (value) => {
+  if (!value || HASH_SALT === 'no-hash') {
+    return value
+  } else {
+    return shortHash(`${HASH_SALT}${value}`)
+  }
+}
 
 const obfuscatePersonalData = (obj) => {
   if (!obj) {
