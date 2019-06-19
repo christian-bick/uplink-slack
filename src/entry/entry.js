@@ -1,10 +1,10 @@
 import store from '../store'
 
-export const PERMISSIONS_TEST = 'Let\'s get started!'
+export const PERMISSIONS_TEXT = 'Let\'s get started!'
 export const ENTRY_TEXT = 'Message contacts outside of your organization.'
 
 export const buildPermissionMessage = (teamId) => ({
-  text: PERMISSIONS_TEST,
+  text: PERMISSIONS_TEXT,
   blocks: [
     {
       'type': 'section',
@@ -77,22 +77,21 @@ export const buildEntryMessage = () => ({
 export const reactToAppHomeOpened = (app) => async ({ context, event, say }) => {
   const user = await store.slack.user.get([context.teamId, context.userId])
 
-  const sendHomeMessage = async (text) => {
+  const sendHomeMessage = async (message) => {
     const { messages: oldMessages } = await app.client.conversations.history({
       token: context.botToken,
       channel: event.channel
     })
-    const firstMessage = oldMessages && oldMessages[0]
-
-    if (firstMessage && firstMessage.text === text) {
+    const lastMessage = oldMessages && oldMessages[0]
+    if (lastMessage && lastMessage.text === message.text) {
       return app.client.chat.update({
-        ts: firstMessage.ts,
+        ts: lastMessage.ts,
         channel: event.channel,
         token: context.botToken,
-        ...text
+        ...message
       })
     } else {
-      return say(text)
+      return say(message)
     }
   }
 
