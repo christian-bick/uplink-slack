@@ -144,7 +144,7 @@ export const grantForUser = (app) => async (req, resp) => {
     const team = await store.slack.team.get(user.teamId)
     await registerUser(app, user)
     resp.redirect(augmentSuccessUri(successUri, team))
-    oauthLog.info('User auth granted')
+    oauthLog.info('User auth granted', { meta: { user, team }})
   } catch (err) {
     oauthLog.error(err)
     resp.redirect(302, errorUri(req))

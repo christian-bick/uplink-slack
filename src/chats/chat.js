@@ -22,10 +22,10 @@ export const IGNORED_MESSAGE_SUBTYPES = [
   'group_archive', 'group_join', 'group_leave', 'group_name', 'group_purpose', 'group_topic', 'group_unarchive'
 ]
 export const SUPPORTED_MESSAGE_SUBTYPES = {
-  file_share: 'file_share',
+  file_share: 'file_share'
 }
 
-export const forwardMessage = (app) => async ({ context, message, say }) => {
+export const forwardMessage = (app, forwardDispatcher = slackDispatcher) => async ({ context, message, say }) => {
   try {
     forwardLog.debug('Received message', { message: _.pick(message, 'user', 'bot_id', 'subtype', 'channel') })
     const channelId = message.channel
@@ -57,20 +57,22 @@ export const forwardMessage = (app) => async ({ context, message, say }) => {
     }
     const contactTeam = await store.slack.team.get(reverseLink.teamId)
     const userProfile = await store.slack.profile.get([context.teamId, context.userId])
-    const forwardContext = {
+    const target = {
       username: userProfile.name || userProfile.email,
       token: contactTeam.botToken,
       channel: reverseLink.channelId
     }
     forwardLog.debug('Attempting to forward message', message)
-    if (!message.subtype) {
-      await forwardText({ app, forwardContext, text: message.text })
-      forwardLog.debug('Forwarded text', { ts: message.ts })
-    } else if (message.subtype === SUPPORTED_MESSAGE_SUBTYPES.file_share) {
-      await forwardFile({ app, forwardContext, files: message.files, say })
-      forwardLog.debug('Forwarded file', { ts: message.ts })
+    const forwardDelegate = forwardDispatcher(message)
+    if (forwardDelegate) {
+      await forwardDelegate({ app, context, message, say, target })
+      forwardLog.info({
+        source: { teamId: context.teamId, userId: context.userId, channelId },
+        target: { teamId: reverseLink.teamId, channelId: reverseLink.channelId }
+      }, 'Message forwarded')
     } else {
       forwardLog.error('A supported message subtype is missing implementation', { subtype: message.subtype })
+      say(FAILED_TO_FORWARD_MESSAGE)
     }
   } catch (err) {
     forwardLog.error(FAILED_TO_FORWARD_MESSAGE, err)
@@ -78,43 +80,48 @@ export const forwardMessage = (app) => async ({ context, message, say }) => {
   }
 }
 
-export const forwardText = async ({ app, forwardContext, text }) => {
-  return app.client.chat.postMessage({
-    ...forwardContext,
-    text
-  })
-}
-
-export const forwardFile = async ({ app, forwardContext, files, say }) => {
-  try {
-    const fileMeta = files[0]
+export const slackDispatcher = (message) => {
+  if (!message.subtype) {
+    return forwardText
+  } else if (message.subtype === SUPPORTED_MESSAGE_SUBTYPES.file_share) {
+    const fileMeta = message.files[0]
     if (fileMeta.mimetype === 'text/plain') {
       if (fileMeta.filetype === 'space') {
-        say(buildNotSupportedMessage('posts'))
+        return forwardFileAsPost
       } else {
-        await forwardFileAsContent({ app, forwardContext, fileMeta })
+        return forwardFileAsSnippet(fileMeta)
       }
     } else {
-      await forwardFileAsMultipart({ app, forwardContext, fileMeta })
+      return forwardFileAsMultipart(fileMeta)
     }
-  } catch (err) {
-    forwardLog.error(FAILED_TO_FORWARD_FILE, err)
-    say(FAILED_TO_FORWARD_FILE)
+  } else {
+    return null
   }
 }
 
-export const forwardFileAsContent = async ({ app, forwardContext, fileMeta }) => {
-  const content = await requestAsync.get(fileMeta.url_private_download, { auth: { bearer: forwardContext.token } })
-  return app.client.files.upload({
-    token: forwardContext.token,
-    channels: forwardContext.channel,
+export const forwardText = async ({ app, target, message }) => {
+  await app.client.chat.postMessage({
+    ...target,
+    text: message.text
+  })
+}
+
+export const forwardFileAsPost = async ({ say }) => {
+  say(buildNotSupportedMessage('posts'))
+}
+
+export const forwardFileAsSnippet = (fileMeta) => async ({ app, target }) => {
+  const content = await requestAsync.get(fileMeta.url_private_download, { auth: { bearer: target.token } })
+  await app.client.files.upload({
+    token: target.token,
+    channels: target.channel,
     filetype: fileMeta.filetype,
     title: fileMeta.title,
     content
   })
 }
 
-export const forwardFileAsMultipart = async ({ app, forwardContext, fileMeta }) => {
+export const forwardFileAsMultipart = (fileMeta) => async ({ app, target }) => {
   const tmpDir = './tmp'
   const tmpFilePath = `${tmpDir}/${uuid()}-${fileMeta.name}`
   forwardLog.debug('Preparing temporary directory', { dir: tmpDir })
@@ -126,7 +133,7 @@ export const forwardFileAsMultipart = async ({ app, forwardContext, fileMeta }) 
   await fsAsync.open(tmpFilePath, 'w', 0o666)
   try {
     forwardLog.debug('Receiving file from Slack', { file: tmpFilePath })
-    const writeStream = request.get(fileMeta.url_private, { auth: { bearer: forwardContext.token } }).pipe(fs.createWriteStream(tmpFilePath))
+    const writeStream = request.get(fileMeta.url_private, { auth: { bearer: target.token } }).pipe(fs.createWriteStream(tmpFilePath))
     forwardLog.debug('Received file from Slack', { url: fileMeta.url_private })
     await new Promise((resolve, reject) => {
       writeStream.on('finish', resolve)
@@ -134,8 +141,8 @@ export const forwardFileAsMultipart = async ({ app, forwardContext, fileMeta }) 
     })
     forwardLog.debug('Forwarding file to Slack', { url: fileMeta.url_private })
     await app.client.files.upload({
-      token: forwardContext.token,
-      channels: forwardContext.channel,
+      token: target.token,
+      channels: target.channel,
       filetype: fileMeta.filetype,
       title: fileMeta.title,
       file: fs.createReadStream(tmpFilePath)
