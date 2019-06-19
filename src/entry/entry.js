@@ -1,4 +1,5 @@
 import store from '../store'
+import { appLog } from '../logger'
 
 export const PERMISSIONS_TEXT = 'Let\'s get started!'
 export const ENTRY_TEXT = 'Message contacts outside of your organization.'
@@ -61,7 +62,7 @@ export const buildEntryMessage = () => ({
           'text': 'Add Contacts',
           'emoji': true
         }
-      }, /* {
+      } /* {
         'type': 'button',
         'url': `https://${process.env.HOST}/oauth/user/request`,
         'text': {
@@ -75,6 +76,7 @@ export const buildEntryMessage = () => ({
 })
 
 export const reactToAppHomeOpened = (app) => async ({ context, event, say }) => {
+  appLog.info('user opened app home', { teamId: context.teamId, userId: context.userId })
   const user = await store.slack.user.get([context.teamId, context.userId])
 
   const sendHomeMessage = async (message) => {
@@ -134,7 +136,7 @@ export const buildOpenChatDialog = (token, triggerId) => ({
         'label': 'Your contact\'s email address',
         'name': 'email',
         'placeholder': 'john.smith@example.com',
-        'data_source': 'external',
+        'data_source': 'external'
       }
     ]
   }
