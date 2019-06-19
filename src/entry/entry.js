@@ -77,22 +77,22 @@ export const buildEntryMessage = () => ({
 export const reactToAppHomeOpened = (app) => async ({ context, event, say }) => {
   const user = await store.slack.user.get([context.teamId, context.userId])
 
-  const sendHomeMessage = async (message) => {
+  const sendHomeMessage = async (text) => {
     const { messages: oldMessages } = await app.client.conversations.history({
       token: context.botToken,
       channel: event.channel
     })
     const firstMessage = oldMessages && oldMessages[0]
 
-    if (firstMessage && firstMessage.text === ENTRY_TEXT) {
+    if (firstMessage && firstMessage.text === text) {
       return app.client.chat.update({
         ts: firstMessage.ts,
         channel: event.channel,
         token: context.botToken,
-        ...message
+        ...text
       })
     } else {
-      return say(message)
+      return say(text)
     }
   }
 
