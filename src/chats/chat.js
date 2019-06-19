@@ -53,9 +53,7 @@ export const forwardMessage = (app) => async ({ context, message, say }) => {
     } else {
       forwardLog.debug('Creating reverse link', reverseLink)
       const linkResult = await createReverseSlackLink({ app, sourceSlackGroup: userSlackGroup })
-      console.log(linkResult)
       reverseLink = linkResult.link
-      console.log(reverseLink)
     }
     const contactTeam = await store.slack.team.get(reverseLink.teamId)
     const userProfile = await store.slack.profile.get([context.teamId, context.userId])
