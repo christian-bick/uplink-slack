@@ -3,7 +3,7 @@ import store from '../store'
 export const PERMISSIONS_TEST = 'Let\'s get started!'
 export const ENTRY_TEXT = 'Message contacts outside of your organization.'
 
-export const buildPermissionMessage = () => ({
+export const buildPermissionMessage = (teamId) => ({
   text: PERMISSIONS_TEST,
   blocks: [
     {
@@ -20,7 +20,7 @@ export const buildPermissionMessage = () => ({
       },
       'accessory': {
         'type': 'button',
-        'url': `https://${process.env.HOST}/oauth/user/request`,
+        'url': `https://${process.env.HOST}/oauth/user/request?teamId=${teamId}`,
         'text': {
           'type': 'plain_text',
           'text': 'Give Permission',
@@ -97,7 +97,7 @@ export const reactToAppHomeOpened = (app) => async ({ context, event, say }) => 
   }
 
   if (!user) {
-    await sendHomeMessage(buildPermissionMessage())
+    await sendHomeMessage(buildPermissionMessage(context.teamId))
   } else {
     await sendHomeMessage(buildEntryMessage())
   }

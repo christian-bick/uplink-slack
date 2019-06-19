@@ -97,7 +97,6 @@ export const requestForTeam = (req, resp) => {
 export const requestForUser = (req, resp) => {
   try {
     const redirectUri = `${baseUri(req)}/oauth/user/grant`
-    const teamId = req.query.teamId
 
     const stateToken = generateStateToken({
       successUri: successUri(req),
@@ -109,7 +108,7 @@ export const requestForUser = (req, resp) => {
       redirectUri,
       stateToken,
       scopes: SLACK_USER_SCOPES_ENCODED,
-      teamId
+      teamId: req.query.teamId
     })
     resp.redirect(302, authUri)
     oauthLog.info('User auth requested')
