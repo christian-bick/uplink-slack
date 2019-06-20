@@ -8,7 +8,7 @@ export const buildReverseGroupCreatedMessage = (userId, contactName) => `<@${use
 
 export const generateChannelName = (name) => {
   const hyphened = name.split(' ').join('-').toLowerCase()
-  return `ul-${hyphened.substr(0, 18)}`
+  return `dm-${hyphened.substr(0, 18)}`
 }
 
 export const generateNextCandidate = (name, attempt) => {
