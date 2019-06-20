@@ -66,10 +66,10 @@ export const createLink = async ({ app, context, source, sink }) => {
         users: context.botId
       })
       await store.slack.group.set([source.teamId, created.channel.id], {
+        mode: 'direct-message',
         source: {
           userId: source.userId,
           teamId: source.teamId,
-          email: source.email
         },
         sink: {
           email: sink.email

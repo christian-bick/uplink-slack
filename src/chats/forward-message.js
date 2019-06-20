@@ -1,4 +1,4 @@
-import { createReverseSlackLink } from './create-link'
+import { createReverseLink } from './create-link'
 import store from '../store'
 import { appLog } from '../logger'
 import { SUPPORTED_MESSAGE_SUBTYPES, IGNORED_MESSAGE_SUBTYPES, buildNotSupportedMessage } from './message-types'
@@ -35,8 +35,8 @@ export const forwardMessage = (app, delegateForward = slackDelegateForward) => a
     if (reverseLink) {
       forwardLog.debug({ reverseLink }, 'found reverse link')
     } else {
-      forwardLog.debug({ reverseLink }, 'creating reverse link')
-      const linkResult = await createReverseSlackLink({ app, sourceSlackGroup: userSlackGroup })
+      forwardLog.debug({'creating reverse link'})
+      const linkResult = await createReverseLink({ app, slackGroup: userSlackGroup })
       reverseLink = linkResult.link
     }
     const contactTeam = await store.slack.team.get(reverseLink.teamId)
