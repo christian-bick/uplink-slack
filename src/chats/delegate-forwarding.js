@@ -16,10 +16,10 @@ export const delegateForwarding = (message) => {
       if (fileMeta.filetype === 'space') {
         return forwardFileAsPost
       } else {
-        return forwardFileAsSnippet(fileMeta)
+        return forwardFileAsSnippet
       }
     } else {
-      return forwardFileAsMultipart(fileMeta)
+      return forwardFileAsMultipart
     }
   } else {
     return null

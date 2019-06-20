@@ -19,7 +19,8 @@ export const forwardFileAsPost = async ({ say }) => {
   say(buildNotSupportedMessage('posts'))
 }
 
-export const forwardFileAsSnippet = (fileMeta) => async ({ app, target }) => {
+export const forwardFileAsSnippet = async ({ app, target, message }) => {
+  const fileMeta = message.files[0]
   const content = await requestAsync.get(fileMeta.url_private_download, { auth: { bearer: target.token } })
   await app.client.files.upload({
     token: target.token,
@@ -30,7 +31,8 @@ export const forwardFileAsSnippet = (fileMeta) => async ({ app, target }) => {
   })
 }
 
-export const forwardFileAsMultipart = (fileMeta) => async ({ app, target }) => {
+export const forwardFileAsMultipart = async ({ app, target, message }) => {
+  const fileMeta = message.files[0]
   const tmpDir = './tmp'
   const tmpFilePath = `${tmpDir}/${uuid()}-${fileMeta.name}`
   forwardLog.debug('Preparing temporary directory', { dir: tmpDir })
