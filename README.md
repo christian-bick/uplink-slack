@@ -1,6 +1,6 @@
 # Uplink for Slack
 
-Enables messaging between users of different Slack teams.
+Enables messaging between users of different Slack workspaces.
 
 ## Prerequisites
 
@@ -159,7 +159,7 @@ End-to-end tests make use of the following test workspaces:
 
 ### Prerequisites
 
-Get an AWS key from your favorite admin and follow AWS documentation to set up the key with AWS CLI.
+Retrieve an AWS key from your favorite admin and follow the AWS documentation to set up AWS CLI.
 
 ### Deploy
 
