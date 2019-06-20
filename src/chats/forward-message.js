@@ -2,14 +2,14 @@ import { createReverseLink } from './create-link'
 import store from '../store'
 import { appLog } from '../logger'
 import { SUPPORTED_MESSAGE_SUBTYPES, IGNORED_MESSAGE_SUBTYPES, buildNotSupportedMessage } from './message-types'
-import { delegateForwarding as slackDelegateForward } from './delegate-forwarding'
+import { delegateForwarding as slackDelegateForwarding } from './delegate-forwarding'
 
 export const FAILED_TO_FORWARD_FILE = ':warning: Failed to forward the last posted file'
 export const FAILED_TO_FORWARD_MESSAGE = ':warning: Failed to forward the last posted message'
 
 const forwardLog = appLog.child({ module: 'chat', action: 'forward-message' })
 
-export const forwardMessage = (app, delegateForward = slackDelegateForward) => async ({ context, message, say }) => {
+export const forwardMessage = (app, delegateForwarding = slackDelegateForwarding) => async ({ context, message, say }) => {
   try {
     forwardLog.debug({ message }, 'received message')
     const channelId = message.channel
@@ -18,7 +18,7 @@ export const forwardMessage = (app, delegateForward = slackDelegateForward) => a
       forwardLog.debug('skipping forwarding (not a linked group)')
       return
     }
-    if (message.subtype && IGNORED_MESSAGE_SUBTYPES.includes(message.subtype)) {
+    if (message.subtype && IGNORED_MESSAGE_SUBTYPES[message.subtype]) {
       forwardLog.debug('skipping forwarding (ignored message subtype)')
       return
     }
@@ -47,7 +47,7 @@ export const forwardMessage = (app, delegateForward = slackDelegateForward) => a
       channel: reverseLink.channelId
     }
     forwardLog.debug({ message, reverseLink }, 'attempting to forward message')
-    const forwardDelegate = delegateForward(message)
+    const forwardDelegate = delegateForwarding(message)
     if (forwardDelegate) {
       await forwardDelegate({ app, context, message, say, target })
       forwardLog.info({ message, reverseLink }, 'message forwarded')

@@ -1,5 +1,5 @@
 import { delegateForwarding } from './delegate-forwarding'
-import { SUPPORTED_MESSAGE_SUBTYPES } from './message-types'
+import { MESSAGE_TYPES } from './message-types'
 import { forwardFileAsMultipart, forwardFileAsPost, forwardFileAsSnippet, forwardText } from './execute-forwarding'
 
 describe('delegateForwarding', () => {
@@ -16,7 +16,7 @@ describe('delegateForwarding', () => {
 
   describe('for files', () => {
     beforeEach('set file meta data', () => {
-      message.subtype = SUPPORTED_MESSAGE_SUBTYPES.file_share
+      message.subtype = MESSAGE_TYPES.file_share
     })
 
     it('should delegate to forwardFileAsSnippet for mimetype=text/plain', () => {
