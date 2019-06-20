@@ -3,11 +3,11 @@ import {
   forwardFileAsPost,
   forwardFileAsSnippet,
   forwardText
-} from './execute-forward'
+} from './execute-forwarding'
 
 import { SUPPORTED_MESSAGE_SUBTYPES } from './message-types'
 
-export const delegateForward = (message) => {
+export const delegateForwarding = (message) => {
   if (!message.subtype) {
     return forwardText
   } else if (message.subtype === SUPPORTED_MESSAGE_SUBTYPES.file_share) {

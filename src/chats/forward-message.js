@@ -2,7 +2,7 @@ import { createReverseLink } from './create-link'
 import store from '../store'
 import { appLog } from '../logger'
 import { SUPPORTED_MESSAGE_SUBTYPES, IGNORED_MESSAGE_SUBTYPES, buildNotSupportedMessage } from './message-types'
-import { delegateForward as slackDelegateForward } from './delegate-forward'
+import { delegateForwarding as slackDelegateForward } from './delegate-forwarding'
 
 export const FAILED_TO_FORWARD_FILE = ':warning: Failed to forward the last posted file'
 export const FAILED_TO_FORWARD_MESSAGE = ':warning: Failed to forward the last posted message'
@@ -35,7 +35,7 @@ export const forwardMessage = (app, delegateForward = slackDelegateForward) => a
     if (reverseLink) {
       forwardLog.debug({ reverseLink }, 'found reverse link')
     } else {
-      forwardLog.debug({'creating reverse link'})
+      forwardLog.debug('creating reverse link')
       const linkResult = await createReverseLink({ app, slackGroup: userSlackGroup })
       reverseLink = linkResult.link
     }
