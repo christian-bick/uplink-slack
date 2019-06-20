@@ -1,15 +1,16 @@
-import { createReverseLink } from './create-link'
 import store from '../store'
 import { appLog } from '../logger'
 import { SUPPORTED_MESSAGE_SUBTYPES, IGNORED_MESSAGE_SUBTYPES, buildNotSupportedMessage } from './message-types'
+
+import { createReverseLink as slackCreateReverseLink } from './create-link'
 import { delegateForwarding as slackDelegateForwarding } from './delegate-forwarding'
 
 export const FAILED_TO_FORWARD_FILE = ':warning: Failed to forward the last posted file'
 export const FAILED_TO_FORWARD_MESSAGE = ':warning: Failed to forward the last posted message'
 
-const forwardLog = appLog.child({ module: 'chat', action: 'forward-message' })
+const forwardLog = appLog.child({ module: 'chat', action: 'forward-message' }, true)
 
-export const forwardMessage = (app, delegateForwarding = slackDelegateForwarding) => async ({ context, message, say }) => {
+export const forwardMessage = (app, createReverseLink = slackCreateReverseLink, delegateForwarding = slackDelegateForwarding) => async ({ context, message, say }) => {
   try {
     forwardLog.debug({ message }, 'received message')
     const channelId = message.channel
