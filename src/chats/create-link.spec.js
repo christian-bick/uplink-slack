@@ -4,11 +4,11 @@ import {
   generateChannelName,
   generateNextCandidate,
   generateNextIterator,
-  createSlackLink
-} from './create-slack-link'
+  createLink
+} from './create-link'
 import store from '../store'
 
-describe('chat', () => {
+describe('create-link', () => {
   describe('generateChannelName', () => {
     it('should replace one empty space', () => {
       const name = generateChannelName('x y')
@@ -62,7 +62,7 @@ describe('chat', () => {
     })
   })
 
-  describe('createSlackLink', () => {
+  describe('createLink', () => {
     const teamId = 'current-team-id'
     const userId = 'current-user-id'
     const userEmail = 'current-user@x.com'
@@ -135,7 +135,7 @@ describe('chat', () => {
       })
 
       it('should create a conversation and invite bot', async () => {
-        await createSlackLink(params)
+        await createLink(params)
         expect(app.client.conversations.create).to.be.calledOnce
         expect(app.client.conversations.invite).to.be.calledOnceWith({
           token: params.context.userToken,
@@ -145,7 +145,7 @@ describe('chat', () => {
       })
 
       it('should return created group when group does not exist', async () => {
-        const result = await createSlackLink(params)
+        const result = await createLink(params)
         expect(result).to.eql({
           alreadyExisted: false,
           link: createdLink
@@ -153,13 +153,13 @@ describe('chat', () => {
       })
 
       it('should create a link when it does not exist yet', async () => {
-        await createSlackLink(params)
+        await createLink(params)
         const link = await store.link.get([userEmail, contactEmail])
         expect(link).to.eql(createdLink)
       })
 
       it('should create a slack group when it does not exist yet', async () => {
-        await createSlackLink(params)
+        await createLink(params)
         const createdGroup = await store.slack.group.get([teamId, groupId])
         expect(createdGroup).to.eql({
           source: {
@@ -176,7 +176,7 @@ describe('chat', () => {
       it('should return existing link when link already exists', async () => {
         await store.link.set([userEmail, contactEmail], existingLink)
         await store.slack.group.set([teamId, existingGroupId], existingGroup)
-        const result = await createSlackLink(params)
+        const result = await createLink(params)
         expect(result).to.eql({
           alreadyExisted: true,
           link: existingLink
@@ -191,7 +191,7 @@ describe('chat', () => {
 
       it('should return created group when second call succeeds', async () => {
         app.client.conversations.create.onSecondCall().returns({ channel: { id: groupId, name: 'group-name' } })
-        const result = await createSlackLink(params)
+        const result = await createLink(params)
         expect(result).to.eql({
           alreadyExisted: false,
           link: createdLink
@@ -200,7 +200,7 @@ describe('chat', () => {
 
       it('should return created group when third call succeeds', async () => {
         app.client.conversations.create.onThirdCall().returns({ channel: { id: groupId, name: 'group-name' } })
-        const result = await createSlackLink(params)
+        const result = await createLink(params)
         expect(result).to.eql({
           alreadyExisted: false,
           link: createdLink
@@ -208,14 +208,14 @@ describe('chat', () => {
       })
 
       it('should throw error when name is taken', async () => {
-        await expect(createSlackLink(params)).to.be.rejectedWith(Error, buildFailedToFindFreeNameInfo(10))
+        await expect(createLink(params)).to.be.rejectedWith(Error, buildFailedToFindFreeNameInfo(10))
       })
     })
 
     describe('error scenarios', () => {
       it('should throw error when slack request fails', async () => {
         app.client.conversations.create.throws(new Error('not_allowed'))
-        await expect(createSlackLink(params)).to.be.rejectedWith(Error, buildCannotCreateGroupInfo(contactEmail, 'not_allowed'))
+        await expect(createLink(params)).to.be.rejectedWith(Error, buildCannotCreateGroupInfo(contactEmail, 'not_allowed'))
       })
     })
   })

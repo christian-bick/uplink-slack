@@ -1,19 +1,15 @@
-import { createReverseSlackLink } from './create-slack-link'
+import { createReverseSlackLink } from './create-link'
 import store from '../store'
 import { appLog } from '../logger'
-import { SUPPORTED_MESSAGE_SUBTYPES, IGNORED_MESSAGE_SUBTYPES } from './slack-message-types'
-import { slackDispatcher } from './slack-dispatcher'
-
-export const buildNotSupportedMessage = (type) => {
-  return `:warning: Forwarding ${type} is not supported at this point.`
-}
+import { SUPPORTED_MESSAGE_SUBTYPES, IGNORED_MESSAGE_SUBTYPES, buildNotSupportedMessage } from './message-types'
+import { delegateForward as slackDelegateForward } from './delegate-forward'
 
 export const FAILED_TO_FORWARD_FILE = ':warning: Failed to forward the last posted file'
 export const FAILED_TO_FORWARD_MESSAGE = ':warning: Failed to forward the last posted message'
 
 const forwardLog = appLog.child({ module: 'chat', action: 'forward-message' })
 
-export const forwardMessage = (app, forwardDispatcher = slackDispatcher) => async ({ context, message, say }) => {
+export const forwardMessage = (app, delegateForward = slackDelegateForward) => async ({ context, message, say }) => {
   try {
     forwardLog.debug({ message }, 'received message')
     const channelId = message.channel
@@ -51,7 +47,7 @@ export const forwardMessage = (app, forwardDispatcher = slackDispatcher) => asyn
       channel: reverseLink.channelId
     }
     forwardLog.debug({ message, reverseLink }, 'attempting to forward message')
-    const forwardDelegate = forwardDispatcher(message)
+    const forwardDelegate = delegateForward(message)
     if (forwardDelegate) {
       await forwardDelegate({ app, context, message, say, target })
       forwardLog.info({ message, reverseLink }, 'message forwarded')

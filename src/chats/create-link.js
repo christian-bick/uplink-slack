@@ -42,7 +42,7 @@ export class LinkResult {
   }
 }
 
-export const createSlackLink = async ({ app, context, source, sink }) => {
+export const createLink = async ({ app, context, source, sink }) => {
   const existingLink = await store.link.get([source.email, sink.email])
   if (existingLink) {
     return LinkResult.existing(existingLink)
@@ -101,7 +101,7 @@ export const createReverseSlackLink = async ({ app, sourceSlackGroup }) => {
   const contactSlackTeam = await store.slack.team.get(contactRegistration.teamId)
   const contactSlackUser = await store.slack.user.get([contactRegistration.teamId, contactRegistration.userId])
   const context = { ...contactSlackTeam, ...contactSlackUser }
-  const linkResult = await createSlackLink({
+  const linkResult = await createLink({
     app,
     context,
     source: contactRegistration,

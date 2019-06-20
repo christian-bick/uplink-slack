@@ -1,5 +1,5 @@
 import { openChat } from './open-chat'
-import { forwardMessage} from './chat'
+import { forwardMessage} from './forward-message'
 import { informJoinedUser, rejoinLinkedGroup } from './chat-health'
 
 export default (app) => {

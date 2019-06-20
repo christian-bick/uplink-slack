@@ -9,7 +9,7 @@ import {
 import {
   buildCannotCreateGroupInfo,
   buildFailedToFindFreeNameInfo,
-} from './create-slack-link'
+} from './create-link'
 
 import store from '../store'
 

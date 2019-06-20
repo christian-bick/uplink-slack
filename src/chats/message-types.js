@@ -7,3 +7,7 @@ export const IGNORED_MESSAGE_SUBTYPES = [
 export const SUPPORTED_MESSAGE_SUBTYPES = {
   file_share: 'file_share'
 }
+
+export const buildNotSupportedMessage = (type) => {
+  return `:warning: Forwarding ${type} is not supported at this point.`
+}

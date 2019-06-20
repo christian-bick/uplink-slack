@@ -1,6 +1,6 @@
 import store from '../store'
 import { appLog } from '../logger'
-import { createSlackLink } from './create-slack-link'
+import { createLink } from './create-link'
 
 export const buildCannotConnectToYourselfMessage = (contactEmail) => {
   return `Looks like this your own email address: ${contactEmail}`
@@ -46,7 +46,7 @@ export const openChat = (app) => async ({ body, context, ack, say }) => {
       return
     }
 
-    const linkResult = await createSlackLink({
+    const linkResult = await createLink({
       app,
       context,
       source: userRegistration,

@@ -3,11 +3,11 @@ import {
   forwardFileAsPost,
   forwardFileAsSnippet,
   forwardText
-} from './slack-forwarding'
+} from './execute-forward'
 
-import { SUPPORTED_MESSAGE_SUBTYPES } from './slack-message-types'
+import { SUPPORTED_MESSAGE_SUBTYPES } from './message-types'
 
-export const slackDispatcher = (message) => {
+export const delegateForward = (message) => {
   if (!message.subtype) {
     return forwardText
   } else if (message.subtype === SUPPORTED_MESSAGE_SUBTYPES.file_share) {

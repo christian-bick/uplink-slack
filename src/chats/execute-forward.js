@@ -1,10 +1,10 @@
-import uuid from "uuid/v4"
-import request from "request"
-import requestAsync from "request-promise-native"
-import {buildNotSupportedMessage} from "./chat"
-import {promises as fsAsync} from "fs"
-import fs from 'fs'
-import {appLog} from "../logger"
+import uuid from 'uuid/v4'
+import request from 'request'
+import requestAsync from 'request-promise-native'
+import { buildNotSupportedMessage } from './message-types'
+import fs, { promises as fsAsync } from 'fs'
+
+import { appLog } from '../logger'
 
 const forwardLog = appLog.child({ module: 'chat', action: 'forward-message' })
 
