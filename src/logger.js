@@ -32,22 +32,40 @@ const obfuscatePersonalData = (obj) => {
   }
 }
 
+const serializeMessage = (message) => {
+  return {
+    type: message.type,
+    subtype: message.subtype,
+    userId: obfuscateValue(message.user),
+    channelId: obfuscateValue(message.channel)
+  }
+}
+
 const obfuscateSensitiveParams = {
+  // Individual attributes
+  teamId: obfuscateValue,
+  userId: obfuscateValue,
+  botId: obfuscateValue,
+  channelId: obfuscateValue,
+  email: obfuscateValue,
+  name: obfuscateValue,
+  // Common objects
   user: obfuscatePersonalData,
   team: obfuscatePersonalData,
   link: obfuscatePersonalData,
+  reverseLink: obfuscatePersonalData,
+  group: obfuscatePersonalData,
   registration: obfuscatePersonalData,
   context: obfuscatePersonalData,
-  source: obfuscatePersonalData,
-  target: obfuscatePersonalData
+  message: serializeMessage,
+  // Standard serializers
+  err: bunyan.stdSerializers.err
 }
 
 const statusLog = bunyan.createLogger({ name: 'status', level: LOG_LEVEL })
-const oauthLog = bunyan.createLogger({ name: 'oauth', level: LOG_LEVEL, serializers: obfuscateSensitiveParams })
 const appLog = bunyan.createLogger({ name: 'app', level: LOG_LEVEL, serializers: obfuscateSensitiveParams })
 
 export {
   statusLog,
-  oauthLog,
   appLog
 }

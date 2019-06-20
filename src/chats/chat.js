@@ -8,8 +8,6 @@ import { createReverseSlackLink } from './create-slack-link'
 import store from '../store'
 import { appLog } from '../logger'
 
-const forwardLog = appLog.child({ action: 'forwarding' })
-
 export const buildNotSupportedMessage = (type) => {
   return `:warning: Forwarding ${type} is not supported at this point.`
 }
@@ -25,33 +23,35 @@ export const SUPPORTED_MESSAGE_SUBTYPES = {
   file_share: 'file_share'
 }
 
+const forwardLog = appLog.child({ module: 'chat', action: 'forward-message' })
+
 export const forwardMessage = (app, forwardDispatcher = slackDispatcher) => async ({ context, message, say }) => {
   try {
-    forwardLog.debug('Received message', { message: _.pick(message, 'user', 'bot_id', 'subtype', 'channel') })
+    forwardLog.debug({ message }, 'received message')
     const channelId = message.channel
     const userSlackGroup = await store.slack.group.get([context.teamId, channelId])
     if (!userSlackGroup) {
-      forwardLog.debug('Skipping forwarding (not a linked group)', { channelId: channelId })
+      forwardLog.debug('skipping forwarding (not a linked group)')
       return
     }
     if (message.subtype && IGNORED_MESSAGE_SUBTYPES.includes(message.subtype)) {
-      forwardLog.debug('Skipping forwarding (ignored message subtype)', { subtype: message.subtype })
+      forwardLog.debug('skipping forwarding (ignored message subtype)')
       return
     }
     if (message.subtype && !SUPPORTED_MESSAGE_SUBTYPES[message.subtype]) {
-      forwardLog.debug('Skipping forwarding (not a supported message subtype)', { subtype: message.subtype })
+      forwardLog.debug('skipping forwarding (not a supported message subtype)')
       say(buildNotSupportedMessage(message.subtype))
       return
     }
     if (!message.user || message.user !== userSlackGroup.source.userId) {
-      forwardLog.debug('Skipping forwarding (not a linked user)', { userId: message.user || message.bot_id })
+      forwardLog.debug('skipping forwarding (not a linked user)')
       return
     }
     let reverseLink = await store.link.get([userSlackGroup.sink.email, userSlackGroup.source.email])
     if (reverseLink) {
-      forwardLog.debug('Found reverse link', reverseLink)
+      forwardLog.debug({ reverseLink }, 'found reverse link')
     } else {
-      forwardLog.debug('Creating reverse link', reverseLink)
+      forwardLog.debug({ reverseLink }, 'creating reverse link')
       const linkResult = await createReverseSlackLink({ app, sourceSlackGroup: userSlackGroup })
       reverseLink = linkResult.link
     }
@@ -62,20 +62,17 @@ export const forwardMessage = (app, forwardDispatcher = slackDispatcher) => asyn
       token: contactTeam.botToken,
       channel: reverseLink.channelId
     }
-    forwardLog.debug('Attempting to forward message', message)
+    forwardLog.debug({ message, reverseLink }, 'attempting to forward message')
     const forwardDelegate = forwardDispatcher(message)
     if (forwardDelegate) {
       await forwardDelegate({ app, context, message, say, target })
-      forwardLog.info({
-        source: { teamId: context.teamId, userId: context.userId, channelId },
-        target: { teamId: reverseLink.teamId, channelId: reverseLink.channelId }
-      }, 'Message forwarded')
+      forwardLog.info({ message, reverseLink }, 'message forwarded')
     } else {
-      forwardLog.error('A supported message subtype is missing implementation', { subtype: message.subtype })
+      forwardLog.error({ message }, 'a supported message subtype is missing implementation')
       say(FAILED_TO_FORWARD_MESSAGE)
     }
   } catch (err) {
-    forwardLog.error(FAILED_TO_FORWARD_MESSAGE, err)
+    forwardLog.error({ err, message }, FAILED_TO_FORWARD_MESSAGE)
     say(FAILED_TO_FORWARD_MESSAGE)
   }
 }
@@ -154,7 +151,7 @@ export const forwardFileAsMultipart = (fileMeta) => async ({ app, target }) => {
       forwardLog.debug('Removing temporary file', { file: tmpFilePath })
       await fsAsync.unlink(tmpFilePath)
     } catch (err) {
-      forwardLog.error('Failed to remove temporary file', { err })
+      forwardLog.error({ err }, 'Failed to remove temporary file')
     }
   }
 }

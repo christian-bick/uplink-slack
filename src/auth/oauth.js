@@ -1,7 +1,7 @@
 import jwt from 'jsonwebtoken'
 import uuid from 'uuid/v4'
 import { promisify } from 'util'
-import { oauthLog } from '../logger'
+import { appLog } from '../logger'
 import store from '../store'
 
 const SLACK_SIGNING_SECRET = process.env.SLACK_SIGNING_SECRET
@@ -12,6 +12,8 @@ const SLACK_USER_SCOPES = ['groups:write', 'groups:read', 'users.profile:read']
 const SLACK_USER_SCOPES_ENCODED = SLACK_USER_SCOPES.join('%20')
 const SLACK_TEAM_SCOPES = ['bot', ...SLACK_USER_SCOPES]
 const SLACK_TEAM_SCOPES_ENCODED = SLACK_TEAM_SCOPES.join('%20')
+
+const oauthLog = appLog.child({ module: 'oauth' }, true)
 
 const baseUri = (req) => `https://${req.hostname}`
 const successUri = (req) => `${baseUri(req)}/oauth-success.html`
@@ -49,18 +51,18 @@ const extractTeam = ({ team_id: teamId, bot: { bot_user_id: botId, bot_access_to
 const registerUser = async (app, user) => {
   const { profile } = await app.client.users.profile.get({
     token: user.userToken,
-    user: user.userId,
+    user: user.userId
   })
 
   await store.user.registration.set(profile.email, {
     platform: 'slack',
     teamId: user.teamId,
     userId: user.userId,
-    email: profile.email,
+    email: profile.email
   })
 
   await store.slack.user.set([user.teamId, user.userId], {
-    ...user,
+    ...user
   })
 
   await store.slack.profile.set([user.teamId, user.userId], {
@@ -87,7 +89,7 @@ export const requestForTeam = (req, resp) => {
       scopes: SLACK_TEAM_SCOPES_ENCODED
     })
     resp.redirect(302, authUri)
-    oauthLog.info('Team auth requested')
+    oauthLog.info({ action: 'request-team-auth' }, 'team auth requested')
   } catch (err) {
     oauthLog.error(err)
     resp.redirect(302, errorUri(req))
@@ -97,6 +99,7 @@ export const requestForTeam = (req, resp) => {
 export const requestForUser = (req, resp) => {
   try {
     const redirectUri = `${baseUri(req)}/oauth/user/grant`
+    const teamId = req.query.teamId
 
     const stateToken = generateStateToken({
       successUri: successUri(req),
@@ -108,10 +111,10 @@ export const requestForUser = (req, resp) => {
       redirectUri,
       stateToken,
       scopes: SLACK_USER_SCOPES_ENCODED,
-      teamId: req.query.teamId
+      teamId
     })
     resp.redirect(302, authUri)
-    oauthLog.info('User auth requested')
+    oauthLog.info({ action: 'request-user-auth', teamId: teamId }, 'user auth requested')
   } catch (err) {
     oauthLog.error(err)
     resp.redirect(302, errorUri(req))
@@ -128,7 +131,7 @@ export const grantForTeam = (app) => async (req, resp) => {
     await store.slack.team.set(team.teamId, team)
     await registerUser(app, user)
     resp.redirect(augmentSuccessUri(successUri, team))
-    oauthLog.info('Team auth granted')
+    oauthLog.info({ action: 'grant-team-auth', teamId: team.teamId, userId: user.userId }, 'team auth granted')
   } catch (err) {
     oauthLog.error(err)
     resp.redirect(302, errorUri(req))
@@ -144,19 +147,11 @@ export const grantForUser = (app) => async (req, resp) => {
     const team = await store.slack.team.get(user.teamId)
     await registerUser(app, user)
     resp.redirect(augmentSuccessUri(successUri, team))
-    oauthLog.info('User auth granted', { meta: { user, team }})
+    oauthLog.info({ action: 'grant-user-auth', teamId: team.teamId, userId: user.userId }, 'user auth granted')
   } catch (err) {
     oauthLog.error(err)
     resp.redirect(302, errorUri(req))
   }
-}
-
-export const success = (req, resp) => {
-  resp.status(200).send('Installation finished. Check back to Slack now.')
-}
-
-export const error = (req, resp) => {
-  resp.status(200).send('Installation failed. Please try again.')
 }
 
 export default (app) => {
@@ -164,6 +159,4 @@ export default (app) => {
   app.receiver.app.get('/oauth/user/request', requestForUser)
   app.receiver.app.get('/oauth/team/grant', grantForTeam(app))
   app.receiver.app.get('/oauth/user/grant', grantForUser(app))
-  app.receiver.app.get('/oauth/success', success)
-  app.receiver.app.get('/oauth/error', error)
 }

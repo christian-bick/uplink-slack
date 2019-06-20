@@ -9,7 +9,7 @@
     "watch": "npm run ut  -- --watch -- --reporter=min",
     "test": "npm run ut && npm run e2e",
     "lint": "eslint \"src/**/*\" \"test/**/*\"",
-    "start": "node -r esm src/index.js | bunyan -o short --no-color",
+    "start": "node -r esm src/index.js",
     "dev": "nodemon -r esm -r dotenv/config src/index.js | bunyan -o short --no-color"
   },
   "repository": {

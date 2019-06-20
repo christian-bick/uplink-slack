@@ -32,7 +32,7 @@ const run = async (port) => {
   // Startup Slack App
   port = port || PORT || 3000
   await app.start(port)
-  statusLog.info(`App is running on port ${port}`)
+  statusLog.info(`app is running on port ${port}`)
   return app
 }
 
