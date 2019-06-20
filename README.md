@@ -21,7 +21,7 @@ If you don't have one already, create your own private Slack workspace for local
 
 Set up a tunnel to your local machine with [ngrok](https://ngrok.com).
 
-Make sure that the tunnel endpoint is a *fixed* URL.
+Make sure that the tunnel endpoint uses a *fixed* subdomain.
 
 ### Slack Application
 
