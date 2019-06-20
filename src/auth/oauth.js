@@ -4,8 +4,8 @@ import { promisify } from 'util'
 import { appLog } from '../logger'
 import store from '../store'
 
+export const SLACK_CLIENT_ID = process.env.SLACK_CLIENT_ID
 const SLACK_SIGNING_SECRET = process.env.SLACK_SIGNING_SECRET
-const SLACK_CLIENT_ID = process.env.SLACK_CLIENT_ID
 const SLACK_CLIENT_SECRET = process.env.SLACK_CLIENT_SECRET
 
 const SLACK_USER_SCOPES = ['groups:write', 'groups:read', 'users.profile:read']
@@ -16,14 +16,14 @@ const SLACK_TEAM_SCOPES_ENCODED = SLACK_TEAM_SCOPES.join('%20')
 const oauthLog = appLog.child({ module: 'oauth' }, true)
 
 const baseUri = (req) => `https://${req.hostname}`
-const successUri = (req) => `${baseUri(req)}/oauth-success.html`
-const errorUri = (req) => `${baseUri(req)}/oauth-error.html`
 
-const generateStateToken = (payload) => jwt.sign(payload, SLACK_SIGNING_SECRET, { expiresIn: '30 minutes' })
+export const successUri = (req, team) => `${baseUri(req)}/oauth-success.html?teamId=${team.teamId}&botId=${team.botId}`
+export const errorUri = (req) => `${baseUri(req)}/oauth-error.html`
 
-const verifyStateToken = async (token) => promisify(jwt.verify)(token, SLACK_SIGNING_SECRET)
+export const generateStateToken = (payload) => jwt.sign(payload, SLACK_SIGNING_SECRET, { expiresIn: '30 minutes' })
+export const verifyStateToken = async (token) => promisify(jwt.verify)(token, SLACK_SIGNING_SECRET)
 
-const buildAuthUri = ({ redirectUri, scopes, stateToken, teamId }) => {
+export const buildAuthUri = ({ redirectUri, scopes, stateToken, teamId }) => {
   return `https://slack.com/oauth/authorize?${[
     `scope=${scopes}`,
     `client_id=${SLACK_CLIENT_ID}`,
@@ -71,14 +71,11 @@ const registerUser = async (app, user) => {
   })
 }
 
-export const augmentSuccessUri = (successUri, team) => `${successUri}?teamId=${team.teamId}&botId=${team.botId}`
-
 export const requestForTeam = (req, resp) => {
   try {
     const redirectUri = `${baseUri(req)}/oauth/team/grant`
 
     const stateToken = generateStateToken({
-      successUri: successUri(req),
       verificationCode: uuid(),
       redirectUri
     })
@@ -102,7 +99,6 @@ export const requestForUser = (req, resp) => {
     const teamId = req.query.teamId
 
     const stateToken = generateStateToken({
-      successUri: successUri(req),
       verificationCode: uuid(),
       redirectUri
     })
@@ -121,16 +117,16 @@ export const requestForUser = (req, resp) => {
   }
 }
 
-export const grantForTeam = (app) => async (req, resp) => {
+export const grantForTeam = (app, verifyAuth = verifyAuthCode, verifyState = verifyStateToken) => async (req, resp) => {
   try {
     const { code, state: stateToken } = req.query
-    const { successUri, redirectUri } = await verifyStateToken(stateToken)
-    const authInfo = await verifyAuthCode(app, code, redirectUri)
+    const { redirectUri } = await verifyState(stateToken)
+    const authInfo = await verifyAuth(app, code, redirectUri)
     const team = extractTeam(authInfo)
     const user = extractUser(authInfo)
     await store.slack.team.set(team.teamId, team)
     await registerUser(app, user)
-    resp.redirect(augmentSuccessUri(successUri, team))
+    resp.redirect(302, successUri(req, team))
     oauthLog.info({ action: 'grant-team-auth', teamId: team.teamId, userId: user.userId }, 'team auth granted')
   } catch (err) {
     oauthLog.error(err)
@@ -138,17 +134,18 @@ export const grantForTeam = (app) => async (req, resp) => {
   }
 }
 
-export const grantForUser = (app) => async (req, resp) => {
+export const grantForUser = (app, verifyAuth = verifyAuthCode, verifyState = verifyStateToken) => async (req, resp) => {
   try {
     const { code, state: stateToken } = req.query
-    const { successUri, redirectUri } = await verifyStateToken(stateToken)
-    const authInfo = await verifyAuthCode(app, code, redirectUri)
+    const { redirectUri } = await verifyState(stateToken)
+    const authInfo = await verifyAuth(app, code, redirectUri)
     const user = extractUser(authInfo)
     const team = await store.slack.team.get(user.teamId)
     await registerUser(app, user)
-    resp.redirect(augmentSuccessUri(successUri, team))
+    resp.redirect(302, successUri(req, team))
     oauthLog.info({ action: 'grant-user-auth', teamId: team.teamId, userId: user.userId }, 'user auth granted')
   } catch (err) {
+    console.log(err)
     oauthLog.error(err)
     resp.redirect(302, errorUri(req))
   }

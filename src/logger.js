@@ -1,6 +1,6 @@
 import bunyan, { INFO } from 'bunyan'
 import shortHash from 'short-hash'
-import _ from 'lodash'
+import { omit } from 'lodash'
 
 const LOG_LEVEL = process.env.LOG_LEVEL || INFO
 const HASH_SALT = process.env.HASH_SALT || ''
@@ -19,7 +19,7 @@ const obfuscatePersonalData = (obj) => {
   if (!obj) {
     return obj
   } else {
-    const omitted = _.omit(obj, OMITTED_FIELDS)
+    const omitted = omit(obj, OMITTED_FIELDS)
     return {
       ...omitted,
       teamId: obfuscateValue(obj.teamId),

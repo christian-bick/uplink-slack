@@ -1,4 +1,4 @@
-import _ from 'lodash'
+import { pick } from 'lodash'
 
 /* eslint-disable camelcase */
 const bot_message = 'bot_message'
@@ -30,7 +30,7 @@ export const MESSAGE_TYPES = {
   file_share
 }
 
-export const IGNORED_MESSAGE_SUBTYPES = _.pick(MESSAGE_TYPES, [
+export const IGNORED_MESSAGE_SUBTYPES = pick(MESSAGE_TYPES, [
   bot_message,
   ekm_access_denied,
   pinned_item, unpinned_item,
@@ -38,7 +38,7 @@ export const IGNORED_MESSAGE_SUBTYPES = _.pick(MESSAGE_TYPES, [
   group_archive, group_join, group_leave, group_name, group_purpose, group_topic, group_unarchive
 ])
 
-export const SUPPORTED_MESSAGE_SUBTYPES = _.pick(MESSAGE_TYPES, [
+export const SUPPORTED_MESSAGE_SUBTYPES = pick(MESSAGE_TYPES, [
   file_share
 ])
 
