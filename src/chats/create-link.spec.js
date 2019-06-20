@@ -12,27 +12,27 @@ describe('create-link', () => {
   describe('generateChannelName', () => {
     it('should replace one empty space', () => {
       const name = generateChannelName('x y')
-      expect(name).to.eql('ul-x-y')
+      expect(name).to.eql('dm-x-y')
     })
 
     it('should replace various empty spaces', () => {
       const name = generateChannelName('x y z')
-      expect(name).to.eql('ul-x-y-z')
+      expect(name).to.eql('dm-x-y-z')
     })
 
     it('should convert to lower case', () => {
       const name = generateChannelName('X')
-      expect(name).to.eql('ul-x')
+      expect(name).to.eql('dm-x')
     })
 
     it('should shorten to 21 characters', () => {
       const name = generateChannelName('123456789012345678901234567890')
-      expect(name).to.eql('ul-123456789012345678')
+      expect(name).to.eql('dm-123456789012345678')
     })
 
     it('should apply everything in right order', () => {
       const name = generateChannelName('1 3 56789012345678901234567890')
-      expect(name).to.eql('ul-1-3-56789012345678')
+      expect(name).to.eql('dm-1-3-56789012345678')
     })
   })
 
@@ -162,6 +162,7 @@ describe('create-link', () => {
         await createLink(params)
         const createdGroup = await store.slack.group.get([teamId, groupId])
         expect(createdGroup).to.eql({
+          mode: 'direct-message',
           source: {
             teamId: teamId,
             userId: userId,

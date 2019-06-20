@@ -70,6 +70,7 @@ export const createLink = async ({ app, context, source, sink }) => {
         source: {
           userId: source.userId,
           teamId: source.teamId,
+          email: source.email
         },
         sink: {
           email: sink.email
