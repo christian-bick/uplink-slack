@@ -8,7 +8,7 @@ import {
 
 import {
   buildCannotCreateGroupInfo,
-  buildFailedToFindFreeNameInfo,
+  buildFailedToFindFreeNameInfo
 } from './create-link'
 
 import store from '../store'
@@ -33,11 +33,11 @@ describe('chat', () => {
       channelId: existingGroupId
     }
 
-    let app = { client: { users: { profile: {}}, conversations: {}, chat: {} } }
+    let app = { client: { users: { profile: {} }, conversations: {}, chat: {} } }
     let params
 
     beforeEach('prepare app', async () => {
-      await store.slack.profile.set([teamId, userId], { email: userEmail } )
+      await store.slack.profile.set([teamId, userId], { email: userEmail })
       app.client.conversations.create = sandbox.stub()
       app.client.conversations.info = sandbox.fake.returns({
         channel: { id: existingGroupId, name: existingGroupName }
@@ -82,7 +82,7 @@ describe('chat', () => {
           platform: 'slack',
           userId: userId,
           teamId: teamId,
-          email: userEmail,
+          email: userEmail
         })
       })
       it('should reply with contact-not-found message', async () => {
@@ -98,7 +98,7 @@ describe('chat', () => {
           platform: 'slack',
           userId: userId,
           teamId: teamId,
-          email: userEmail,
+          email: userEmail
         })
         await store.user.registration.set(contactEmail, {
           platform: 'slack',
@@ -106,6 +106,28 @@ describe('chat', () => {
           teamId: contactTeamId,
           email: contactEmail
         })
+      })
+
+      it('should add a contact entry to empty contacts', async () => {
+        await openChat(app)(params)
+        const contacts = await store.user.contacts.smembers(userEmail)
+        expect(contacts).to.contain(contactEmail)
+      })
+
+      it('should not create a duplicate contact entry when contact already exists', async () => {
+        await store.user.contacts.sadd(userEmail, [ contactEmail ])
+        await openChat(app)(params)
+        const contacts = await store.user.contacts.smembers(userEmail)
+        expect(contacts).to.have.lengthOf(1)
+      })
+
+      it('should add a contact entry to existing contacts', async () => {
+        const existingEmail = 'existing-email'
+        await store.user.contacts.sadd(userEmail, [ existingEmail ])
+        await openChat(app)(params)
+        const contacts = await store.user.contacts.smembers(userEmail)
+        expect(contacts).to.contain(contactEmail)
+        expect(contacts).to.contain(existingEmail)
       })
 
       describe('group name available', () => {
@@ -128,7 +150,7 @@ describe('chat', () => {
           expect(app.client.chat.postMessage).to.be.calledOnceWith({
             channel: existingGroupId,
             text: buildGroupAlreadyExistsMessage(userId, contactEmail),
-            token: params.context.botToken,
+            token: params.context.botToken
           })
         })
       })
