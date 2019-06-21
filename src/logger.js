@@ -5,7 +5,7 @@ import { omit } from 'lodash'
 const LOG_LEVEL = process.env.LOG_LEVEL || INFO
 const HASH_SALT = process.env.HASH_SALT || ''
 
-const OMITTED_FIELDS = ['botToken', 'userToken']
+const OMITTED_FIELDS = ['botToken', 'userToken', 'matches' ]
 
 const obfuscateValue = (value) => {
   if (!value || HASH_SALT === 'no-hash') {

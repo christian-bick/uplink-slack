@@ -36,9 +36,10 @@ export const forwardMessage = (app, createReverseLink = slackCreateReverseLink, 
     if (reverseLink) {
       forwardLog.debug({ reverseLink }, 'found reverse link')
     } else {
-      forwardLog.debug('creating reverse link')
+      forwardLog.debug('attempting to create reverse link')
       const linkResult = await createReverseLink({ app, slackGroup: userSlackGroup })
       reverseLink = linkResult.link
+      forwardLog.debug({ reverseLink }, 'reverse link created')
     }
     const contactTeam = await store.slack.team.get(reverseLink.teamId)
     const userProfile = await store.slack.profile.get([context.teamId, context.userId])
@@ -47,11 +48,11 @@ export const forwardMessage = (app, createReverseLink = slackCreateReverseLink, 
       token: contactTeam.botToken,
       channel: reverseLink.channelId
     }
-    forwardLog.debug({ message, reverseLink }, 'attempting to forward message')
+    forwardLog.debug({ message }, 'attempting to forward message')
     const forwardDelegate = delegateForwarding(message)
     if (forwardDelegate) {
       await forwardDelegate({ app, context, message, say, target })
-      forwardLog.info({ message, reverseLink }, 'message forwarded')
+      forwardLog.info({ context, message, reverseLink }, 'message forwarded')
     } else {
       forwardLog.error({ message }, 'a supported message subtype is missing implementation')
       say(FAILED_TO_FORWARD_MESSAGE)
