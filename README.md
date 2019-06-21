@@ -35,13 +35,13 @@ Create a bot user and name it as you like (e.g. uplink-dev).
 
 ##### Interactive components 
 
-###### Interactivity (Request URL)
+Interactivity (Request URL):
 
 ```
 https://[your-tunnel-endpoint]/slack/events
 ```
 
-###### Message Menus (Options Load URL)
+Message Menus (Options Load URL):
 
 ```
 https://[your-tunnel-endpoint]/slack/events
@@ -49,19 +49,19 @@ https://[your-tunnel-endpoint]/slack/events
 
 ##### Event Subscriptions
 
-###### Enable Events (Request URL)
+Enable Events (Request URL):
 
 ```
 https://[your-tunnel-endpoint]/slack/events
 ```
 
-###### Subscribe to Workspace Events
+Subscribe to Workspace Events:
 
 ```
 app_home_opened
 ```
 
-###### Subscribe to Bot Events
+Subscribe to Bot Events:
 
 ```
 group_left
@@ -74,13 +74,13 @@ message.im
 
 You might need to install the app on your workspace before having access to these options.
 
-##### Redirect URLs
+Redirect URLs:
 
 ```
 https://[your-tunnel-endpoint]/oauth/
 ```
 
-##### Scopes
+Scopes:
 
 ```
 groups:read
@@ -99,7 +99,6 @@ This will grant you all necessary tokens and can be repeated as often as necessa
 Create a `.env` file in the project root with the following contents:
 
 ```
-
 SLACK_CLIENT_ID=[your-apps-client-id]
 SLACK_CLIENT_SECRET=[your-apps-client-secret]
 SLACK_SIGNING_SECRET=[your-apps-signing-secret]
@@ -115,6 +114,8 @@ LOG_LEVEL=debug
 You can find the Slack credentials under `Basic Information` in your App's Setting on Slack.
 
 ## Running a local server
+
+Is as simple as:
 
 ```
 docker-compose up
@@ -132,17 +133,26 @@ Source files are linked with the node server. When source files are changed, the
 
 ### Unit
 
+To run all unit tests:
+
 ```
 npm run ut
 ```
 
-And in watch mode:
+To run unit tests in watch mode:
 
 ```
 npm run watch
 ```
 
+The log level for unit-tests is set to "fatal" to not pollute test result outputs with undesired info and error logs.
+
+File watchers will trigger a rerun of all tests in watch mode. Watch mode uses a mocha reporter which reports failed 
+tests only.
+
 ### End-to-End
+
+To run all e2e tests:
 
 ```
 npm run e2e
@@ -154,6 +164,7 @@ End-to-end tests make use of the following test workspaces:
 
 - Domain: `uplink-chat-1`
 - User: `christian.bick@uplink-chat.com`
+- Password: ask
 
 ## Deployment
 
@@ -162,6 +173,8 @@ End-to-end tests make use of the following test workspaces:
 Retrieve an AWS key from your favorite admin and follow the AWS documentation to set up AWS CLI.
 
 ### Deploy
+
+To deploy to production:
 
 ```
 ./deployment/deploy-prod.sh
