@@ -46,6 +46,8 @@ export const openChat = (app) => async ({ body, context, ack, say }) => {
       return
     }
 
+    await store.user.contacts.sadd(userEmail, [ contactEmail ])
+
     const linkResult = await createLink({
       app,
       context,
