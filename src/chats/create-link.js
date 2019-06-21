@@ -95,7 +95,7 @@ export const createLink = async ({ app, context, source, sink }) => {
   throw new Error(buildFailedToFindFreeNameInfo(maxAttempts))
 }
 
-export const createReverseLink = async ({ app, sourceSlackGroup: slackGroup }) => {
+export const createReverseLink = async ({ app, slackGroup }) => {
   const contactRegistration = await store.user.registration.get(slackGroup.sink.email)
   const userRegistration = await store.user.registration.get(slackGroup.source.email)
   const userProfile = await store.slack.profile.get([slackGroup.source.teamId, slackGroup.source.userId])
