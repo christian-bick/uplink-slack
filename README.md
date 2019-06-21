@@ -11,29 +11,27 @@ Docker Compose
 AWS CLI
 ```
 
-## Environment
-
-### Workspace
+## Workspace
 
 If you don't have one already, create your own private Slack workspace for local development purposes only.
 
-### Local Tunnel
+## Local Tunnel
 
 Set up a tunnel to your local machine with [ngrok](https://ngrok.com).
 
 Make sure that the tunnel endpoint uses a *fixed* subdomain.
 
-### Slack Application
+## Slack Application
 
 Create a fresh Slack application on your development workspace at [api.slack.com](https://api.slack.com).
 
-#### Set the following options in your Slack app
+Continue to configure the application as stated below.
 
-##### Bot Users
+### Bot Users
 
 Create a bot user and name it as you like (e.g. uplink-dev).
 
-##### Interactive components 
+### Interactive components 
 
 Interactivity (Request URL):
 
@@ -47,7 +45,7 @@ Message Menus (Options Load URL):
 https://[your-tunnel-endpoint]/slack/events
 ```
 
-##### Event Subscriptions
+### Event Subscriptions
 
 Enable Events (Request URL):
 
@@ -70,7 +68,7 @@ message.groups
 message.im
 ```
 
-#### OAuth & Permissions 
+### OAuth & Permissions 
 
 You might need to install the app on your workspace before having access to these options.
 
@@ -89,12 +87,12 @@ bot
 users.profile:read
 ```
 
-#### Install App
+### Install App
 
 Install the app on your development workspace if you haven't done that yet. 
 This will grant you all necessary tokens and can be repeated as often as necessary.
 
-### Environment variables
+## Environment variables
 
 Create a `.env` file in the project root with the following contents:
 
@@ -158,9 +156,7 @@ To run all e2e tests:
 npm run e2e
 ```
 
-#### Test Resources
-
-End-to-end tests make use of the following test workspaces:
+End-to-end tests make use of the following test workspace:
 
 - Domain: `uplink-chat-1`
 - User: `christian.bick@uplink-chat.com`
