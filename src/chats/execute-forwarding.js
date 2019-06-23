@@ -19,9 +19,9 @@ export const forwardFileAsPost = async ({ say }) => {
   say(buildNotSupportedMessage('posts'))
 }
 
-export const forwardFileAsSnippet = async ({ app, target, message }) => {
+export const forwardFileAsSnippet = async ({ app, context, target, message }) => {
   const fileMeta = message.files[0]
-  const content = await requestAsync.get(fileMeta.url_private_download, { auth: { bearer: target.token } })
+  const content = await requestAsync.get(fileMeta.url_private, { auth: { bearer: context.botToken } })
   await app.client.files.upload({
     token: target.token,
     channels: target.channel,
@@ -31,7 +31,7 @@ export const forwardFileAsSnippet = async ({ app, target, message }) => {
   })
 }
 
-export const forwardFileAsMultipart = async ({ app, target, message }) => {
+export const forwardFileAsMultipart = async ({ app, context, target, message }) => {
   const fileMeta = message.files[0]
   const tmpDir = './tmp'
   const tmpFilePath = `${tmpDir}/${uuid()}-${fileMeta.name}`
@@ -44,7 +44,7 @@ export const forwardFileAsMultipart = async ({ app, target, message }) => {
   await fsAsync.open(tmpFilePath, 'w', 0o666)
   try {
     forwardLog.debug('Receiving file from Slack', { file: tmpFilePath })
-    const writeStream = request.get(fileMeta.url_private, { auth: { bearer: target.token } }).pipe(fs.createWriteStream(tmpFilePath))
+    const writeStream = request.get(fileMeta.url_private, { auth: { bearer: context.botToken } }).pipe(fs.createWriteStream(tmpFilePath))
     forwardLog.debug('Received file from Slack', { url: fileMeta.url_private })
     await new Promise((resolve, reject) => {
       writeStream.on('finish', resolve)
