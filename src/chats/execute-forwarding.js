@@ -8,6 +8,20 @@ import { appLog } from '../logger'
 
 const forwardLog = appLog.child({ module: 'chat', action: 'forward-message' })
 
+export const buildFile = ({ message, target, fileMeta, data }) => {
+  const augmentedFile = {
+    filetype: fileMeta.filetype,
+    title: fileMeta.title,
+    token: target.token,
+    channels: target.channel,
+    ...data
+  }
+  if (message.text) {
+    augmentedFile.initial_comment = message.text
+  }
+  return augmentedFile
+}
+
 export const forwardText = async ({ app, target, message }) => {
   await app.client.chat.postMessage({
     ...target,
@@ -22,13 +36,9 @@ export const forwardFileAsPost = async ({ say }) => {
 export const forwardFileAsSnippet = async ({ app, context, target, message }) => {
   const fileMeta = message.files[0]
   const content = await requestAsync.get(fileMeta.url_private, { auth: { bearer: context.botToken } })
-  await app.client.files.upload({
-    token: target.token,
-    channels: target.channel,
-    filetype: fileMeta.filetype,
-    title: fileMeta.title,
-    content
-  })
+  const data = { content }
+  const forwardedFile = buildFile({ message, target, fileMeta, data })
+  await app.client.files.upload(forwardedFile)
 }
 
 export const forwardFileAsMultipart = async ({ app, context, target, message }) => {
@@ -51,13 +61,9 @@ export const forwardFileAsMultipart = async ({ app, context, target, message }) 
       writeStream.on('error', reject)
     })
     forwardLog.debug('Forwarding file to Slack', { url: fileMeta.url_private })
-    await app.client.files.upload({
-      token: target.token,
-      channels: target.channel,
-      filetype: fileMeta.filetype,
-      title: fileMeta.title,
-      file: fs.createReadStream(tmpFilePath)
-    })
+    const data = { file: fs.createReadStream(tmpFilePath) }
+    const forwardedFile = buildFile({ message, target, fileMeta, data })
+    await app.client.files.upload(forwardedFile)
   } catch (err) {
     throw err
   } finally {
