@@ -15,22 +15,26 @@ describe('delegateForwarding', () => {
     message = {}
   })
 
-  it('should delegate to forwardText for message without subtype', () => {
-    const delegate = delegateForwarding(message)
-    expect(delegate).to.equal(forwardText)
-  })
+  describe('non files', () => {
+    it('should delegate to forwardText for message without subtype', () => {
+      const delegate = delegateForwarding(message)
+      expect(delegate).to.equal(forwardText)
+    })
 
-  it('should delegate to forwardTextAsMe for message with subtype me_message', () => {
-    message.subtype = MESSAGE_TYPES.me_message
-    const delegate = delegateForwarding(message)
-    expect(delegate).to.equal(forwardTextAsMe)
+    it('should delegate to forwardText for message with subtype thread_broadcast ', () => {
+      message.subtype = MESSAGE_TYPES.thread_broadcast
+      const delegate = delegateForwarding(message)
+      expect(delegate).to.equal(forwardText)
+    })
+
+    it('should delegate to forwardTextAsMe for message with subtype me_message', () => {
+      message.subtype = MESSAGE_TYPES.me_message
+      const delegate = delegateForwarding(message)
+      expect(delegate).to.equal(forwardTextAsMe)
+    })
   })
 
   describe('for files', () => {
-    beforeEach('set file meta data', () => {
-      message.subtype = MESSAGE_TYPES.file_share
-    })
-
     it('should delegate to forwardFileAsSnippet for mimetype=text/plain', () => {
       message.files = [{ mimetype: 'text/plain' }]
       const delegate = delegateForwarding(message)

@@ -73,6 +73,9 @@ export const forwardMessage = (
       if (matchingMessage) {
         forwardLog.debug('found matching thread message')
         target.thread_ts = matchingMessage.ts
+        if (message.subtype === 'thread_broadcast') {
+          target.reply_broadcast = true
+        }
       } else {
         forwardLog.info({ message, target, context }, 'unable not find matching thread message')
         say(FAILED_TO_FORWARD_THREAD_MESSAGE)

@@ -151,6 +151,23 @@ describe('forwardMessage', () => {
           })
         })
 
+        it('should forward broadcast as message with reply_broadcast', async () => {
+          params.message.thread_ts = threadTs
+          params.message.subtype = MESSAGE_TYPES.thread_broadcast
+          await stubbedForwardMessage(params)
+          expect(delegate).to.be.calledWith({
+            app,
+            message,
+            context,
+            say,
+            target: {
+              ...target,
+              thread_ts: contactThreadTs,
+              reply_broadcast: true
+            }
+          })
+        })
+
         it('should send a warning when matching message cannot be found', async () => {
           params.message.thread_ts = threadTs
           await forwardMessage(app, createReverseLink, delegateForwarding, sandbox.fake.returns(null))(params)
