@@ -19,6 +19,9 @@ export const buildFile = ({ message, target, fileMeta, data }) => {
   if (message.text) {
     augmentedFile.initial_comment = message.text
   }
+  if (target.thread_ts) {
+    augmentedFile.thread_ts = target.thread_ts
+  }
   return augmentedFile
 }
 
