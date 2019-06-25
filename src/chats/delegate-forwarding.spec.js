@@ -1,6 +1,12 @@
 import { delegateForwarding } from './delegate-forwarding'
 import { MESSAGE_TYPES } from './message-types'
-import { forwardFileAsMultipart, forwardFileAsPost, forwardFileAsSnippet, forwardText } from './execute-forwarding'
+import {
+  forwardFileAsMultipart,
+  forwardFileAsPost,
+  forwardFileAsSnippet,
+  forwardText,
+  forwardTextAsMe
+} from './execute-forwarding'
 
 describe('delegateForwarding', () => {
   let message
@@ -12,6 +18,12 @@ describe('delegateForwarding', () => {
   it('should delegate to forwardText for message without subtype', () => {
     const delegate = delegateForwarding(message)
     expect(delegate).to.equal(forwardText)
+  })
+
+  it('should delegate to forwardTextAsMe for message with subtype me_message', () => {
+    message.subtype = MESSAGE_TYPES.me_message
+    const delegate = delegateForwarding(message)
+    expect(delegate).to.equal(forwardTextAsMe)
   })
 
   describe('for files', () => {

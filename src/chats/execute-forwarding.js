@@ -29,6 +29,13 @@ export const forwardText = async ({ app, target, message }) => {
   })
 }
 
+export const forwardTextAsMe = async ({ app, target, message }) => {
+  await app.client.chat.postMessage({
+    ...target,
+    text: `_${message.text}_`
+  })
+}
+
 export const forwardFileAsPost = async ({ say }) => {
   say(buildNotSupportedMessage('posts'))
 }

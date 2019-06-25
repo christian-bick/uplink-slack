@@ -20,6 +20,7 @@ const group_purpose = 'group_purpose'
 const group_topic = 'group_topic'
 const group_unarchive = 'group_unarchive'
 const file_share = 'file_share'
+const me_message = 'me_message'
 
 export const MESSAGE_TYPES = {
   bot_message,
@@ -27,7 +28,8 @@ export const MESSAGE_TYPES = {
   pinned_item, unpinned_item,
   channel_archive, channel_join, channel_leave, channel_name, channel_purpose, channel_topic, channel_unarchive,
   group_archive, group_join, group_leave, group_name, group_purpose, group_topic, group_unarchive,
-  file_share
+  file_share,
+  me_message
 }
 
 export const IGNORED_MESSAGE_SUBTYPES = pick(MESSAGE_TYPES, [
@@ -39,7 +41,7 @@ export const IGNORED_MESSAGE_SUBTYPES = pick(MESSAGE_TYPES, [
 ])
 
 export const SUPPORTED_MESSAGE_SUBTYPES = pick(MESSAGE_TYPES, [
-  file_share
+  file_share, me_message
 ])
 
 export const buildNotSupportedMessage = (type) => {
