@@ -1,4 +1,4 @@
-import { FAILED_TO_FORWARD_MESSAGE, forwardMessage } from './forward-message'
+import { FAILED_TO_FORWARD_MESSAGE, FAILED_TO_FORWARD_THREAD_MESSAGE, forwardMessage } from './forward-message'
 import store from '../store'
 import { MESSAGE_TYPES } from './message-types'
 
@@ -6,6 +6,7 @@ describe('forwardMessage', () => {
   let app
   let delegateForwarding
   let createReverseLink
+  let findMatchingMessage
 
   let delegate
 
@@ -28,6 +29,10 @@ describe('forwardMessage', () => {
   const contactEmail = 'contact-email'
   const contactChannelId = 'contact-channel-id'
   const contactBotToken = 'contact-bot-token'
+  const contactUserToken = 'contact-user-token'
+
+  const threadTs = 'thread-ts'
+  const contactThreadTs = 'contact-thread-ts'
 
   const userSlackGroup = {
     source: { userId, teamId, email: userEmail },
@@ -55,13 +60,14 @@ describe('forwardMessage', () => {
     delegate = sandbox.fake()
     delegateForwarding = sandbox.fake.returns(delegate)
     createReverseLink = sandbox.fake.returns({ link: reverseLink })
-    stubbedForwardMessage = forwardMessage(app, createReverseLink, delegateForwarding)
+    findMatchingMessage = sandbox.fake.returns({ ts: contactThreadTs })
+    stubbedForwardMessage = forwardMessage(app, createReverseLink, delegateForwarding, findMatchingMessage)
     params = { message, say, context }
   })
 
   describe('without slack group', () => {
     it('should not forward the message', async () => {
-      await forwardMessage(app, delegateForwarding)(params)
+      await stubbedForwardMessage(params)
       expect(delegate).to.not.be.called
     })
   })
@@ -107,10 +113,49 @@ describe('forwardMessage', () => {
         store.link.set([contactEmail, userEmail], reverseLink)
       })
 
-      it('should forward message and not create reverse link', async () => {
+      it('should not create reverse link', async () => {
         await stubbedForwardMessage(params)
         expect(createReverseLink).to.not.be.called
-        expect(delegate).to.be.calledWith({ app, message, context, say, target })
+      })
+
+      describe('standard message', () => {
+        it('should forward message', async () => {
+          await stubbedForwardMessage(params)
+          expect(delegate).to.be.calledWith({ app, message, context, say, target })
+        })
+      })
+
+      describe('thread meassage', () => {
+        beforeEach('add slack group and user', () => {
+          store.slack.group.set([contactTeamId, contactChannelId], {
+            source: { teamId: contactTeamId, userId: contactUserId }
+          })
+          store.slack.user.set([contactTeamId, contactUserId], {
+            userToken: contactUserToken
+          })
+        })
+
+        it('should forward message with thread_ts', async () => {
+          params.message.thread_ts = threadTs
+          await stubbedForwardMessage(params)
+          expect(findMatchingMessage).to.be.calledWith({ app, token: contactUserToken, channel: target.channel, ts: threadTs })
+          expect(delegate).to.be.calledWith({
+            app,
+            message,
+            context,
+            say,
+            target: {
+              ...target,
+              thread_ts: contactThreadTs
+            }
+          })
+        })
+
+        it('should send a warning when matching message cannot be found', async () => {
+          params.message.thread_ts = threadTs
+          await forwardMessage(app, createReverseLink, delegateForwarding, sandbox.fake.returns(null))(params)
+          expect(say).to.be.calledOnceWith(FAILED_TO_FORWARD_THREAD_MESSAGE)
+        })
       })
 
       it('should send a warning when delegation fails', async () => {

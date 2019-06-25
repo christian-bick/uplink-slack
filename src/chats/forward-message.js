@@ -4,13 +4,25 @@ import { SUPPORTED_MESSAGE_SUBTYPES, IGNORED_MESSAGE_SUBTYPES, buildNotSupported
 
 import { createReverseLink as slackCreateReverseLink } from './create-link'
 import { delegateForwarding as slackDelegateForwarding } from './delegate-forwarding'
+import { findMatchingMessage as slackFindMatchingMessage } from './find-matching-message'
 
 export const FAILED_TO_FORWARD_FILE = ':warning: Failed to forward the last posted file'
 export const FAILED_TO_FORWARD_MESSAGE = ':warning: Failed to forward the last posted message'
+export const FAILED_TO_FORWARD_THREAD_MESSAGE = `${FAILED_TO_FORWARD_MESSAGE} because the threat cannot be 
+  found on your contact's side`
 
 const forwardLog = appLog.child({ module: 'chat', action: 'forward-message' }, true)
 
-export const forwardMessage = (app, createReverseLink = slackCreateReverseLink, delegateForwarding = slackDelegateForwarding) => async ({ context, message, say }) => {
+export const forwardMessage = (
+  app,
+  createReverseLink = slackCreateReverseLink,
+  delegateForwarding = slackDelegateForwarding,
+  findMatchingMessage = slackFindMatchingMessage
+) => async ({
+  context,
+  message,
+  say
+}) => {
   try {
     forwardLog.debug({ message }, 'received message')
     const channelId = message.channel
@@ -47,6 +59,24 @@ export const forwardMessage = (app, createReverseLink = slackCreateReverseLink, 
       username: userProfile.name || userProfile.email,
       token: contactTeam.botToken,
       channel: reverseLink.channelId
+    }
+    if (message.thread_ts) {
+      forwardLog.debug('attempting to find matching thread message')
+      const contactGroup = await store.slack.group.get([reverseLink.teamId, reverseLink.channelId])
+      const contactUser = await store.slack.user.get([contactGroup.source.teamId, contactGroup.source.userId])
+      const matchingMessage = await findMatchingMessage({
+        app,
+        channel: target.channel,
+        token: contactUser.userToken,
+        ts: message.thread_ts
+      })
+      if (matchingMessage) {
+        forwardLog.debug('found matching thread message')
+        target.thread_ts = matchingMessage.ts
+      } else {
+        forwardLog.info({ message, target, context }, 'unable not find matching thread message')
+        say(FAILED_TO_FORWARD_THREAD_MESSAGE)
+      }
     }
     if (userProfile.image48) {
       target.icon_url = userProfile.image48
