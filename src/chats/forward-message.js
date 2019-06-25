@@ -48,7 +48,10 @@ export const forwardMessage = (app, createReverseLink = slackCreateReverseLink, 
       token: contactTeam.botToken,
       channel: reverseLink.channelId
     }
-    forwardLog.debug({ message }, 'attempting to forward message')
+    if (userProfile.image48) {
+      target.icon_url = userProfile.image48
+    }
+    forwardLog.debug({ message, target }, 'attempting to forward message')
     const forwardDelegate = delegateForwarding(message)
     if (forwardDelegate) {
       await forwardDelegate({ app, context, message, say, target })

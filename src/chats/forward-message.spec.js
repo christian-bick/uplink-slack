@@ -21,6 +21,7 @@ describe('forwardMessage', () => {
   const teamId = 'team-id'
   const userEmail = 'user-email'
   const userName = 'user-name'
+  const userImage = 'user-image'
 
   const contactUserId = 'contact-user-id'
   const contactTeamId = 'contact-team-id'
@@ -42,7 +43,8 @@ describe('forwardMessage', () => {
   const target = {
     username: userName,
     token: contactBotToken,
-    channel: contactChannelId
+    channel: contactChannelId,
+    icon_url: userImage
   }
 
   beforeEach('prepare', () => {
@@ -68,7 +70,7 @@ describe('forwardMessage', () => {
     beforeEach('add slack group, slack profile and contact slack team', () => {
       store.slack.group.set([teamId, channelId], userSlackGroup)
       store.slack.team.set(contactTeamId, { botToken: contactBotToken })
-      store.slack.profile.set([teamId, userId], { name: userName })
+      store.slack.profile.set([teamId, userId], { name: userName, image48: userImage })
     })
 
     it('should not forward message when subtype is ignored', async () => {

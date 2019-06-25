@@ -16,6 +16,7 @@ describe('oauth', () => {
   const teamId = 'team-id'
   const userEmail = 'user-email'
   const userName = 'user-name'
+  const userImage = 'user-image'
   const userToken = 'user-token'
   const botToken = 'bot-token'
   const botId = 'bot-id'
@@ -84,7 +85,8 @@ describe('oauth', () => {
 
     const profile = {
       real_name: userName,
-      email: userEmail
+      email: userEmail,
+      image_48: userImage,
     }
 
     const userAuthInfo = { team_id: teamId, user_id: userId, access_token: userToken, scope }
@@ -105,7 +107,7 @@ describe('oauth', () => {
       const slackProfile = await store.slack.profile.get([teamId, userId])
       expect(registration).to.eql({ platform: 'slack', teamId, userId, email: userEmail })
       expect(slackUser).to.eql({ teamId, userId, userToken, scope })
-      expect(slackProfile).to.eql({ email: userEmail, name: userName })
+      expect(slackProfile).to.eql({ email: userEmail, name: userName, image48: userImage })
     }
 
     describe('grantForTeam', () => {
