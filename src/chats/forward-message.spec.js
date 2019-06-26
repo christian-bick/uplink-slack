@@ -41,7 +41,6 @@ describe('forwardMessage', () => {
 
   const reverseLink = {
     teamId: contactTeamId,
-    userId: contactUserId,
     channelId: contactChannelId
   }
 
@@ -94,7 +93,7 @@ describe('forwardMessage', () => {
     })
 
     it('should not forward message when user is not linked', async () => {
-      params.message.user = 'other_user'
+      params.context.userId = 'other_user'
       await stubbedForwardMessage(params)
       expect(delegate).to.not.be.called
       expect(say).to.not.be.called
@@ -125,6 +124,15 @@ describe('forwardMessage', () => {
         })
       })
 
+      describe('change/delete message', () => {
+        it('should forward message', async () => {
+          params.context.userId = null
+          params.message.previous_message = message
+          await stubbedForwardMessage(params)
+          expect(delegate).to.be.calledWith({ app, message, context, say, target })
+        })
+      })
+
       describe('thread meassage', () => {
         beforeEach('add slack group and user', () => {
           store.slack.group.set([contactTeamId, contactChannelId], {
@@ -138,7 +146,7 @@ describe('forwardMessage', () => {
         it('should forward message with thread_ts', async () => {
           params.message.thread_ts = threadTs
           await stubbedForwardMessage(params)
-          expect(findMatchingMessage).to.be.calledWith({ app, token: contactUserToken, channel: target.channel, ts: threadTs })
+          expect(findMatchingMessage).to.be.calledWith({ app, teamId: contactTeamId, channelId: contactChannelId, ts: threadTs })
           expect(delegate).to.be.calledWith({
             app,
             message,

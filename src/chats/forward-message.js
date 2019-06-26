@@ -24,9 +24,12 @@ export const forwardMessage = (
   say
 }) => {
   try {
-    forwardLog.debug({ message }, 'received message')
-    const channelId = message.channel
-    const userSlackGroup = await store.slack.group.get([context.teamId, channelId])
+    // Complete context for message updates and deletion
+    context.userId = context.userId || (message.previous_message && message.previous_message.user)
+
+    forwardLog.debug({ message, context }, 'received message')
+
+    const userSlackGroup = await store.slack.group.get([context.teamId, message.channel])
     if (!userSlackGroup) {
       forwardLog.debug('skipping forwarding (not a linked group)')
       return
@@ -40,7 +43,7 @@ export const forwardMessage = (
       say(buildNotSupportedMessage(message.subtype))
       return
     }
-    if (!message.user || message.user !== userSlackGroup.source.userId) {
+    if (context.userId !== userSlackGroup.source.userId) {
       forwardLog.debug('skipping forwarding (not a linked user)')
       return
     }
@@ -62,14 +65,7 @@ export const forwardMessage = (
     }
     if (message.thread_ts) {
       forwardLog.debug('attempting to find matching thread message')
-      const contactGroup = await store.slack.group.get([reverseLink.teamId, reverseLink.channelId])
-      const contactUser = await store.slack.user.get([contactGroup.source.teamId, contactGroup.source.userId])
-      const matchingMessage = await findMatchingMessage({
-        app,
-        channel: target.channel,
-        token: contactUser.userToken,
-        ts: message.thread_ts
-      })
+      const matchingMessage = await findMatchingMessage({ app, ...reverseLink, ts: message.thread_ts })
       if (matchingMessage) {
         forwardLog.debug('found matching thread message')
         target.thread_ts = matchingMessage.ts

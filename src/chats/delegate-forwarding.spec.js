@@ -1,11 +1,12 @@
 import { delegateForwarding } from './delegate-forwarding'
 import { MESSAGE_TYPES } from './message-types'
 import {
+  forwardDeletion,
   forwardFileAsMultipart,
   forwardFileAsPost,
   forwardFileAsSnippet,
   forwardText,
-  forwardTextAsMe
+  forwardTextAsMe, forwardUpdate
 } from './execute-forwarding'
 
 describe('delegateForwarding', () => {
@@ -31,6 +32,18 @@ describe('delegateForwarding', () => {
       message.subtype = MESSAGE_TYPES.me_message
       const delegate = delegateForwarding(message)
       expect(delegate).to.equal(forwardTextAsMe)
+    })
+
+    it('should delegate to forwardUpdate for message with subtype message_changed', () => {
+      message.subtype = MESSAGE_TYPES.message_changed
+      const delegate = delegateForwarding(message)
+      expect(delegate).to.equal(forwardUpdate)
+    })
+
+    it('should delegate to forwardDeletion for message with subtype message_deleted', () => {
+      message.subtype = MESSAGE_TYPES.message_deleted
+      const delegate = delegateForwarding(message)
+      expect(delegate).to.equal(forwardDeletion)
     })
   })
 

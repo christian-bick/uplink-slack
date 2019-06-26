@@ -1,3 +1,4 @@
+/* eslint-disable camelcase */
 import uuid from 'uuid/v4'
 import request from 'request'
 import requestAsync from 'request-promise-native'
@@ -5,6 +6,7 @@ import { buildNotSupportedMessage } from './message-types'
 import fs, { promises as fsAsync } from 'fs'
 
 import { appLog } from '../logger'
+import { findMatchingMessage } from './find-matching-message'
 
 const forwardLog = appLog.child({ module: 'chat', action: 'forward-message' })
 
@@ -36,6 +38,26 @@ export const forwardTextAsMe = async ({ app, target, message }) => {
   await app.client.chat.postMessage({
     ...target,
     text: `_${message.text}_`
+  })
+}
+
+export const forwardUpdate = async ({ app, target, message, context }) => {
+  console.log(message)
+  const { ts, thread_ts } = message.previous_message
+  const matchingMessage = await findMatchingMessage({ app, teamId: context.teamId, channelId: target.channel, ts, thread_ts })
+  await app.client.chat.update({
+    ...target,
+    text: message.message.text,
+    ts: matchingMessage.ts
+  })
+}
+
+export const forwardDeletion = async ({ app, target, message, context }) => {
+  const { ts, thread_ts } = message.previous_message
+  const matchingMessage = await findMatchingMessage({ app, teamId: context.teamId, channelId: target.channel, ts, thread_ts })
+  await app.client.chat.delete({
+    ...target,
+    ts: matchingMessage.ts
   })
 }
 
