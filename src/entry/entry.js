@@ -32,7 +32,7 @@ export const buildPermissionMessage = (teamId) => ({
   ]
 })
 
-export const buildEntryMessage = () => ({
+export const buildEntryMessage = (teamId) => ({
   text: ENTRY_TEXT,
   blocks: [
     {
@@ -62,15 +62,15 @@ export const buildEntryMessage = () => ({
           'text': 'Add Contacts',
           'emoji': true
         }
-      } /* {
+      }, {
         'type': 'button',
-        'url': `https://${process.env.HOST}/oauth/user/request`,
+        'url': `https://${process.env.HOST}/oauth/user/request?teamId=${teamId}`,
         'text': {
           'type': 'plain_text',
           'text': 'Reinstall',
           'emoji': true
         }
-      } */]
+      }]
     }
   ]
 })
@@ -99,7 +99,7 @@ export const reactToAppHomeOpened = (app) => async ({ context, event, say }) => 
   if (!user) {
     await sendHomeMessage(buildPermissionMessage(context.teamId))
   } else {
-    await sendHomeMessage(buildEntryMessage())
+    await sendHomeMessage(buildEntryMessage(context.teamId))
   }
 }
 
