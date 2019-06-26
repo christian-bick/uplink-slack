@@ -52,8 +52,7 @@ export const forwardMessage = (
       forwardLog.debug({ reverseLink }, 'found reverse link')
     } else {
       forwardLog.debug('attempting to create reverse link')
-      const linkResult = await createReverseLink({ app, slackGroup: userSlackGroup })
-      reverseLink = linkResult.link
+      const { link: reverseLink } = await createReverseLink({ app, slackGroup: userSlackGroup })
       forwardLog.debug({ reverseLink }, 'reverse link created')
     }
     const contactTeam = await store.slack.team.get(reverseLink.teamId)

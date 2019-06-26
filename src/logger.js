@@ -5,7 +5,7 @@ import { omit } from 'lodash'
 const LOG_LEVEL = process.env.LOG_LEVEL || INFO
 const HASH_SALT = process.env.HASH_SALT || ''
 
-const OMITTED_FIELDS = ['botToken', 'userToken', 'matches' ]
+const OMITTED_FIELDS = [ 'botToken', 'userToken', 'matches', 'token' ]
 
 const obfuscateValue = (value) => {
   if (!value || HASH_SALT === 'no-hash') {
@@ -37,7 +37,10 @@ const serializeMessage = (message) => {
     type: message.type,
     subtype: message.subtype,
     userId: obfuscateValue(message.user),
-    channelId: obfuscateValue(message.channel)
+    channelId: obfuscateValue(message.channel),
+    ts: message.ts,
+    threadTs: message.thread_ts,
+    files: message.files ? message.files.length : 0
   }
 }
 
@@ -58,6 +61,8 @@ const obfuscateSensitiveParams = {
   registration: obfuscatePersonalData,
   context: obfuscatePersonalData,
   message: serializeMessage,
+  source: obfuscatePersonalData,
+  sink: obfuscatePersonalData,
   // Standard serializers
   err: bunyan.stdSerializers.err
 }
