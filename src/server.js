@@ -20,12 +20,14 @@ const run = async (port) => {
     authorize
   })
 
-  // Register
-  entry(app)
+  // Register http routes
   auth(app)
   ping(app)
-  contacts(app)
+
+  // Register bot handlers
+  entry(app)
   chats(app)
+  contacts(app)
 
   app.receiver.app.use(express.static('public'))
 
