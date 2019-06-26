@@ -146,7 +146,6 @@ export const grantForUser = (app, verifyAuth = verifyAuthCode, verifyState = ver
     resp.redirect(302, successUri(req, team))
     oauthLog.info({ action: 'grant-user-auth', teamId: team.teamId, userId: user.userId }, 'user auth granted')
   } catch (err) {
-    console.log(err)
     oauthLog.error(err)
     resp.redirect(302, errorUri(req))
   }
