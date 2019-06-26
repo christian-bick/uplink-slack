@@ -23,6 +23,9 @@ describe('forwardMessage', () => {
   const userEmail = 'user-email'
   const userName = 'user-name'
   const userImage = 'user-image'
+  const botId = 'user-bot-id'
+
+  const parentUserId = 'parent-user-id'
 
   const contactUserId = 'contact-user-id'
   const contactTeamId = 'contact-team-id'
@@ -48,12 +51,13 @@ describe('forwardMessage', () => {
     username: userName,
     token: contactBotToken,
     channel: contactChannelId,
-    icon_url: userImage
+    icon_url: userImage,
+    team: contactTeamId
   }
 
   beforeEach('prepare', () => {
     message = { channel: channelId, user: userId }
-    context = { teamId, userId }
+    context = { teamId, userId, botId }
     app = {}
     say = sandbox.fake()
     delegate = sandbox.fake()
@@ -100,7 +104,7 @@ describe('forwardMessage', () => {
     })
 
     describe('without reverse link', () => {
-      it('should forward message and created reverse link', async () => {
+      it('should forward message and create reverse link', async () => {
         await stubbedForwardMessage(params)
         expect(createReverseLink).to.be.calledOnce
         expect(delegate).to.be.calledWith({ app, message, context, say, target })
@@ -145,8 +149,9 @@ describe('forwardMessage', () => {
 
         it('should forward message with thread_ts', async () => {
           params.message.thread_ts = threadTs
+          params.message.parent_user_id = parentUserId
           await stubbedForwardMessage(params)
-          expect(findMatchingMessage).to.be.calledWith({ app, teamId: contactTeamId, channelId: contactChannelId, ts: threadTs })
+          expect(findMatchingMessage).to.be.calledWith({ app, teamId: contactTeamId, channelId: contactChannelId, ts: threadTs, botId, userId: parentUserId })
           expect(delegate).to.be.calledWith({
             app,
             message,
