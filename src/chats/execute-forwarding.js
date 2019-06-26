@@ -2,11 +2,11 @@
 import uuid from 'uuid/v4'
 import request from 'request'
 import requestAsync from 'request-promise-native'
-import { buildNotSupportedMessage } from './message-types'
 import fs, { promises as fsAsync } from 'fs'
 
 import { appLog } from '../logger'
 import { findMatchingMessage } from './find-matching-message'
+import { convertPost } from './convert-post'
 
 const forwardLog = appLog.child({ module: 'chat', action: 'forward-message' })
 
@@ -53,7 +53,7 @@ export const forwardUpdate = async ({ app, target, message, context }) => {
     botId: context.botId,
     userId: context.userId,
     ts,
-    parent,
+    parent
   })
 
   await app.client.chat.update({
@@ -84,8 +84,14 @@ export const forwardDeletion = async ({ app, target, message, context }) => {
   })
 }
 
-export const forwardFileAsPost = async ({ say }) => {
-  say(buildNotSupportedMessage('posts'))
+export const forwardFileAsPost = async ({ app, message, context, target, say }, index = 0) => {
+  const fileMeta = message.files[index]
+  const content = await requestAsync.get(fileMeta.url_private, { auth: { bearer: context.botToken } })
+  const convertedContent = convertPost(content)
+  // console.log(convertedContent)
+  const data = { content: convertedContent }
+  const forwardedFile = buildFile({ message, target, fileMeta, data })
+  await app.client.files.upload(forwardedFile)
 }
 
 export const forwardFileAsSnippet = async ({ app, context, target, message }, index = 0) => {
