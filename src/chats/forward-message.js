@@ -58,14 +58,26 @@ export const forwardMessage = (
     }
     const contactTeam = await store.slack.team.get(reverseLink.teamId)
     const userProfile = await store.slack.profile.get([context.teamId, context.userId])
+
     const target = {
       username: userProfile.name || userProfile.email,
       token: contactTeam.botToken,
-      channel: reverseLink.channelId
+      channel: reverseLink.channelId,
+      team: reverseLink.teamId
     }
+
     if (message.thread_ts) {
       forwardLog.debug('attempting to find matching thread message')
-      const matchingMessage = await findMatchingMessage({ app, ...reverseLink, ts: message.thread_ts })
+
+      const matchingMessage = await findMatchingMessage({
+        app,
+        channelId: reverseLink.channelId,
+        teamId: reverseLink.teamId,
+        userId: message.parent_user_id,
+        botId: context.botId,
+        ts: message.thread_ts,
+      })
+
       if (matchingMessage) {
         forwardLog.debug('found matching thread message')
         target.thread_ts = matchingMessage.ts

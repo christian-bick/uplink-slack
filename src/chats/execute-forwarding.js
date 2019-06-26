@@ -42,9 +42,20 @@ export const forwardTextAsMe = async ({ app, target, message }) => {
 }
 
 export const forwardUpdate = async ({ app, target, message, context }) => {
-  console.log(message)
-  const { ts, thread_ts } = message.previous_message
-  const matchingMessage = await findMatchingMessage({ app, teamId: context.teamId, channelId: target.channel, ts, thread_ts })
+  const { ts, thread_ts, parent_user_id } = message.previous_message
+
+  const parent = thread_ts ? { userId: parent_user_id, ts: thread_ts } : null
+
+  const matchingMessage = await findMatchingMessage({
+    app,
+    channelId: target.channel,
+    teamId: target.team,
+    botId: context.botId,
+    userId: context.userId,
+    ts,
+    parent,
+  })
+
   await app.client.chat.update({
     ...target,
     text: message.message.text,
@@ -53,8 +64,20 @@ export const forwardUpdate = async ({ app, target, message, context }) => {
 }
 
 export const forwardDeletion = async ({ app, target, message, context }) => {
-  const { ts, thread_ts } = message.previous_message
-  const matchingMessage = await findMatchingMessage({ app, teamId: context.teamId, channelId: target.channel, ts, thread_ts })
+  const { ts, thread_ts, parent_user_id } = message.previous_message
+
+  const parent = thread_ts ? { userId: parent_user_id, ts: thread_ts } : null
+
+  const matchingMessage = await findMatchingMessage({
+    app,
+    channelId: target.channel,
+    teamId: target.team,
+    botId: context.botId,
+    userId: context.userId,
+    ts,
+    parent
+  })
+
   await app.client.chat.delete({
     ...target,
     ts: matchingMessage.ts
