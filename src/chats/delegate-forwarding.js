@@ -9,17 +9,30 @@ import {
 
 import { MESSAGE_TYPES } from './message-types'
 
+export const delegateForwardForFile = (file) => {
+  if (file.mimetype === 'text/plain') {
+    if (file.filetype === 'space') {
+      return forwardFileAsPost
+    } else {
+      return forwardFileAsSnippet
+    }
+  } else {
+    return forwardFileAsMultipart
+  }
+}
+
+export const forwardFileList = async (params) => {
+  const { message  } = params
+  const forwardFiles = message.files.map((file, index) => delegateForwardForFile(file)(params, index))
+  await Promise.all(forwardFiles)
+}
+
 export const delegateForwarding = (message) => {
   if (message.files) {
-    const fileMeta = message.files[0]
-    if (fileMeta.mimetype === 'text/plain') {
-      if (fileMeta.filetype === 'space') {
-        return forwardFileAsPost
-      } else {
-        return forwardFileAsSnippet
-      }
+    if (message.files.length === 1) {
+      return delegateForwardForFile(message.files[0])
     } else {
-      return forwardFileAsMultipart
+      return forwardFileList
     }
   } else if (message.subtype === MESSAGE_TYPES.message_deleted) {
     return forwardDeletion

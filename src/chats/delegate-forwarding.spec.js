@@ -1,4 +1,4 @@
-import { delegateForwarding } from './delegate-forwarding'
+import { delegateForwarding, forwardFileList } from './delegate-forwarding'
 import { MESSAGE_TYPES } from './message-types'
 import {
   forwardDeletion,
@@ -64,6 +64,12 @@ describe('delegateForwarding', () => {
       message.files = [{ mimetype: 'image/jpeg' }]
       const delegate = delegateForwarding(message)
       expect(delegate).to.equal(forwardFileAsMultipart)
+    })
+
+    it('should delegate to forwardFileList for multiples files', () => {
+      message.files = [{ mimetype: 'image/jpeg' }, { mimetype: 'image/jpeg' }]
+      const delegate = delegateForwarding(message)
+      expect(delegate).to.equal(forwardFileList)
     })
   })
 })
