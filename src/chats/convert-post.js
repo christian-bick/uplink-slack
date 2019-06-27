@@ -1,4 +1,5 @@
 import json2md from 'json2md'
+import link from '../store/link'
 
 export const TAGS = {
   code: '`',
@@ -37,14 +38,11 @@ export const formatMappers = {
   u: formatText(TAGS.u)
 }
 
-export const shiftRange = (range, shift) => {
-  return [ range[0], range[1] + shift * 2 ]
-}
-
 export const applyFormats = (params) => {
   const formats = params.formats
+  const links = params.links
 
-  const formatActions = Object.keys(formats).reduce((previous, formatType) => {
+  const formatActions = !formats ? [] : Object.keys(formats).reduce((previous, formatType) => {
     const mapper = formatMappers[formatType]
     if (!mapper) {
       return previous
@@ -53,7 +51,14 @@ export const applyFormats = (params) => {
     }
   }, [])
 
-  const { shiftedActions: actions } = formatActions.sort((x, y) => {
+  const linkActions = !links ? [] : Object.keys(links).reduce((previous, url) => {
+    const mapper = formatText('[', `](${url})`)
+    return [ ...previous, { action: mapper, shift: url.length + 2, range: links[url] } ]
+  }, [])
+
+  const actions = [...linkActions, ...formatActions]
+
+  const sortedActions = actions.sort((x, y) => {
     const startDateBigger = x.range[0] > y.range[0]
     const endDateBigger = x.range[1] > y.range[1]
     if (startDateBigger && endDateBigger) {
@@ -63,9 +68,12 @@ export const applyFormats = (params) => {
     } else {
       return 1
     }
-  }).reduce((previous, action) => {
+  })
+
+  const { shiftedActions } = sortedActions.reduce((previous, action) => {
     const nextShift = action.range[1] >= previous.position ? previous.shift : 0
-    const shiftedAction = { ...action, range: shiftRange(action.range, nextShift) }
+    const shiftedRange = [ action.range[0], action.range[1] + nextShift * 2 ]
+    const shiftedAction = { ...action, range: shiftedRange }
     return {
       shiftedActions: [...previous.shiftedActions, shiftedAction],
       shift: nextShift + action.shift,
@@ -73,7 +81,9 @@ export const applyFormats = (params) => {
     }
   }, { shiftedActions: [], shift: 0, position: params.text.length })
 
-  return actions.reduce((previous, { action, range }) => action(range, previous), params.text)
+  console.log(shiftedActions)
+
+  return shiftedActions.reduce((previous, { action, range }) => action(range, previous), params.text)
 }
 
 export const convertJson = originalJson => originalJson
