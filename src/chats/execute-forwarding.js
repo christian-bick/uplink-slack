@@ -84,7 +84,7 @@ export const forwardDeletion = async ({ app, target, message, context }) => {
   })
 }
 
-export const forwardFileAsPost = async ({ app, message, context, target, say }, index = 0) => {
+export const forwardFileAsPost = async ({ app, message, context, target }, index = 0) => {
   const fileMeta = message.files[index]
   const content = await requestAsync.get(fileMeta.url_private, { auth: { bearer: context.botToken } })
   const convertedContent = convertPost(content)
