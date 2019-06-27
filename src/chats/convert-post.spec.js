@@ -12,21 +12,48 @@ describe('applyFormats', () => {
 
   it('should apply format for whole string', () => {
     const text = applyFormats(params)
-    expect(text).eql('```Code Block```')
+    expect(text).eql('`Code Block`')
   })
 
   it('should apply format for part of the string', () => {
     params.formats.code = [5, 10]
     const text = applyFormats(params)
-    expect(text).eql('Code ```Block```')
+    expect(text).eql('Code `Block`')
+  })
+
+  it('should apply supported formats and ignore unsupported ones', () => {
+    params.formats.code = [5, 10]
+    params.formats.not_supported = [0, 4]
+    const text = applyFormats(params)
+    expect(text).eql('Code `Block`')
   })
 
   it('should apply several formats at the same time', () => {
-    params.formats.code = [5, 10]
     params.formats.strike = [0, 4]
+    params.formats.code = [5, 10]
     const text = applyFormats(params)
-    expect(text).eql('~~Code~~ ```Block```')
+    expect(text).eql('~~Code~~ `Block`')
   })
+
+  it('should combine formats', () => {
+    params.formats.code = [5, 10]
+    params.formats.strike = [0, 10]
+    const text = applyFormats(params)
+    expect(text).eql('~~Code `Block`~~')
+  })
+
+  it.only('should combine tress', () => {
+    params.text = params.text + ' bold italic underlined'
+    params.formats.code = [5, 10]
+    params.formats.strike = [0, 10]
+    params.formats.u = [23, 33]
+    params.formats.i = [16, 33]
+    params.formats.b = [11, 15]
+    const text = applyFormats(params)
+    expect(text).eql('~~Code `Block`~~ **bold** *italic ***underlined****')
+  })
+
+
 })
 
 describe.skip('convertPost', () => {
