@@ -88,7 +88,6 @@ export const forwardFileAsPost = async ({ app, message, context, target, say }, 
   const fileMeta = message.files[index]
   const content = await requestAsync.get(fileMeta.url_private, { auth: { bearer: context.botToken } })
   const convertedContent = convertPost(content)
-  // console.log(convertedContent)
   const data = { content: convertedContent }
   const forwardedFile = buildFile({ message, target, fileMeta, data })
   await app.client.files.upload(forwardedFile)
