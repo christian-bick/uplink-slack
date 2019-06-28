@@ -1,7 +1,7 @@
 import store from '../store'
 
 export const PERMISSIONS_TEXT = 'Let\'s get started!'
-export const ENTRY_TEXT = 'Message contacts outside of your organization.'
+export const ENTRY_TEXT = '*You are ready to go!* Start messaging contacts outside of this workspace.'
 
 export const buildPermissionMessage = (teamId) => ({
   text: PERMISSIONS_TEXT,
@@ -10,13 +10,16 @@ export const buildPermissionMessage = (teamId) => ({
       'type': 'section',
       'text': {
         'type': 'mrkdwn',
-        'text': 'Have conversations with contacts outside of your Slack team as if they were here!'
+        'text': 'You are just one step away from an awesome messaging experience with your contacts on other Slack ' +
+        'workspaces!'
       }
+    }, {
+      'type': 'divider'
     }, {
       'type': 'section',
       'text': {
         'type': 'mrkdwn',
-        'text': '*Just, before we can start I need your permission to modify groups.*'
+        'text': '*Just before we can start, I need to ask for some permissions.*'
       },
       'accessory': {
         'type': 'button',
@@ -39,6 +42,29 @@ export const buildEntryMessage = (teamId) => ({
       'text': {
         'type': 'mrkdwn',
         'text': ENTRY_TEXT
+      },
+      'accessory': {
+        'type': 'overflow',
+        'action_id': 'entry-overflow',
+        'options': [
+          {
+            'text': {
+              'type': 'plain_text',
+              'text': 'Get Support',
+              'emoji': true
+            },
+            'value': 'value-0',
+            'url': encodeURI(`mailto:support@uplink-chat.com?subject=Support Request (Team ${teamId})`)
+          },
+          {
+            'text': {
+              'type': 'plain_text',
+              'text': 'Reinstall App'
+            },
+            'value': 'value-1',
+            'url': `https://${process.env.HOST}/oauth/user/request?teamId=${teamId}`
+          }
+        ]
       }
     }, {
       'type': 'divider'
@@ -46,7 +72,7 @@ export const buildEntryMessage = (teamId) => ({
       'type': 'actions',
       'elements': [{
         'type': 'button',
-        'action_id': `select-chat`,
+        'action_id': 'select-chat',
         'style': 'primary',
         'text': {
           'type': 'plain_text',
@@ -55,18 +81,10 @@ export const buildEntryMessage = (teamId) => ({
         }
       }, {
         'type': 'button',
-        'action_id': `add-contacts`,
+        'action_id': 'add-contacts',
         'text': {
           'type': 'plain_text',
           'text': 'Add Contacts',
-          'emoji': true
-        }
-      }, {
-        'type': 'button',
-        'url': `https://${process.env.HOST}/oauth/user/request?teamId=${teamId}`,
-        'text': {
-          'type': 'plain_text',
-          'text': 'Reinstall',
           'emoji': true
         }
       }]
@@ -95,7 +113,7 @@ export const reactToAppHomeOpened = (app) => async ({ context, event, say }) => 
     }
   }
 
-  if (!user) {
+  if (!!user) {
     await sendHomeMessage(buildPermissionMessage(context.teamId))
   } else {
     await sendHomeMessage(buildEntryMessage(context.teamId))

@@ -28,6 +28,7 @@ export const buildContactBlockList = (augmentedEmailAddressList, userProfile) =>
     'value': email
   } : {
     'type': 'button',
+    'action_id': 'invite-contact',
     'url': encodeURI(`mailto:${email}?subject=${INVITE_SUBJECT}&body=${inviteBody(userProfile)}`),
     'text': {
       'type': 'plain_text',
