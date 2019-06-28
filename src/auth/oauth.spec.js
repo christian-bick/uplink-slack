@@ -86,7 +86,7 @@ describe('oauth', () => {
     const profile = {
       real_name: userName,
       email: userEmail,
-      image_48: userImage,
+      image_48: userImage
     }
 
     const userAuthInfo = { team_id: teamId, user_id: userId, access_token: userToken, scope }

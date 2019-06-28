@@ -11,7 +11,7 @@ const inviteBody = (sender) => 'Hi! How is it going?\n\n' +
   `Here is the link: ${INVITE_LINK}\n\n` +
   `Best ${sender.real_name}`
 
-export const buildContactBlockList = (augmentedEmailAddressList, userProfile) => augmentedEmailAddressList.map(({email, installed}) => ({
+export const buildContactBlockList = (augmentedEmailAddressList, userProfile) => augmentedEmailAddressList.map(({ email, installed }) => ({
   'type': 'section',
   'text': {
     'type': 'mrkdwn',

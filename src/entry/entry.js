@@ -1,5 +1,4 @@
 import store from '../store'
-import { appLog } from '../logger'
 
 export const PERMISSIONS_TEXT = 'Let\'s get started!'
 export const ENTRY_TEXT = 'Message contacts outside of your organization.'

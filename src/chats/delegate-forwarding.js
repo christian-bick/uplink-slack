@@ -22,7 +22,7 @@ export const delegateForwardForFile = (file) => {
 }
 
 export const forwardFileList = async (params) => {
-  const { message  } = params
+  const { message } = params
   const forwardFiles = message.files.map((file, index) => delegateForwardForFile(file)(params, index))
   await Promise.all(forwardFiles)
 }

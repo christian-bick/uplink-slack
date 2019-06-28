@@ -1,4 +1,4 @@
-import {filterEmails, rateEmail} from './list'
+import { filterEmails, rateEmail } from './list'
 
 describe('rateEmails', () => {
   it('exact matches should be rated 1', () => {

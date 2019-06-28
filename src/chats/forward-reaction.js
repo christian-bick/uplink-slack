@@ -5,7 +5,6 @@ import { appLog } from '../logger'
 const forwardLog = appLog.child({ module: 'chat', action: 'forward-message' })
 
 export const forwardReaction = (app, remove = false) => async ({ event, body, context }) => {
-
   const userSlackGroup = await store.slack.group.get([context.teamId, event.item.channel])
   if (!userSlackGroup) {
     forwardLog.debug('skipping reaction forwarding (not a linked group)')

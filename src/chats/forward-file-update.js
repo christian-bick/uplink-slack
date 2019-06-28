@@ -1,7 +1,7 @@
 import { findMatchingMessage } from './find-matching-message'
 import store from '../store'
 import { appLog } from '../logger'
-import {delegateForwardForFile} from "./delegate-forwarding"
+import { delegateForwardForFile } from './delegate-forwarding'
 
 const forwardLog = appLog.child({ module: 'chat', action: 'forward-file-updated' })
 
@@ -52,7 +52,7 @@ export const forwardFileUpdate = (app) => async ({ event, body, context }) => {
     return
   }
 
-  if (! matchingMessage.files) {
+  if (!matchingMessage.files) {
     forwardLog.error({ context, message: matchingMessage, source: userSlackGroup.source, sink: userSlackGroup.sink }, 'found a matching message without files')
     return
   }
@@ -60,11 +60,14 @@ export const forwardFileUpdate = (app) => async ({ event, body, context }) => {
   const contactTeam = await store.slack.team.get(userSlackGroup.source.teamId)
 
   const delegate = delegateForwardForFile(fileInfo.file)
-  await delegate({ app, message: originalMessage, context, target: {
-    token: contactTeam.botToken,
-    channel: reverseLink.channelId,
-    team: reverseLink.teamId
-  }})
+  await delegate({ app,
+    message: originalMessage,
+    context,
+    target: {
+      token: contactTeam.botToken,
+      channel: reverseLink.channelId,
+      team: reverseLink.teamId
+    } })
 
   await app.client.files.delete({
     token: contactTeam.botToken,

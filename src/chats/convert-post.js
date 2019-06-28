@@ -45,7 +45,7 @@ export const splitListIntoTuples = (rangeArray) => {
     if (index % 2 === 0) {
       return [...result, [value, null]]
     } else {
-      result[result.length-1][1] = value
+      result[result.length - 1][1] = value
       return result
     }
   }, [])

@@ -111,7 +111,7 @@ export const createReverseLink = async ({ app, slackGroup }) => {
   await app.client.chat.postMessage({
     token: context.botToken,
     channel: linkResult.link.channelId,
-    text: buildReverseGroupCreatedMessage(contactRegistration.userId, userProfile.name),
+    text: buildReverseGroupCreatedMessage(contactRegistration.userId, userProfile.name)
   })
   return linkResult
 }

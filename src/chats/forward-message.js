@@ -75,7 +75,7 @@ export const forwardMessage = (
         teamId: reverseLink.teamId,
         userId: message.parent_user_id,
         botId: context.botId,
-        ts: message.thread_ts,
+        ts: message.thread_ts
       })
 
       if (matchingMessage) {
