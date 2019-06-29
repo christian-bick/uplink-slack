@@ -1,7 +1,8 @@
 import redis from '../redis'
 import { userRegistrationKey, userContactsKey } from '../redis-keys'
-import { addContacts, buildContactBlockList } from './add-contacts'
+import { addContacts } from './add-contacts'
 import store from '../store'
+import { buildContactBlockList } from './list-contacts'
 
 describe('contacts', () => {
   let app = { client: { users: { profile: {} } } }
