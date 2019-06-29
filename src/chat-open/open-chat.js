@@ -10,44 +10,6 @@ const { text } = object
 const { section } = block
 const { button } = element
 
-export const buildCannotConnectToYourselfMessage = (contactEmail) => {
-  return `Looks like this your own email address: ${contactEmail}`
-}
-
-export const buildRegistrationNotFoundMessage = (teamId) => {
-  return { blocks: [
-    section(
-      text(`Looks like you haven't installed ${APP_NAME} yet.`),
-      {
-        accessory: button('user-install-init', 'Install', {
-          url: userAuthLink(teamId)
-        })
-      }
-    )
-  ] }
-}
-
-export const buildContactNotFoundMessage = (contactEmail, userProfile) => {
-  return { blocks: [
-    section(
-      text(`Looks like your contact is not using ${APP_NAME} yet. We couldn't find someone with the email address ${contactEmail}.`, TEXT_FORMAT_MRKDWN),
-      {
-        accessory: button('invite-contact', 'Invite', {
-          url: buildInvitationLink(contactEmail, userProfile)
-        })
-      }
-    )
-  ] }
-}
-
-export const buildGroupAlreadyExistsMessage = (userId, contactEmail) => {
-  return `<@${userId}> This is your ongoing conversation with ${contactEmail}`
-}
-
-export const buildGroupCreatedMessage = (userId, contactEmail) => {
-  return `<@${userId}> This is your new conversation with ${contactEmail}. I will forward your messages and reply on behalf of your contact.`
-}
-
 export const openChat = (app) => async ({ body, context, ack, say }) => {
   try {
     ack()
@@ -98,4 +60,42 @@ export const openChat = (app) => async ({ body, context, ack, say }) => {
     appLog.error(err)
     say(err.message)
   }
+}
+
+export const buildCannotConnectToYourselfMessage = (contactEmail) => {
+  return `Looks like this your own email address: ${contactEmail}`
+}
+
+export const buildRegistrationNotFoundMessage = (teamId) => {
+  return { blocks: [
+      section(
+        text(`Looks like you haven't installed ${APP_NAME} yet.`),
+        {
+          accessory: button('user-install-init', 'Install', {
+            url: userAuthLink(teamId)
+          })
+        }
+      )
+    ] }
+}
+
+export const buildContactNotFoundMessage = (contactEmail, userProfile) => {
+  return { blocks: [
+      section(
+        text(`Looks like your contact is not using ${APP_NAME} yet. We couldn't find someone with the email address ${contactEmail}.`, TEXT_FORMAT_MRKDWN),
+        {
+          accessory: button('invite-contact', 'Invite', {
+            url: buildInvitationLink(contactEmail, userProfile)
+          })
+        }
+      )
+    ] }
+}
+
+export const buildGroupAlreadyExistsMessage = (userId, contactEmail) => {
+  return `<@${userId}> This is your ongoing conversation with ${contactEmail}`
+}
+
+export const buildGroupCreatedMessage = (userId, contactEmail) => {
+  return `<@${userId}> This is your new conversation with ${contactEmail}. I will forward your messages and reply on behalf of your contact.`
 }

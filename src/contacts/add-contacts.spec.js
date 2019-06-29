@@ -1,6 +1,6 @@
 import redis from '../redis'
 import { userRegistrationKey, userContactsKey } from '../redis-keys'
-import { addContacts, buildContactBlockList } from './add'
+import { addContacts, buildContactBlockList } from './add-contacts'
 import store from '../store'
 
 describe('contacts', () => {
