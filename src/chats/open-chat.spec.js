@@ -18,11 +18,13 @@ describe('chat', () => {
     const teamId = 'current-team-id'
     const userId = 'current-user-id'
     const userEmail = 'current-user@x.com'
+    const userName = 'user-name'
     const contactName = 'user name'
     const contactEmail = 'contact@x.com'
     const contactUserId = 'contact-user-id'
     const contactTeamId = 'contact-team-id'
     const groupId = 'group-id'
+    const userProfile = { email: userEmail, name: userName }
 
     const existingGroupId = 'existing-group-id'
     const existingGroupName = 'existing-group-name'
@@ -37,7 +39,7 @@ describe('chat', () => {
     let params
 
     beforeEach('prepare app', async () => {
-      await store.slack.profile.set([teamId, userId], { email: userEmail })
+      await store.slack.profile.set([teamId, userId], userProfile)
       app.client.conversations.create = sandbox.stub()
       app.client.conversations.info = sandbox.fake.returns({
         channel: { id: existingGroupId, name: existingGroupName }
@@ -72,7 +74,7 @@ describe('chat', () => {
       it('should reply with contact-not-found message', async () => {
         await openChat(app)(params)
         expect(params.ack, 'ack').to.be.calledOnce
-        expect(params.say, 'say').to.be.calledOnceWith(buildRegistrationNotFoundMessage(contactEmail))
+        expect(params.say, 'say').to.be.calledOnceWith(buildRegistrationNotFoundMessage(teamId))
       })
     })
 
@@ -88,7 +90,7 @@ describe('chat', () => {
       it('should reply with contact-not-found message', async () => {
         await openChat(app)(params)
         expect(params.ack, 'ack').to.be.calledOnce
-        expect(params.say, 'say').to.be.calledOnceWith(buildContactNotFoundMessage(contactEmail))
+        expect(params.say, 'say').to.be.calledOnceWith(buildContactNotFoundMessage(contactEmail, userProfile))
       })
     })
 

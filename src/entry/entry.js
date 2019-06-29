@@ -1,4 +1,5 @@
 import store from '../store'
+import { supportLink, userAuthLink } from '../global'
 
 export const PERMISSIONS_TEXT = 'Let\'s get started!'
 export const ENTRY_TEXT = '*You are ready to go!* Start messaging contacts outside of this workspace.'
@@ -22,12 +23,13 @@ export const buildPermissionMessage = (teamId) => ({
         'text': '*Just before we can start, I need to ask for some permissions.*'
       },
       'accessory': {
+        'action_id': 'user-install-init',
         'type': 'button',
-        'url': `https://${process.env.HOST}/oauth/user/request?teamId=${teamId}`,
+        'url': userAuthLink(teamId),
         'text': {
           'type': 'plain_text',
           'text': 'Give Permission',
-          'emoji': true
+          'emoji': false
         }
       }
     }
@@ -53,16 +55,16 @@ export const buildEntryMessage = (teamId) => ({
               'text': 'Get Support',
               'emoji': true
             },
-            'value': 'value-0',
-            'url': encodeURI(`mailto:support@uplink-chat.com?subject=Support Request (Team ${teamId})`)
+            'value': 'support',
+            'url': supportLink(teamId)
           },
           {
             'text': {
               'type': 'plain_text',
               'text': 'Reinstall App'
             },
-            'value': 'value-1',
-            'url': `https://${process.env.HOST}/oauth/user/request?teamId=${teamId}`
+            'value': 'reinstall',
+            'url': userAuthLink(teamId)
           }
         ]
       }
@@ -113,7 +115,7 @@ export const reactToAppHomeOpened = (app) => async ({ context, event, say }) => 
     }
   }
 
-  if (!!user) {
+  if (!user) {
     await sendHomeMessage(buildPermissionMessage(context.teamId))
   } else {
     await sendHomeMessage(buildEntryMessage(context.teamId))
