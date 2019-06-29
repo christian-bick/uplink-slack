@@ -31,7 +31,7 @@ export const filterEmails = (searchString, emailList) => {
   return emailList.filter(email => rateEmail(criteriaList, email) > 0.5)
 }
 
-export const listContacts = (app) => async ({ body, context, ack }) => {
+export const listContactsAsOptions = (app) => async ({ body, context, ack }) => {
   const searchString = body.value
   const { email: userEmail } = await store.slack.profile.get([context.teamId, context.userId])
   const contacts = await store.user.contacts.smembers(userEmail)
