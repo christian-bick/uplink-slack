@@ -5,9 +5,9 @@ import redis from '../redis'
 import { slackProfileKey, userRegistrationKey } from '../redis-keys'
 import store from '../store'
 
-const { text } = object
+const { text, option } = object
 const { section, divider } = block
-const { button } = element
+const { button, overflow } = element
 
 export const buildContactList = async (contactEmailList) => {
   // Get contact registrations
@@ -28,6 +28,8 @@ export const buildContactList = async (contactEmailList) => {
 
   return contacts.sort((left, right) => {
     if (left.installed && !right.installed) {
+      return -1
+    } else if (!left.installed && right.installed) {
       return 1
     } else if (left.profile && right.profile) {
       return left.profile.name.localeCompare(right.profile.name)
@@ -37,31 +39,66 @@ export const buildContactList = async (contactEmailList) => {
   })
 }
 
-export const listContacts = (app) => async ({ context, say, ack }) => {
-  ack()
-  const userProfile = await store.slack.profile.get([context.teamId, context.userId])
+export const generateFullContactListMessage = async (teamId, userId, editable = false) => {
+  const userProfile = await store.slack.profile.get([teamId, userId])
   const contactEmailList = await store.user.contacts.smembers(userProfile.email)
   const contactList = await buildContactList(contactEmailList)
-  say({
+  return {
     blocks: [
       divider(),
       section(
-        text('*Your contact list*', TEXT_FORMAT_MRKDWN)
+        text('*Your Contact List*', TEXT_FORMAT_MRKDWN),
+        {
+          accessory: overflow('list-contacts-mode', [
+            editable ? option(':pencil: Stop Editing', 'edit-stop') : option(':pencil: Edit Contacts', 'edit'),
+            option(':x: Close List', 'close')
+          ])
+        }
       ),
       divider(),
-      ...buildContactBlockList(contactList, userProfile),
+      ...buildContactBlockList(contactList, userProfile, editable),
       divider()
     ]
-  })
+  }
 }
 
-export const buildContactBlockList = (contactList, userProfile) => contactList.map(({ email, installed, profile }) => (
+export const listContacts = (app) => async ({ context, say, ack }) => {
+  ack()
+  const message = await generateFullContactListMessage(context.teamId, context.userId)
+  say(message)
+}
+
+export const listContactsMode = (app) => async ({ action, ack, respond, context }) => {
+  ack()
+  const value = action.selected_option.value
+  if (value === 'close') {
+    respond({
+      delete_original: true
+    })
+  } else if (value === 'edit') {
+    const message = await generateFullContactListMessage(context.teamId, context.userId, true)
+    respond(message)
+  } else if (value === 'edit-stop') {
+    const message = await generateFullContactListMessage(context.teamId, context.userId, false)
+    respond(message)
+  }
+}
+
+export const actionButton = ({ userProfile, email, installed, editable }) => {
+  if (editable) {
+    return button('remove-contact', 'Remove', { value: email })
+  } else if (installed) {
+    return button('open-chat', 'Message', { value: email })
+  } else {
+    return button('invite-contact', 'Invite', { url: buildInvitationLink(email, userProfile) })
+  }
+}
+
+export const buildContactBlockList = (contactList, userProfile, editable) => contactList.map(({ email, installed, profile: contactProfile }) => (
   section(
-    text(profile ? `${profile.name} (${email})` : email, TEXT_FORMAT_MRKDWN),
+    text(contactProfile ? `${contactProfile.name} (${email})` : email, TEXT_FORMAT_MRKDWN),
     {
-      accessory: installed
-        ? button('open-chat', 'Message', { value: email })
-        : button('invite-contact', 'Invite', { url: buildInvitationLink(email, userProfile) })
+      accessory: actionButton({ userProfile, email, installed, contactProfile, editable })
     }
   )
 ))
