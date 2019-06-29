@@ -11,7 +11,7 @@ import {
   buildFailedToFindFreeNameInfo
 } from './create-link'
 
-import store from '../store'
+import store from '../store/index'
 
 describe('chat', () => {
   describe('openChat', () => {

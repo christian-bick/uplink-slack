@@ -1,4 +1,4 @@
-import store from '../store'
+import store from '../store/index'
 
 export const buildCannotCreateGroupInfo = (contactEmail, reason) => `Failed to create a group for your conversation with ${contactEmail} (${reason || 'for unknown reasons'})`
 

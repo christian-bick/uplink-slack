@@ -2,7 +2,8 @@ import { App, LogLevel } from '@slack/bolt'
 import { statusLog } from './logger'
 import ping from './ping'
 import contacts from './contacts'
-import chats from './chats'
+import chat from './chat'
+import chatOpen from './chat-open'
 import auth from './auth'
 import entry from './entry'
 import authorize from './auth/authorize'
@@ -26,7 +27,8 @@ const run = async (port) => {
 
   // Register bot handlers
   entry(app)
-  chats(app)
+  chat(app)
+  chatOpen(app)
   contacts(app)
 
   app.receiver.app.use(express.static('public'))

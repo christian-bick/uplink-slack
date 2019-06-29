@@ -1,6 +1,6 @@
 import { block, object, element, TEXT_FORMAT_MRKDWN } from 'slack-block-kit'
 
-import store from '../store'
+import store from '../store/index'
 import { appLog } from '../logger'
 import { createLink } from './create-link'
 import { APP_NAME, userAuthLink } from '../global'

@@ -6,7 +6,7 @@ import {
   generateNextIterator,
   createLink
 } from './create-link'
-import store from '../store'
+import store from '../store/index'
 
 describe('create-link', () => {
   describe('generateChannelName', () => {

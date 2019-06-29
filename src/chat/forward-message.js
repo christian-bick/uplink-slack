@@ -2,7 +2,7 @@ import store from '../store'
 import { appLog } from '../logger'
 import { SUPPORTED_MESSAGE_SUBTYPES, IGNORED_MESSAGE_SUBTYPES, buildNotSupportedMessage } from './message-types'
 
-import { createReverseLink as slackCreateReverseLink } from './create-link'
+import { createReverseLink as slackCreateReverseLink } from '../chat-open/create-link'
 import { delegateForwarding as slackDelegateForwarding } from './delegate-forwarding'
 import { findMatchingMessage as slackFindMatchingMessage } from './find-matching-message'
 

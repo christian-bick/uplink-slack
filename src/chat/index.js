@@ -1,4 +1,4 @@
-import { openChat } from './open-chat'
+import { openChat } from '../chat-open/open-chat'
 import { forwardMessage } from './forward-message'
 import { informJoinedUser, rejoinLinkedGroup } from './chat-health'
 import { forwardReaction } from './forward-reaction'
