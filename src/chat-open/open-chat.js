@@ -10,11 +10,11 @@ const { text } = object
 const { section } = block
 const { button } = element
 
-export const openChat = (app) => async ({ body, context, ack, say }) => {
+export const openChat = (app) => async ({ action, body, context, ack, say }) => {
   try {
     ack()
 
-    const contactEmail = body.submission.email
+    const contactEmail = action ? action.value : body.submission.email
 
     const userProfile = await store.slack.profile.get([context.teamId, context.userId])
     if (userProfile.email === contactEmail) {

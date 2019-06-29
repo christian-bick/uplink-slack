@@ -21,7 +21,9 @@ describe('contacts', () => {
     const contactUserId = 'user-2'
     const userEmail = 'user-1@b.com'
     const contactEmail = 'contact-1@b.com'
+    const contactName = 'contact-name'
     const contactEmail2 = 'contact-2@b.com'
+    const contactProfile = { email: contactEmail, name: contactName }
     const context = { botToken: 'bot-token' }
     const profileInfo = { profile: { email: userEmail, real_name: 'Chris' } }
     const contactRegistration = {
@@ -85,17 +87,19 @@ describe('contacts', () => {
       expectReplyWithEmails([{ email: contactEmail, installed: false }])
     })
 
-    it('should return email block for active single contact', async () => {
-      await redis.setAsync(userRegistrationKey(contactEmail), contactRegistration)
+    it('should return contact block for active single contact', async () => {
+      await store.user.registration.set(contactEmail, contactRegistration)
+      await store.slack.profile.set([contactTeamId, contactUserId], contactProfile)
       await addContacts(app)(params)
-      expectReplyWithEmails([{ email: contactEmail, installed: true }])
+      expectReplyWithEmails([{ email: contactEmail, profile: contactProfile, installed: true }])
     })
 
     it('should return contact block for active and inactive contacts', async () => {
-      await redis.setAsync(userRegistrationKey(contactEmail), contactRegistration)
+      await store.user.registration.set(contactEmail, contactRegistration)
+      await store.slack.profile.set([contactTeamId, contactUserId], contactProfile)
       params.body.submission.contacts += `\n${contactEmail2}`
       await addContacts(app)(params)
-      expectReplyWithEmails([{ email: contactEmail, installed: true }, { email: contactEmail2, installed: false }])
+      expectReplyWithEmails([{ email: contactEmail, profile: contactProfile, installed: true }, { email: contactEmail2, installed: false }])
     })
   })
 })

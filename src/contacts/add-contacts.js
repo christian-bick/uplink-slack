@@ -13,7 +13,6 @@ export const addContacts = (app) => async ({ context, body, say, ack }) => {
 
   const contactEmailList = extractEmails(body.submission.contacts)
   await store.user.contacts.sadd(userEmail, contactEmailList)
-
   const contactList = await buildContactList(contactEmailList)
   say({
     blocks: buildContactBlockList(contactList, profile)
