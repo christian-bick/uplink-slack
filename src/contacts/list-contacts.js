@@ -1,7 +1,13 @@
+import {block, element, object, TEXT_FORMAT_MRKDWN} from 'slack-block-kit'
+
 import { buildInvitationLink } from '../invite/invite-contact'
 import redis from '../redis'
 import { slackProfileKey, userRegistrationKey } from '../redis-keys'
 import store from '../store'
+
+const { text } = object
+const { section } = block
+const { button } = element
 
 export const buildContactList = async (contactEmailList) => {
   // Get contact registrations
@@ -23,37 +29,21 @@ export const buildContactList = async (contactEmailList) => {
 
 export const listContacts = (app) => async ({ context, say, ack }) => {
   ack()
-  const userProfile = await  store.slack.profile.get([context.teamId, context.userId])
+  const userProfile = await store.slack.profile.get([context.teamId, context.userId])
   const contactEmailList = await store.user.contacts.smembers(userProfile.email)
-  const contactList = await  buildContactList(contactEmailList)
+  const contactList = await buildContactList(contactEmailList)
   say({
     blocks: buildContactBlockList(contactList, userProfile)
   })
 }
 
-export const buildContactBlockList = (contactList, userProfile) => contactList.map(({ email, installed }) => ({
-  'type': 'section',
-  'text': {
-    'type': 'mrkdwn',
-    'text': email
-  },
-  'accessory': installed ? {
-    'type': 'button',
-    'action_id': 'open-chat',
-    'text': {
-      'type': 'plain_text',
-      'text': 'Message',
-      'emoji': false
-    },
-    'value': email
-  } : {
-    'type': 'button',
-    'action_id': 'invite-contact',
-    'url': buildInvitationLink(email, userProfile),
-    'text': {
-      'type': 'plain_text',
-      'text': 'Invite',
-      'emoji': false
+export const buildContactBlockList = (contactList, userProfile) => contactList.map(({ email, installed }) => (
+  section(
+    text(email, TEXT_FORMAT_MRKDWN),
+    {
+      accessory: installed
+        ? button('open-chat', 'Message', { value: email })
+        : button('invite-contact', 'Invite', { url: buildInvitationLink(email, userProfile) })
     }
-  }
-}))
+  )
+))
