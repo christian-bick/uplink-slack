@@ -117,6 +117,14 @@ export const buildEntryMessage = (teamId) => ({
           'text': 'Add Contacts',
           'emoji': true
         }
+      }, {
+        'type': 'button',
+        'action_id': 'list-contacts',
+        'text': {
+          'type': 'plain_text',
+          'text': 'List Contacts',
+          'emoji': true
+        }
       }]
     }
   ]
