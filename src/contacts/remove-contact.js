@@ -6,6 +6,6 @@ export const removeContact = (app) => async ({ context, action, ack, respond }) 
   const userProfile = await store.slack.profile.get([context.teamId, context.userId])
   const contactEmail = action.value
   await store.user.contacts.srem(userProfile.email, contactEmail)
-  const message = await generateFullContactListMessage(context.teamId, context.userId, true)
+  const message = await generateFullContactListMessage(context, true)
   respond(message)
 }

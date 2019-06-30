@@ -12,6 +12,7 @@ import {
 } from './create-link'
 
 import store from '../store/index'
+import {BotError} from "../errors"
 
 describe('chat', () => {
   describe('openChat', () => {
@@ -25,6 +26,8 @@ describe('chat', () => {
     const contactTeamId = 'contact-team-id'
     const groupId = 'group-id'
     const userProfile = { email: userEmail, name: userName }
+
+    const context = { teamId, userId }
 
     const existingGroupId = 'existing-group-id'
     const existingGroupName = 'existing-group-name'
@@ -55,7 +58,7 @@ describe('chat', () => {
     beforeEach('prepare params', () => {
       params = {
         body: { submission: { email: contactEmail } },
-        context: { teamId: teamId, userId: userId, botToken: 'bot-token', userToken: 'user-token', botId: 'bot-id' },
+        context: { teamId, userId, botToken: 'bot-token', userToken: 'user-token', botId: 'bot-id' },
         ack: sandbox.fake(),
         say: sandbox.fake()
       }
@@ -74,7 +77,7 @@ describe('chat', () => {
       it('should reply with contact-not-found message', async () => {
         await openChat(app)(params)
         expect(params.ack, 'ack').to.be.calledOnce
-        expect(params.say, 'say').to.be.calledOnceWith(buildRegistrationNotFoundMessage(teamId))
+        expect(params.say, 'say').to.be.calledOnceWith(buildRegistrationNotFoundMessage(context))
       })
     })
 
@@ -90,7 +93,7 @@ describe('chat', () => {
       it('should reply with contact-not-found message', async () => {
         await openChat(app)(params)
         expect(params.ack, 'ack').to.be.calledOnce
-        expect(params.say, 'say').to.be.calledOnceWith(buildContactNotFoundMessage(contactEmail, userProfile))
+        expect(params.say, 'say').to.be.calledOnceWith(buildContactNotFoundMessage(context, contactEmail, userProfile))
       })
     })
 
@@ -141,7 +144,7 @@ describe('chat', () => {
           await openChat(app)(params)
           expect(app.client.chat.postMessage).to.be.calledOnceWith({
             channel: groupId,
-            text: buildGroupCreatedMessage(userId, contactEmail),
+            text: buildGroupCreatedMessage(context, contactEmail),
             token: params.context.botToken
           })
         })
@@ -151,7 +154,7 @@ describe('chat', () => {
           await openChat(app)(params)
           expect(app.client.chat.postMessage).to.be.calledOnceWith({
             channel: existingGroupId,
-            text: buildGroupAlreadyExistsMessage(userId, contactEmail),
+            text: buildGroupAlreadyExistsMessage(context, contactEmail),
             token: params.context.botToken
           })
         })
@@ -161,13 +164,15 @@ describe('chat', () => {
         it('should reply with failure message when name is taken', async () => {
           app.client.conversations.create.throws({ data: { error: 'name_taken' } })
           await openChat(app)(params)
-          expect(params.say, 'say').to.be.calledOnceWith(buildFailedToFindFreeNameInfo(10))
+          const expectedMsg = BotError.buildMessage(buildFailedToFindFreeNameInfo(10), context)
+          expect(params.say, 'say').to.be.calledOnceWith(expectedMsg)
         })
 
         it('should reply with failure message when slack request fails', async () => {
           app.client.conversations.create.throws(new Error('not_allowed'))
           await openChat(app)(params)
-          expect(params.say, 'say').to.be.calledOnceWith(buildCannotCreateGroupInfo(contactEmail, 'not_allowed'))
+          const expectedMsg = BotError.buildMessage(buildCannotCreateGroupInfo(contactEmail, 'not_allowed'), context)
+          expect(params.say, 'say').to.be.calledOnceWith(expectedMsg)
         })
       })
     })

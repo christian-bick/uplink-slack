@@ -1,4 +1,5 @@
 import store from '../store/index'
+import {BotError} from "../errors"
 
 export const buildCannotCreateGroupInfo = (contactEmail, reason) => `Failed to create a group for your conversation with ${contactEmail} (${reason || 'for unknown reasons'})`
 
@@ -88,11 +89,11 @@ export const createLink = async ({ app, context, source, sink }) => {
       if (err.data && err.data.error === 'name_taken') {
         retryAttempt++
       } else {
-        throw new Error(buildCannotCreateGroupInfo(sink.email, err.message))
+        throw new BotError(buildCannotCreateGroupInfo(sink.email, err.message), context)
       }
     }
   }
-  throw new Error(buildFailedToFindFreeNameInfo(maxAttempts))
+  throw new BotError(buildFailedToFindFreeNameInfo(maxAttempts), context)
 }
 
 export const createReverseLink = async ({ app, slackGroup }) => {

@@ -4,10 +4,11 @@ import { buildInvitationLink } from '../invite/invite-contact'
 import redis from '../redis'
 import { slackProfileKey, userRegistrationKey } from '../redis-keys'
 import store from '../store'
+import {buildPrimaryActions} from "../entry/entry-actions"
 
-const { text, option } = object
+const { text } = object
 const { section, divider } = block
-const { button, overflow } = element
+const { button } = element
 
 export const buildContactList = async (contactEmailList) => {
   // Get contact registrations
@@ -39,24 +40,24 @@ export const buildContactList = async (contactEmailList) => {
   })
 }
 
-export const generateFullContactListMessage = async (teamId, userId, editable = false) => {
-  const userProfile = await store.slack.profile.get([teamId, userId])
+export const generateFullContactListMessage = async (context, editable = false) => {
+  const userProfile = await store.slack.profile.get([context.teamId, context.userId])
   const contactEmailList = await store.user.contacts.smembers(userProfile.email)
   const contactList = await buildContactList(contactEmailList)
   return {
     blocks: [
-      divider(),
       section(
-        text('*Your Contact List*', TEXT_FORMAT_MRKDWN),
+        text(':notebook_with_decorative_cover: *This is your contact list*', TEXT_FORMAT_MRKDWN),
         {
-          accessory: overflow('list-contacts-mode', [
-            editable ? option(':pencil: Stop Editing', 'edit-stop') : option(':pencil: Edit Contacts', 'edit'),
-            option(':x: Close List', 'close')
-          ])
+          accessory: editable
+            ? button('list-contacts-mode', ':pencil: Stop Editing', { value: 'edit-stop' })
+            : button('list-contacts-mode', ':pencil: Edit', { value: 'edit' })
         }
       ),
       divider(),
       ...buildContactBlockList(contactList, userProfile, editable),
+      divider(),
+      buildPrimaryActions(context),
       divider()
     ]
   }
@@ -64,27 +65,27 @@ export const generateFullContactListMessage = async (teamId, userId, editable = 
 
 export const listContacts = (app) => async ({ context, say, ack }) => {
   ack()
-  const message = await generateFullContactListMessage(context.teamId, context.userId)
+  const message = await generateFullContactListMessage(context)
   say(message)
 }
 
 export const listContactsMode = (app) => async ({ action, ack, respond, context }) => {
   ack()
-  const value = action.selected_option.value
+  const value = action.value
   if (value === 'close') {
     respond({
       delete_original: true
     })
   } else if (value === 'edit') {
-    const message = await generateFullContactListMessage(context.teamId, context.userId, true)
+    const message = await generateFullContactListMessage(context, true)
     respond(message)
   } else if (value === 'edit-stop') {
-    const message = await generateFullContactListMessage(context.teamId, context.userId, false)
+    const message = await generateFullContactListMessage(context, false)
     respond(message)
   }
 }
 
-export const actionButton = ({ userProfile, email, installed, editable }) => {
+export const buildContactButton = ({ userProfile, email, installed, editable }) => {
   if (editable) {
     return button('remove-contact', 'Remove', { value: email })
   } else if (installed) {
@@ -94,11 +95,24 @@ export const actionButton = ({ userProfile, email, installed, editable }) => {
   }
 }
 
-export const buildContactBlockList = (contactList, userProfile, editable) => contactList.map(({ email, installed, profile: contactProfile }) => (
-  section(
-    text(contactProfile ? `${contactProfile.name} (${email})` : email, TEXT_FORMAT_MRKDWN),
-    {
-      accessory: actionButton({ userProfile, email, installed, contactProfile, editable })
-    }
-  )
-))
+export const buildContactBlockList = (contactList, userProfile, editable) => {
+  if (contactList.length === 0) {
+    return [
+      section(
+        text('You haven\'t added any contacts yet.\n\n _Add contacts to see who uses Uplink already, ' +
+          'to invite contacts and to get notified when they joined._', TEXT_FORMAT_MRKDWN),
+        {
+          accessory: button('add-contacts', 'Add Contacts')
+        }
+      )
+    ]
+  }
+  return contactList.map(({ email, installed, profile: contactProfile }) => (
+    section(
+      text(contactProfile ? `${contactProfile.name} (${email})` : email, TEXT_FORMAT_MRKDWN),
+      {
+        accessory: buildContactButton({ userProfile, email, installed, contactProfile, editable })
+      }
+    )
+  ))
+}

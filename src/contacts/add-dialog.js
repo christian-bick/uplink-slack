@@ -1,9 +1,9 @@
 export const showAddContactsDialog = (app) => async ({ body, context, ack }) => {
   ack()
-  await app.client.dialog.open(buildAddContactsDialog(context.botToken, body.trigger_id))
+  await app.client.dialog.open(buildAddContactsDialog(context, body.trigger_id))
 }
 
-export const buildAddContactsDialog = (token, triggerId) => ({
+export const buildAddContactsDialog = ({ botToken: token }, triggerId) => ({
   'token': token,
   'trigger_id': triggerId,
   'dialog': {
