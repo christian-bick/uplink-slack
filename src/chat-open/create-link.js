@@ -6,7 +6,9 @@ export const buildCannotCreateGroupInfo = (contactEmail, reason) => `Failed to c
 
 export const buildFailedToFindFreeNameInfo = (attempts) => `Failed to find a free group name after ${attempts} attempts`
 
-export const buildReverseGroupCreatedMessage = (userId, contactName) => `<@${userId}> This is the start of your conversation with ${contactName}. I will forward messages between the two of you within this group.`
+export const buildReverseGroupCreatedMessage = (userId, contactName) =>
+  `<@${userId}> This is the start of your conversation with ${contactName}. I will forward messages between the two of you within this group.\n\n
+  _Please note that your contact will be able to see your profile name and profile picture for this workspace._`
 
 export const generateChannelName = (name) => {
   const hyphened = name.split(' ').join('-').toLowerCase()

@@ -45,17 +45,19 @@ export const openChat = (app) => async ({ action, body, context, ack, say }) => 
       sink: contactRegistration
     })
 
+    const contactProfile = await store.slack.profile.get([contactRegistration.teamId, contactRegistration.userId])
+
     if (linkResult.alreadyExisted) {
       await app.client.chat.postMessage({
         token: context.botToken,
         channel: linkResult.link.channelId,
-        text: buildGroupAlreadyExistsMessage(context, contactEmail)
+        text: buildGroupAlreadyExistsMessage(context, contactProfile.name)
       })
     } else {
       await app.client.chat.postMessage({
         token: context.botToken,
         channel: linkResult.link.channelId,
-        text: buildGroupCreatedMessage(context, contactEmail)
+        text: buildGroupCreatedMessage(context, contactProfile.name)
       })
     }
   } catch (err) {
@@ -105,12 +107,12 @@ export const buildContactNotFoundMessage = (context, contactEmail, userProfile) 
   ] }
 }
 
-export const buildGroupAlreadyExistsMessage = ({ userId }, contactEmail) => {
-  return `<@${userId}> This is your ongoing conversation with ${contactEmail}`
+export const buildGroupAlreadyExistsMessage = ({ userId }, userName) => {
+  return `<@${userId}> This is your ongoing conversation with *${userName}*.`
 }
 
-export const buildGroupCreatedMessage = ({ userId }, contactEmail) => {
-  return `<@${userId}> This is your new conversation with ${contactEmail}. I will forward your messages and reply on behalf of your contact.\n\n
+export const buildGroupCreatedMessage = ({ userId }, userName) => {
+  return `<@${userId}> This is your new conversation with *${userName}*. I will forward messages between the two of you within this group.\n\n
   _Please note that your contact will be able to see your profile name and profile picture for this workspace._`
 }
 
