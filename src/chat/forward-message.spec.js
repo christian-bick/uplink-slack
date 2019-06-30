@@ -1,4 +1,9 @@
-import { FAILED_TO_FORWARD_MESSAGE, FAILED_TO_FORWARD_THREAD_MESSAGE, forwardMessage } from './forward-message'
+import {
+  BLOCKED_MESSAGE,
+  FAILED_TO_FORWARD_MESSAGE,
+  FAILED_TO_FORWARD_THREAD_MESSAGE,
+  forwardMessage
+} from './forward-message'
 import store from '../store'
 import { MESSAGE_TYPES } from './message-types'
 
@@ -191,7 +196,6 @@ describe('forwardMessage', () => {
       it('should send a warning when delegation fails', async () => {
         delegateForwarding = sandbox.fake.returns(null)
         await forwardMessage(app, createReverseLink, delegateForwarding)(params)
-        expect(delegateForwarding).to.be.calledOnce
         expect(delegate).to.not.be.called
         expect(say).to.be.calledOnceWith(FAILED_TO_FORWARD_MESSAGE)
       })
@@ -200,9 +204,18 @@ describe('forwardMessage', () => {
         delegate = sandbox.fake.throws('error')
         delegateForwarding = sandbox.fake.returns(delegate)
         await forwardMessage(app, createReverseLink, delegateForwarding)(params)
-        expect(delegateForwarding).to.be.calledOnce
         expect(delegate).to.be.calledOnce
         expect(say).to.be.calledOnceWith(FAILED_TO_FORWARD_MESSAGE)
+      })
+
+      it('should send a blocked warning when destination channel is archived', async () => {
+        const error = new Error()
+        error.data = { error: 'is_archived' }
+        delegate = sandbox.fake.throws(error)
+        delegateForwarding = sandbox.fake.returns(delegate)
+        await forwardMessage(app, createReverseLink, delegateForwarding)(params)
+        expect(delegate).to.be.calledOnce
+        expect(say).to.be.calledOnceWith(BLOCKED_MESSAGE)
       })
     })
   })

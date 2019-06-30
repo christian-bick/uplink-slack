@@ -113,7 +113,8 @@ export const buildGroupAlreadyExistsMessage = ({ userId }, userName) => {
 
 export const buildGroupCreatedMessage = ({ userId }, userName) => {
   return `<@${userId}> This is your new conversation with *${userName}*. I will forward messages between the two of you within this group.\n\n
-  _Please note that your contact will be able to see your profile name and profile picture for this workspace._`
+  _When sending messages, ${userName} will see your profile name and picture for this workspace._\n
+  _To block ${userName}, simply archive this channel (but don't delete it)._`
 }
 
 export const buildCreateLinkFailureMessage = (context) =>

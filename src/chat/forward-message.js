@@ -11,6 +11,8 @@ export const FAILED_TO_FORWARD_MESSAGE = ':warning: Failed to forward the last p
 export const FAILED_TO_FORWARD_THREAD_MESSAGE = `${FAILED_TO_FORWARD_MESSAGE} because the threat cannot be 
   found on your contact's side`
 
+export const BLOCKED_MESSAGE = ':warning: You have been blocked by this contact.'
+
 const forwardLog = appLog.child({ module: 'chat', action: 'forward-message' }, true)
 
 export const forwardMessage = (
@@ -102,7 +104,11 @@ export const forwardMessage = (
       say(FAILED_TO_FORWARD_MESSAGE)
     }
   } catch (err) {
-    forwardLog.error({ err, message }, FAILED_TO_FORWARD_MESSAGE)
-    say(FAILED_TO_FORWARD_MESSAGE)
+    if (err.data && err.data.error === 'is_archived') {
+      say(BLOCKED_MESSAGE)
+    } else {
+      forwardLog.error({ err, message }, FAILED_TO_FORWARD_MESSAGE)
+      say(FAILED_TO_FORWARD_MESSAGE)
+    }
   }
 }

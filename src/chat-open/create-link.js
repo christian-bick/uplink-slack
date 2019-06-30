@@ -8,7 +8,8 @@ export const buildFailedToFindFreeNameInfo = (attempts) => `Failed to find a fre
 
 export const buildReverseGroupCreatedMessage = (userId, contactName) =>
   `<@${userId}> This is the start of your conversation with ${contactName}. I will forward messages between the two of you within this group.\n\n
-  _Please note that your contact will be able to see your profile name and profile picture for this workspace._`
+  When sending messages, ${contactName} will see your profile name and picture for this workspace._\n
+  _To block ${contactName}, simply archive this channel (but don't delete it)._`
 
 export const generateChannelName = (name) => {
   const hyphened = name.split(' ').join('-').toLowerCase()
