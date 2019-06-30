@@ -3,6 +3,11 @@ import uuid from 'uuid/v4'
 import { promisify } from 'util'
 import { appLog } from '../logger'
 import store from '../store'
+import { block, element, object, TEXT_FORMAT_MRKDWN } from 'slack-block-kit'
+
+const { text } = object
+const { section, divider } = block
+const { button } = element
 
 export const SLACK_CLIENT_ID = process.env.SLACK_CLIENT_ID
 const SLACK_SIGNING_SECRET = process.env.SLACK_SIGNING_SECRET
@@ -49,27 +54,76 @@ const extractTeam = ({ team_id: teamId, bot: { bot_user_id: botId, bot_access_to
 })
 
 const registerUser = async (app, user) => {
-  const { profile } = await app.client.users.profile.get({
+  const { profile: slackProfile } = await app.client.users.profile.get({
     token: user.userToken,
     user: user.userId
   })
 
-  await store.user.registration.set(profile.email, {
+  const existingRegistration = await store.user.registration.get(slackProfile.email)
+
+  const registration = {
     platform: 'slack',
     teamId: user.teamId,
     userId: user.userId,
-    email: profile.email
-  })
+    email: slackProfile.email
+  }
 
-  await store.slack.user.set([user.teamId, user.userId], {
-    ...user
-  })
+  const profile = {
+    email: slackProfile.email,
+    name: slackProfile.display_name || slackProfile.real_name,
+    image48: slackProfile.image_48
+  }
 
-  await store.slack.profile.set([user.teamId, user.userId], {
-    email: profile.email,
-    name: profile.real_name || profile.display_name,
-    image48: profile.image_48
-  })
+  await store.user.registration.set(profile.email, registration)
+  await store.slack.user.set([user.teamId, user.userId], user)
+  await store.slack.profile.set([user.teamId, user.userId], profile)
+
+  oauthLog.info({ user, profile, registration, existed: !!existingRegistration }, 'user registered')
+  return { profile, registration, existed: !!existingRegistration }
+}
+
+const sendInstallNotifications = async ({ app, profile, existed }) => {
+  try {
+    if (existed) {
+      oauthLog.info('skipped notifications (existing registration')
+      return
+    }
+    const mirroredContacts = await store.user.contactsMirrored.smembers(profile.email)
+    if (!mirroredContacts || mirroredContacts.length === 0) {
+      oauthLog.info('skipped notifications (no mirrored contacts')
+      return
+    }
+    const sendNotificationCommands = mirroredContacts.map(async (contactEmail) => {
+      const contactRegistration = await store.user.registration.get(contactEmail)
+      const contactTeam = await store.slack.team.get(contactRegistration.teamId)
+      const { channel } = await app.client.im.open({
+        token: contactTeam.botToken,
+        user: contactRegistration.userId
+      })
+      return app.client.chat.postMessage({
+        token: contactTeam.botToken,
+        channel: channel.id,
+        text: `${profile.name} just joined uplink`,
+        blocks: [
+          section(
+            text(`<@${contactRegistration.userId}>* One of your contacts just joined Uplink*`, TEXT_FORMAT_MRKDWN)
+          ),
+          divider(),
+          section(
+            text(`${profile.name} (${profile.email})`, TEXT_FORMAT_MRKDWN),
+            {
+              accessory: button('open-chat', 'Message', { value: profile.email })
+            }
+          ),
+          divider()
+        ]
+      })
+    })
+    await Promise.all(sendNotificationCommands)
+    oauthLog.info({ profile }, 'notifications sent out')
+  } catch (err) {
+    oauthLog.error({ err, profile }, 'notification sending failed')
+  }
 }
 
 export const requestForTeam = (req, resp) => {
@@ -118,7 +172,7 @@ export const requestForUser = (req, resp) => {
   }
 }
 
-export const grantForTeam = (app, verifyAuth = verifyAuthCode, verifyState = verifyStateToken) => async (req, resp) => {
+export const grantForTeam = (app, verifyAuth = verifyAuthCode, verifyState = verifyStateToken, sendNotifications = sendInstallNotifications) => async (req, resp) => {
   try {
     const { code, state: stateToken } = req.query
     const { redirectUri } = await verifyState(stateToken)
@@ -126,25 +180,31 @@ export const grantForTeam = (app, verifyAuth = verifyAuthCode, verifyState = ver
     const team = extractTeam(authInfo)
     const user = extractUser(authInfo)
     await store.slack.team.set(team.teamId, team)
-    await registerUser(app, user)
+    const { profile, existed } = await registerUser(app, user)
+
     resp.redirect(302, successUri(req, team))
     oauthLog.info({ action: 'grant-team-auth', teamId: team.teamId, userId: user.userId }, 'team auth granted')
+
+    await sendNotifications({ app, profile, existed })
   } catch (err) {
     oauthLog.error(err)
     resp.redirect(302, errorUri(req))
   }
 }
 
-export const grantForUser = (app, verifyAuth = verifyAuthCode, verifyState = verifyStateToken) => async (req, resp) => {
+export const grantForUser = (app, verifyAuth = verifyAuthCode, verifyState = verifyStateToken, sendNotifications = sendInstallNotifications) => async (req, resp) => {
   try {
     const { code, state: stateToken } = req.query
     const { redirectUri } = await verifyState(stateToken)
     const authInfo = await verifyAuth(app, code, redirectUri)
     const user = extractUser(authInfo)
     const team = await store.slack.team.get(user.teamId)
-    await registerUser(app, user)
+    const { profile, existed } = await registerUser(app, user)
+
     resp.redirect(302, successUri(req, team))
     oauthLog.info({ action: 'grant-user-auth', teamId: team.teamId, userId: user.userId }, 'user auth granted')
+
+    await sendNotifications({ app, profile, existed })
   } catch (err) {
     oauthLog.error(err)
     resp.redirect(302, errorUri(req))

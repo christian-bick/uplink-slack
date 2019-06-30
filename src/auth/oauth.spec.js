@@ -94,8 +94,10 @@ describe('oauth', () => {
 
     let verifyAuth
     let verifyState
+    let sendNotifications
 
     beforeEach('prepare', () => {
+      sendNotifications = sandbox.fake()
       verifyState = sandbox.fake.returns({ redirectUri })
       app.client.users.profile.get = sandbox.fake.returns({ profile })
       resp.redirect = sandbox.fake()
@@ -110,18 +112,23 @@ describe('oauth', () => {
       expect(slackProfile).to.eql({ email: userEmail, name: userName, image48: userImage })
     }
 
+    const expectNotifcationSent = async () => {
+      expect(sendNotifications).to.be.calledOnce
+    }
+
     describe('grantForTeam', () => {
       beforeEach('prepare', () => {
         verifyAuth = sandbox.fake.returns(teamAuthInfo)
       })
 
       it('should redirect to success uri', async () => {
-        await grantForTeam(app, verifyAuth, verifyState)(req, resp)
+        await grantForTeam(app, verifyAuth, verifyState, sendNotifications)(req, resp)
         expect(resp.redirect).to.be.calledOnce
         expect(resp.redirect).to.not.be.calledWith(302, errorUri(req))
         const team = await store.slack.team.get(teamId)
         expect(team).to.eql({ teamId, botToken })
         await expectUserRegistered()
+        await expectNotifcationSent()
       })
     })
 
@@ -132,10 +139,11 @@ describe('oauth', () => {
       })
 
       it('should redirect to success uri', async () => {
-        await grantForUser(app, verifyAuth, verifyState)(req, resp)
+        await grantForUser(app, verifyAuth, verifyState, sendNotifications)(req, resp)
         expect(resp.redirect).to.be.calledOnce
         expect(resp.redirect).to.not.be.calledWith(302, errorUri(req))
         await expectUserRegistered()
+        await expectNotifcationSent()
       })
     })
   })

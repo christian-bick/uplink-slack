@@ -23,6 +23,7 @@ const obfuscateSensitiveParams = {
   channelId: obfuscateValue,
   email: obfuscateValue,
   name: obfuscateValue,
+  image48: obfuscateValue,
   // Common objects
   user: obfuscatePersonalData,
   team: obfuscatePersonalData,
