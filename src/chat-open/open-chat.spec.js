@@ -116,7 +116,9 @@ describe('chat', () => {
       it('should add a contact entry to empty contacts', async () => {
         await openChat(app)(params)
         const contacts = await store.user.contacts.smembers(userEmail)
+        const contactsMirrored = await store.user.contactsMirrored.smembers(contactEmail)
         expect(contacts).to.contain(contactEmail)
+        expect(contactsMirrored).to.contain(userEmail)
       })
 
       it('should not create a duplicate contact entry when contact already exists', async () => {

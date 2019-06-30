@@ -31,6 +31,7 @@ export const openChat = (app) => async ({ action, body, context, ack, say }) => 
     }
 
     await store.user.contacts.sadd(userProfile.email, [ contactEmail ])
+    await store.user.contactsMirrored.sadd(contactEmail, [ userProfile.email ])
 
     const contactRegistration = await store.user.registration.get(contactEmail)
     if (!contactRegistration) {

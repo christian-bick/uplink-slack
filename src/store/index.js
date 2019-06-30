@@ -1,5 +1,6 @@
-import userRegistration from './registration'
-import userContacts from './contacts'
+import userRegistration from './user-registration'
+import userContacts from './user-contacts'
+import userContactsMirrored from './user-contacts-mirrored'
 
 import link from './link'
 
@@ -18,6 +19,7 @@ export default {
   },
   user: {
     registration: userRegistration,
-    contacts: userContacts
+    contacts: userContacts,
+    contactsMirrored: userContactsMirrored,
   }
 }

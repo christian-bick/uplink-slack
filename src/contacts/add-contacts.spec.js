@@ -63,15 +63,21 @@ describe('contacts', () => {
 
     it('should add a contact for one email and a fresh user', async () => {
       await addContacts(app)(params)
-      const contactEntries = await redis.smembersAsync(userContactsKey(userEmail))
+      const contactEntries = await store.user.contacts.smembers(userEmail)
+      const mirroredEntries = await store.user.contactsMirrored.smembers(contactEmail)
       expect(contactEntries).to.eql([contactEmail])
+      expect(mirroredEntries).to.eql([userEmail])
     })
 
     it('should create several contacts for several emails and a fresh user', async () => {
       params.body.submission.contacts += `\n${contactEmail2}`
       await addContacts(app)(params)
       const contactEntries = await store.user.contacts.smembers(userEmail)
+      const mirroredEntriesOne = await store.user.contactsMirrored.smembers(contactEmail)
+      const mirroredEntriesTwo = await store.user.contactsMirrored.smembers(contactEmail2)
       expect(contactEntries).to.eql([contactEmail, contactEmail2])
+      expect(mirroredEntriesOne).to.eql([userEmail])
+      expect(mirroredEntriesTwo).to.eql([userEmail])
     })
 
     it('should add contacts to an existing user', async () => {
