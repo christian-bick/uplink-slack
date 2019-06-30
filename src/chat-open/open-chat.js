@@ -110,7 +110,8 @@ export const buildGroupAlreadyExistsMessage = ({ userId }, contactEmail) => {
 }
 
 export const buildGroupCreatedMessage = ({ userId }, contactEmail) => {
-  return `<@${userId}> This is your new conversation with ${contactEmail}. I will forward your messages and reply on behalf of your contact.`
+  return `<@${userId}> This is your new conversation with ${contactEmail}. I will forward your messages and reply on behalf of your contact.\n\n
+  _Please note that your contact will be able to see your profile name and profile picture for this workspace._`
 }
 
 export const buildCreateLinkFailureMessage = (context) =>
