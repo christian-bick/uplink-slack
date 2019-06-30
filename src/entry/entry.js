@@ -23,7 +23,7 @@ export const reactToAppHomeOpened = (app) => async ({ context, event, say }) => 
 }
 
 export const PERMISSIONS_TEXT = 'Let\'s get started!'
-export const ENTRY_TEXT = '*You are ready to go!* Start messaging contacts outside of this workspace.'
+export const ENTRY_TEXT = ':+1: *You are ready to go!* Start messaging contacts outside of this workspace.'
 
 export const buildPermissionMessage = (context) => ({
   text: PERMISSIONS_TEXT,
