@@ -104,6 +104,7 @@ describe('create-link', () => {
         channel: { id: existingGroupId, name: existingGroupName }
       })
       app.client.conversations.invite = sandbox.fake()
+      app.client.conversations.unarchive = sandbox.fake()
       await store.slack.profile.set([contactTeamId, contactUserId], {
         email: contactEmail,
         name: contactName
@@ -158,7 +159,7 @@ describe('create-link', () => {
         expect(link).to.eql(createdLink)
       })
 
-      it('should create a slack group when it does not exist yet', async () => {
+      it('should create a slack group when link does not exist yet', async () => {
         await createLink(params)
         const createdGroup = await store.slack.group.get([teamId, groupId])
         expect(createdGroup).to.eql({
@@ -174,9 +175,54 @@ describe('create-link', () => {
         })
       })
 
-      it('should return existing link when link already exists', async () => {
+      it('should return existing link when link and group already exist', async () => {
         await store.link.set([userEmail, contactEmail], existingLink)
         await store.slack.group.set([teamId, existingGroupId], existingGroup)
+        const result = await createLink(params)
+        expect(result).to.eql({
+          alreadyExisted: true,
+          link: existingLink
+        })
+      })
+
+      it('should return a new link and group when link exists but group does not', async () => {
+        await store.link.set([userEmail, contactEmail], existingLink)
+        app.client.conversations.info = sandbox.fake.returns(null)
+        const result = await createLink(params)
+        expect(result).to.eql({
+          alreadyExisted: false,
+          link: createdLink
+        })
+      })
+
+      it('should create a new slack group when link exists but group does not', async () => {
+        await store.link.set([userEmail, contactEmail], existingLink)
+        app.client.conversations.info = sandbox.fake.returns(null)
+        await createLink(params)
+        const createdGroup = await store.slack.group.get([teamId, groupId])
+        expect(createdGroup).to.eql({
+          mode: 'direct-message',
+          source: {
+            teamId: teamId,
+            userId: userId,
+            email: userEmail
+          },
+          sink: {
+            email: contactEmail
+          }
+        })
+      })
+
+      it('should unarchive group when when link exists and group is archived ', async () => {
+        await store.link.set([userEmail, contactEmail], existingLink)
+        app.client.conversations.info = sandbox.fake.returns({ channel: { is_archived: true }})
+        await createLink(params)
+        expect(app.client.conversations.unarchive).to.be.calledOnce
+      })
+
+      it('should return existing link when link exsists and group is archived ', async () => {
+        await store.link.set([userEmail, contactEmail], existingLink)
+        app.client.conversations.info = sandbox.fake.returns({ channel: { is_archived: true }})
         const result = await createLink(params)
         expect(result).to.eql({
           alreadyExisted: true,

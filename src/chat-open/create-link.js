@@ -1,5 +1,6 @@
 import store from '../store/index'
-import {BotError} from "../errors"
+import { BotError } from '../errors'
+import { appLog } from '../logger'
 
 export const buildCannotCreateGroupInfo = (contactEmail, reason) => `Failed to create a group for your conversation with ${contactEmail} (${reason || 'for unknown reasons'})`
 
@@ -46,7 +47,27 @@ export class LinkResult {
 export const createLink = async ({ app, context, source, sink }) => {
   const existingLink = await store.link.get([source.email, sink.email])
   if (existingLink) {
-    return LinkResult.existing(existingLink)
+    let existingChannelInfo
+    try {
+      existingChannelInfo = await app.client.conversations.info({ token: context.userToken, channel: existingLink.channelId })
+    } catch (err) {
+      if (err.data && err.data.error === 'channel_not_found') {
+        appLog.info({ context, source, sink }, 'link group not found (creating new group)')
+      } else {
+        throw err
+      }
+    }
+
+    if (existingChannelInfo) {
+      if (existingChannelInfo.channel.is_archived) {
+        await app.client.conversations.unarchive({
+          token: context.userToken,
+          channel: existingLink.channelId
+        })
+      }
+      appLog.info({ context, source, sink }, 'link created (from existing group)')
+      return LinkResult.existing(existingLink)
+    }
   }
   const sinkProfile = await store.slack.profile.get([sink.teamId, sink.userId])
   const chatName = generateChannelName(sinkProfile.name)
@@ -84,6 +105,8 @@ export const createLink = async ({ app, context, source, sink }) => {
         channelId: created.channel.id
       }
       await store.link.set([source.email, sink.email], link)
+
+      appLog.info({ context, source, sink }, 'link created (from new group)')
       return LinkResult.created(link)
     } catch (err) {
       if (err.data && err.data.error === 'name_taken') {
