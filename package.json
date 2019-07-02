@@ -10,6 +10,7 @@
     "test": "npm run ut && npm run e2e",
     "lint": "eslint \"src/**/*\" \"test/**/*\"",
     "start": "node -r esm src/index.js",
+    "templates": "node -r esm email/deploy-template.js invite-contact-v1",
     "dev": "nodemon -r esm -r dotenv/config src/index.js | bunyan -o short --no-color"
   },
   "repository": {

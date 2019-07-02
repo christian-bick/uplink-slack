@@ -4,7 +4,7 @@ import store from '../store/index'
 import { appLog } from '../logger'
 import { createLink } from './create-link'
 import { APP_NAME, userAuthLink } from '../global'
-import { buildInvitationLink } from '../invite/invite-contact'
+import { buildInvitationLink } from '../contacts/invite-contact'
 import { buildPrimaryActions } from '../entry/entry-actions'
 import { BotError } from '../errors'
 
