@@ -1,0 +1,141 @@
+<!DOCTYPE html PUBLIC>
+<html lang="en" xmlns="http://www.w3.org/1999/html">
+<head>
+  <meta http-equiv="Content-Type" content="text/html" charset="UTF-8">
+  <meta name="format-detection" content="telephone=no">
+  <meta name="viewport" content="width=device-width; initial-scale=1.0; maximum-scale=1.0; user-scalable=no;">
+  <meta http-equiv="X-UA-Compatible" content="IE=9; IE=8; IE=7; IE=EDGE" />
+  <style>
+    body {
+      padding: 0;
+      margin: 0;
+      font-family: "Helvetica Neue", sans-serif;
+      color: darkslategrey;
+    }
+    p {
+      font-size: 20px;
+    }
+    .outer-container {
+      padding: 50px 20px;
+      margin: 0;
+    }
+    .inner-container {
+      padding: 0;
+      margin: 0;
+      max-width: 600px;
+    }
+    .header {
+      width: 50%;
+    }
+    .header img {
+      display: inline-block;
+      width: 56px;
+      height: 56px;
+      margin: 0 15px 0 0;
+    }
+    .header h1 {
+      display: inline-block;
+      line-height: 73px;
+      font-size: 73px;
+      color: #4084c5;
+      margin: 0;
+    }
+    .content {
+
+    }
+    .content p {
+      margin-top: 50px;
+      margin-bottom: 50px;
+    }
+    .cta a {
+      color: white;
+      background-color: #47808d;
+      text-decoration: none;
+      padding: 15px;
+      font-size: 110%;
+      border-radius: 5px;
+    }
+    .footer {
+    }
+    .footer p {
+      color: #b0b0b0;
+      margin-top: 100px;
+      font-size: 14px;
+    }
+    .footer a {
+      color: #b0b0b0;
+      text-decoration: none;
+    }
+  </style>
+</head>
+<body>
+<center>
+  <!-- Outer Container -->
+  <table border="0" cellpadding="0" cellspacing="0" width="100%" height="100%" class="outer-container">
+    <tr>
+      <td align="center" valign="top">
+        <!-- Inner Container -->
+        <table border="0" cellpadding="0" cellspacing="0" class="inner-container">
+
+          <!-- Header -->
+          <tr>
+            <td align="center" valign="middle" class="header">
+              <img alt="" src="https://www.uplink-chat.com/assets/img/logo/uplink-logo-no-outline-150px-dark.png">
+              <h1>Uplink</h1>
+            </td>
+          </tr>
+
+          <!-- Content -->
+          <tr>
+            <td align="left" valign="top" class="content">
+              <p>
+                Hello {{recipient.name}}!
+                <br><br>
+                <b>{{sender.name}}</b> would like to move your email conversation to Slack.<br><br>
+                  Add Uplink to your own Slack and start messaging across workspaces with <b>{{sender.name}}</b>
+                  and other contacts in less than a minute!<br><br>
+              </p>
+            </td>
+          </tr>
+          <tr>
+            <td align="center" valign="top" class="cta">
+              <!-- CTA -->
+              <table border="0" cellpadding="0" cellspacing="0" width="300">
+                <tr>
+                  <td align="center" valign="middle">
+                    <a href="https://www.uplink-chat.com">Add to Slack</a>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+          <tr>
+            <td align="left" valign="top" class="footer">
+              <p>
+                You get this email because <b>{{sender.name}}</b> ({{sender.email}}) invited you to use Uplink.
+                <b>{{sender.name}}</b> has also provided your email address to send out this invitation. You are not
+                receiving this email as a subscriber to an email list. When you don't know <b>{{sender.name}}</b> and
+                think that something is fishy then please let us know and write to <b>support@uplink-chat.com</b>.
+              </p>
+            </td>
+          </tr>
+
+          <!-- Footer -->
+          <tr>
+            <td align="center" valign="middle" class="footer">
+
+              <p>
+                <a href="https://www.uplink-chat.com">Website</a> |
+                <a href="https://www.uplink-chat.com/imprint">Imprint</a> |
+                <a href="https://www.uplink-chat.com/privacy">Privacy</a> |
+                <a href="https://www.uplink-chat.com/terms">Terms</a>
+              </p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</center>
+</body>
+</html>

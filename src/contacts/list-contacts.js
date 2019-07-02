@@ -1,6 +1,6 @@
 import { block, element, object, TEXT_FORMAT_MRKDWN } from 'slack-block-kit'
 
-import { buildInvitationLink } from '../invite/invite-contact'
+import { buildInvitationLink } from './invite-contact'
 import redis from '../redis'
 import { slackProfileKey, userRegistrationKey } from '../redis-keys'
 import store from '../store'
@@ -91,7 +91,7 @@ export const buildContactButton = ({ userProfile, email, installed, editable }) 
   } else if (installed) {
     return button('open-chat', 'Message', { value: email })
   } else {
-    return button('invite-contact', 'Invite', { url: buildInvitationLink(email, userProfile) })
+    return button('invite-contact', 'Invite', { value: email } /*, { url: buildInvitationLink(email, userProfile) } */)
   }
 }
 
