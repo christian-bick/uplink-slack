@@ -1,6 +1,7 @@
 import userRegistration from './user-registration'
 import userContacts from './user-contacts'
 import userContactsMirrored from './user-contacts-mirrored'
+import userInvites from './user-invites'
 
 import link from './link'
 
@@ -21,5 +22,6 @@ export default {
     registration: userRegistration,
     contacts: userContacts,
     contactsMirrored: userContactsMirrored,
+    invites: userInvites
   }
 }

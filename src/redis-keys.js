@@ -3,6 +3,7 @@ const key = (prefixes, identifiers) => `${prefixes.join('-')}:${identifiers.join
 export const userRegistrationKey = (userEmail) => key(['registration'], [userEmail])
 export const userContactsKey = (userEmail) => key(['contacts'], [userEmail])
 export const userContactsMirroredKey = (userEmail) => key(['contacts', 'mirrored'], [userEmail])
+export const userInvitesKey = (userEmail) => key(['invites'], [userEmail])
 
 export const linkKey = (sourceEmail, sinkEmail) => key(['link'], [sourceEmail, sinkEmail])
 
