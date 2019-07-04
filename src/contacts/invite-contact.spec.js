@@ -43,6 +43,7 @@ describe('inviteContact', () => {
     it('should send out email', async () => {
       await inviteContact(app, sendEmail)({ context, action, ack, say })
       expect(ack).to.be.calledOnce
+      expect(say).to.be.calledOnce
       expect(sendEmail).to.be.calledWith({
         ConfigurationSetName: 'invitations',
         Destination: { ToAddresses: [contactProfile.email] },
@@ -59,6 +60,7 @@ describe('inviteContact', () => {
       await inviteContact(app, sendEmail)({ context, action, ack, say })
       await inviteContact(app, sendEmail)({ context, action, ack, say })
       expect(ack).to.be.calledTwice
+      expect(say).to.be.calledTwice
       expect(sendEmail).to.be.calledOnce
     })
   })
@@ -72,6 +74,7 @@ describe('inviteContact', () => {
     it('should not send out email when already registered', async () => {
       await inviteContact(app, sendEmail)({ context, action, ack, say })
       expect(ack).to.be.called
+      expect(say).to.be.called
       expect(sendEmail).to.not.be.called
     })
   })

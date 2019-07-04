@@ -13,12 +13,14 @@ export const inviteContact = (app, sendEmail = sendEmailViaSes, inviteIdle = INV
   const registration = await store.user.registration.get(contactEmail)
   if (registration) {
     appLog.info({ email: contactEmail }, 'invite not sent out (existing registration)')
+    say(`The email address ${contactEmail} is already registered and you can start a conversation at any time.`)
     return
   }
 
   const invites = await store.user.invites.get(contactEmail)
   if (invites) {
     appLog.info({ email: contactEmail }, 'invite not sent out (existing invite)')
+    say(`We already sent out an invite to ${contactEmail} lately.`)
     return
   }
 
@@ -44,5 +46,6 @@ export const inviteContact = (app, sendEmail = sendEmailViaSes, inviteIdle = INV
     })
   })
 
+  say(`We just sent out an invite to ${contactEmail} and will let you know when it was accepted.`)
   appLog.info({ email: contactEmail, profile: userProfile }, 'invite sent out')
 }

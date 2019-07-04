@@ -1,9 +1,9 @@
 import { block, element, object, TEXT_FORMAT_MRKDWN } from 'slack-block-kit'
 
 import redis from '../redis'
-import {slackProfileKey, userInvitesKey, userRegistrationKey} from '../redis-keys'
+import { slackProfileKey, userInvitesKey, userRegistrationKey } from '../redis-keys'
 import store from '../store'
-import {buildPrimaryActions} from "../entry/entry-actions"
+import { buildPrimaryActions } from '../entry/entry-actions'
 
 const { text } = object
 const { section, divider } = block
@@ -17,7 +17,7 @@ export const buildContactList = async (contactEmailList) => {
 
   const inviteKeys = contactEmailList.map(email => userInvitesKey(email))
   const inviteMulti = inviteKeys.reduce((multi, key) => multi.get(key), redis.multi())
-  const invites =  await inviteMulti.execAsync()
+  const invites = await inviteMulti.execAsync()
 
   // Get contact profiles
   const contactProfileKeys = contactRegistrations.map(reg => {
@@ -28,7 +28,8 @@ export const buildContactList = async (contactEmailList) => {
 
   const contacts = contactEmailList.map((email, index) => ({
     email,
-    installed: !!contactRegistrations[index], profile: contactProfiles[index],
+    installed: !!contactRegistrations[index],
+    profile: contactProfiles[index],
     invited: !!invites[index]
   }))
 
@@ -96,7 +97,7 @@ export const buildContactButton = ({ email, installed, invited, editable }) => {
   } else if (installed) {
     return button('open-chat', 'Message', { value: email })
   } else if (invited) {
-    return button('invited-contact', 'Invite Pending', { value: email })
+    return button('invite-contact', 'Invite Pending', { value: email })
   } else {
     return button('invite-contact', 'Invite', { value: email })
   }
