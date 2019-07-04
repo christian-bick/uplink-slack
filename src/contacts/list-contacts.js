@@ -1,6 +1,5 @@
 import { block, element, object, TEXT_FORMAT_MRKDWN } from 'slack-block-kit'
 
-import { buildInvitationLink } from './invite-contact'
 import redis from '../redis'
 import { slackProfileKey, userRegistrationKey } from '../redis-keys'
 import store from '../store'

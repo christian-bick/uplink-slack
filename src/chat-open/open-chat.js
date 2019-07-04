@@ -4,7 +4,6 @@ import store from '../store/index'
 import { appLog } from '../logger'
 import { createLink } from './create-link'
 import { APP_NAME, userAuthLink } from '../global'
-import { buildInvitationLink } from '../contacts/invite-contact'
 import { buildPrimaryActions } from '../entry/entry-actions'
 import { BotError } from '../errors'
 
@@ -97,9 +96,7 @@ export const buildContactNotFoundMessage = (context, contactEmail, userProfile) 
     section(
       text(`But you can always send an invite to ${contactEmail}.`, TEXT_FORMAT_MRKDWN),
       {
-        accessory: button('invite-contact', 'Invite', {
-          url: buildInvitationLink(contactEmail, userProfile)
-        })
+        accessory: button('invite-contact', 'Invite', { value: contactEmail })
       }
     ),
     divider(),
