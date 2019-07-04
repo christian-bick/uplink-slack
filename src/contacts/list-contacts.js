@@ -1,7 +1,7 @@
 import { block, element, object, TEXT_FORMAT_MRKDWN } from 'slack-block-kit'
 
 import redis from '../redis'
-import { slackProfileKey, userRegistrationKey } from '../redis-keys'
+import {slackProfileKey, userInvitesKey, userRegistrationKey} from '../redis-keys'
 import store from '../store'
 import {buildPrimaryActions} from "../entry/entry-actions"
 
@@ -15,6 +15,10 @@ export const buildContactList = async (contactEmailList) => {
   const regMulti = contactRegistrationKeys.reduce((multi, key) => multi.get(key), redis.multi())
   const contactRegistrations = await regMulti.execAsync().map(JSON.parse)
 
+  const inviteKeys = contactEmailList.map(email => userInvitesKey(email))
+  const inviteMulti = inviteKeys.reduce((multi, key) => multi.get(key), redis.multi())
+  const invites =  await inviteMulti.execAsync()
+
   // Get contact profiles
   const contactProfileKeys = contactRegistrations.map(reg => {
     return reg ? slackProfileKey(reg.teamId, reg.userId) : 'not-existing'
@@ -23,7 +27,9 @@ export const buildContactList = async (contactEmailList) => {
   const contactProfiles = await profileMulti.execAsync().map(JSON.parse)
 
   const contacts = contactEmailList.map((email, index) => ({
-    email, installed: !!contactRegistrations[index], profile: contactProfiles[index]
+    email,
+    installed: !!contactRegistrations[index], profile: contactProfiles[index],
+    invited: !!invites[index]
   }))
 
   return contacts.sort((left, right) => {
@@ -54,7 +60,7 @@ export const generateFullContactListMessage = async (context, editable = false) 
         }
       ),
       divider(),
-      ...buildContactBlockList(contactList, userProfile, editable),
+      ...buildContactBlockList(contactList, editable),
       divider(),
       buildPrimaryActions(context),
       divider()
@@ -84,17 +90,20 @@ export const listContactsMode = (app) => async ({ action, ack, respond, context 
   }
 }
 
-export const buildContactButton = ({ userProfile, email, installed, editable }) => {
+export const buildContactButton = ({ email, installed, invited, editable }) => {
   if (editable) {
     return button('remove-contact', 'Remove', { value: email })
   } else if (installed) {
     return button('open-chat', 'Message', { value: email })
+  } else if (invited) {
+    return button('invited-contact', 'Invite Pending', { value: email })
   } else {
-    return button('invite-contact', 'Invite', { value: email } /*, { url: buildInvitationLink(email, userProfile) } */)
+    return button('invite-contact', 'Invite', { value: email })
   }
 }
 
-export const buildContactBlockList = (contactList, userProfile, editable) => {
+export const buildContactBlockList = (contactList, editable) => {
+  console.log(contactList)
   if (contactList.length === 0) {
     return [
       section(
@@ -106,11 +115,11 @@ export const buildContactBlockList = (contactList, userProfile, editable) => {
       )
     ]
   }
-  return contactList.map(({ email, installed, profile: contactProfile }) => (
+  return contactList.map(({ email, installed, invited, profile: contactProfile }) => (
     section(
       text(contactProfile ? `${contactProfile.name} (${email})` : email, TEXT_FORMAT_MRKDWN),
       {
-        accessory: buildContactButton({ userProfile, email, installed, contactProfile, editable })
+        accessory: buildContactButton({ email, installed, invited, editable })
       }
     )
   ))

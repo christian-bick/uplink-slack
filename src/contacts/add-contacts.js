@@ -36,7 +36,7 @@ export const buildAddContactsMessage = (contactList, profile, context) => ({
       text(':heavy_check_mark: *The following contacts have been added to your list*', TEXT_FORMAT_MRKDWN)
     ),
     divider(),
-    ...buildContactBlockList(contactList, profile),
+    ...buildContactBlockList(contactList),
     divider(),
     buildPrimaryActions(context),
     divider()
