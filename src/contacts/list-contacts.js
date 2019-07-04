@@ -103,7 +103,6 @@ export const buildContactButton = ({ email, installed, invited, editable }) => {
 }
 
 export const buildContactBlockList = (contactList, editable) => {
-  console.log(contactList)
   if (contactList.length === 0) {
     return [
       section(
