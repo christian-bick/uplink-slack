@@ -62,4 +62,17 @@ describe('inviteContact', () => {
       expect(sendEmail).to.be.calledOnce
     })
   })
+
+  describe('already registered', () => {
+
+    beforeEach(async () => {
+      await store.user.registration.set(contactProfile.email, {})
+    })
+
+    it('should not send out email when already registered', async () => {
+      await inviteContact(app, sendEmail)({ context, action, ack, say })
+      expect(ack).to.be.called
+      expect(sendEmail).to.not.be.called
+    })
+  })
 })

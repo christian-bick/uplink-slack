@@ -8,16 +8,21 @@ export const sendEmailViaSes = async (params) => ses.sendTemplatedEmail(params).
 
 export const inviteContact = (app, sendEmail = sendEmailViaSes, inviteIdle = INVITE_IDLE) => async ({ context, action, ack, say }) => {
   ack()
-  const contactEmail = 'christian.bick@uplink-chat.com' || action.value
-  const userProfile = await store.slack.profile.get([context.teamId, context.userId])
+  const contactEmail = /* 'christian.bick@uplink-chat.com' ||  */ action.value
 
-  const invites = await store.user.invites.get(contactEmail)
-
-  if (invites) {
-    appLog.info({ profile: userProfile }, 'invite not sent out (just one invite per day)')
+  const registration = await store.user.registration.get(contactEmail)
+  if (registration) {
+    appLog.info({ email: contactEmail }, 'invite not sent out (existing registration)')
     return
   }
 
+  const invites = await store.user.invites.get(contactEmail)
+  if (invites) {
+    appLog.info({ email: contactEmail }, 'invite not sent out (existing invite)')
+    return
+  }
+
+  const userProfile = await store.slack.profile.get([context.teamId, context.userId])
   await store.user.invites.setex(contactEmail, inviteIdle, userProfile.email)
 
   await sendEmail({
