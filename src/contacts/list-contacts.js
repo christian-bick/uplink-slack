@@ -9,6 +9,28 @@ const { text } = object
 const { section, divider } = block
 const { button } = element
 
+export const listContacts = (app) => async ({ context, say, ack }) => {
+  ack()
+  const message = await generateFullContactListMessage(context)
+  say(message)
+}
+
+export const listContactsMode = (app) => async ({ action, ack, respond, context }) => {
+  ack()
+  const value = action.value
+  if (value === 'close') {
+    respond({
+      delete_original: true
+    })
+  } else if (value === 'edit') {
+    const message = await generateFullContactListMessage(context, true)
+    respond(message)
+  } else if (value === 'edit-stop') {
+    const message = await generateFullContactListMessage(context, false)
+    respond(message)
+  }
+}
+
 export const buildContactList = async (contactEmailList) => {
   // Get contact registrations
   const contactRegistrationKeys = contactEmailList.map(email => userRegistrationKey(email))
@@ -66,28 +88,6 @@ export const generateFullContactListMessage = async (context, editable = false) 
       buildPrimaryActions(context),
       divider()
     ]
-  }
-}
-
-export const listContacts = (app) => async ({ context, say, ack }) => {
-  ack()
-  const message = await generateFullContactListMessage(context)
-  say(message)
-}
-
-export const listContactsMode = (app) => async ({ action, ack, respond, context }) => {
-  ack()
-  const value = action.value
-  if (value === 'close') {
-    respond({
-      delete_original: true
-    })
-  } else if (value === 'edit') {
-    const message = await generateFullContactListMessage(context, true)
-    respond(message)
-  } else if (value === 'edit-stop') {
-    const message = await generateFullContactListMessage(context, false)
-    respond(message)
   }
 }
 

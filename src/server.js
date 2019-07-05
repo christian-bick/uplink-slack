@@ -1,5 +1,5 @@
 import { App, LogLevel } from '@slack/bolt'
-import { statusLog } from './logger'
+import { appLog, statusLog } from './logger'
 import ping from './ping'
 import contacts from './contacts'
 import chat from './chat'
@@ -19,6 +19,10 @@ const run = async (port) => {
     signingSecret: SLACK_SIGNING_SECRET,
     logLevel: LOG_LEVEL || LogLevel.INFO,
     authorize
+  })
+
+  app.error(err => {
+    appLog.error(err)
   })
 
   // Register http routes

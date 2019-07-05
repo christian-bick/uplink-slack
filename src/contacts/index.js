@@ -4,13 +4,14 @@ import { showAddContactsDialog } from './add-dialog'
 import { listContacts, listContactsMode } from './list-contacts'
 import { removeContact } from './remove-contact'
 import { inviteContact } from './invite-contact'
+import { catchAsync } from '../errors-async'
 
 export default (app) => {
-  app.action({ callback_id: 'add-contacts' }, addContacts(app))
-  app.options({ callback_id: 'open-chat' }, listContactsAsOptions(app))
-  app.action('invite-contact', inviteContact(app))
-  app.action('add-contacts', showAddContactsDialog(app))
-  app.action('list-contacts', listContacts(app))
-  app.action('list-contacts-mode', listContactsMode(app))
-  app.action('remove-contact', removeContact(app))
+  app.action({ callback_id: 'add-contacts' }, catchAsync(addContacts(app)))
+  app.options({ callback_id: 'open-chat' }, catchAsync(listContactsAsOptions(app)))
+  app.action('invite-contact', catchAsync(inviteContact(app)))
+  app.action('add-contacts', catchAsync(showAddContactsDialog(app)))
+  app.action('list-contacts', catchAsync(listContacts(app)))
+  app.action('list-contacts-mode', catchAsync(listContactsMode(app)))
+  app.action('remove-contact', catchAsync(removeContact(app)))
 }
