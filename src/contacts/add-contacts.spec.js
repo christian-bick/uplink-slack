@@ -1,7 +1,8 @@
 import redis from '../redis'
-import { userRegistrationKey, userContactsKey } from '../redis-keys'
-import { addContacts, buildAddContactsMessage } from './add-contacts'
+import { userRegistrationKey } from '../redis-keys'
+import { ADD_CONTACTS_HEADLINE, addContacts } from './add-contacts'
 import store from '../store'
+import { generateFullContactListMessage } from './list-contacts'
 
 describe('contacts', () => {
   let app = { client: { users: { profile: {} } } }
@@ -19,12 +20,13 @@ describe('contacts', () => {
     const contactTeamId = 'team-2'
     const contactUserId = 'user-2'
     const userEmail = 'user-1@b.com'
+    const userName = 'user-name'
     const contactEmail = 'contact-1@b.com'
     const contactName = 'contact-name'
     const contactEmail2 = 'contact-2@b.com'
     const contactProfile = { email: contactEmail, name: contactName }
     const context = { teamId, userId, botToken: 'bot-token' }
-    const profileInfo = { profile: { email: userEmail, real_name: 'Chris' } }
+    const profile = { email: userEmail, name: userName }
     const contactRegistration = {
       platform: 'slack',
       teamId: contactTeamId,
@@ -34,8 +36,8 @@ describe('contacts', () => {
     let params
     let body
 
-    beforeEach('set up', () => {
-      app.client.users.profile.get = sandbox.fake.returns(profileInfo)
+    beforeEach('set up', async () => {
+      await store.slack.profile.set([teamId, userId], profile)
       body = {
         team_id: teamId,
         user_id: userId,
@@ -44,8 +46,8 @@ describe('contacts', () => {
       params = { context, body, say, ack }
     })
 
-    const expectReplyWithContacts = (expectedEmails) => {
-      const message = buildAddContactsMessage(expectedEmails, profileInfo.profile, context)
+    const expectReplyWithContacts = async () => {
+      const message = await generateFullContactListMessage(context, ADD_CONTACTS_HEADLINE)
       expect(say).to.have.been.calledWith(message)
     }
 
@@ -89,14 +91,14 @@ describe('contacts', () => {
 
     it('should return contact block for an inactive contact', async () => {
       await addContacts(app)(params)
-      expectReplyWithContacts([{ email: contactEmail, installed: false }])
+      await expectReplyWithContacts()
     })
 
     it('should return contact block for active single contact', async () => {
       await store.user.registration.set(contactEmail, contactRegistration)
       await store.slack.profile.set([contactTeamId, contactUserId], contactProfile)
       await addContacts(app)(params)
-      expectReplyWithContacts([{ email: contactEmail, profile: contactProfile, installed: true }])
+      await expectReplyWithContacts()
     })
 
     it('should return contact block for active and inactive contacts', async () => {
@@ -104,7 +106,7 @@ describe('contacts', () => {
       await store.slack.profile.set([contactTeamId, contactUserId], contactProfile)
       params.body.submission.contacts += `\n${contactEmail2}`
       await addContacts(app)(params)
-      expectReplyWithContacts([{ email: contactEmail, profile: contactProfile, installed: true }, { email: contactEmail2, installed: false }])
+      await expectReplyWithContacts()
     })
   })
 })

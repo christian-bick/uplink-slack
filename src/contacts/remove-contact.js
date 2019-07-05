@@ -1,11 +1,10 @@
 import store from '../store'
-import {generateFullContactListMessage} from "./list-contacts"
+import { LIST_CONTACTS_HEADLINE, replyWithContactList } from './list-contacts'
 
-export const removeContact = (app) => async ({ context, action, ack, respond }) => {
+export const removeContact = (app) => async ({ context, action, body, ack, say, respond }) => {
   ack()
   const userProfile = await store.slack.profile.get([context.teamId, context.userId])
   const contactEmail = action.value
   await store.user.contacts.srem(userProfile.email, contactEmail)
-  const message = await generateFullContactListMessage(context, true)
-  respond(message)
+  await replyWithContactList({ context, say, respond, body }, LIST_CONTACTS_HEADLINE, true)
 }
