@@ -2,13 +2,15 @@ import { INVITE_EMAIL, INVITE_LINK, INVITE_NAME, INVITE_IDLE } from '../global'
 import store from '../store/index'
 import AWS from 'aws-sdk'
 import { appLog } from '../logger'
+import { LIST_CONTACTS_TEXT, replyWithContactList } from './list-contacts'
+import {ADD_CONTACTS_HEADLINE} from "./add-contacts"
 const ses = new AWS.SES({ region: 'eu-west-1' })
 
 export const sendEmailViaSes = async (params) => ses.sendTemplatedEmail(params).promise()
 
-export const inviteContact = (app, sendEmail = sendEmailViaSes, inviteIdle = INVITE_IDLE) => async ({ context, action, ack, say }) => {
+export const inviteContact = (app, sendEmail = sendEmailViaSes, inviteIdle = INVITE_IDLE) => async ({ context, action, body, ack, say, respond }) => {
   ack()
-  const contactEmail = /* 'christian.bick@uplink-chat.com' ||  */ action.value
+  const contactEmail = action.value
 
   const registration = await store.user.registration.get(contactEmail)
   if (registration) {
@@ -46,6 +48,11 @@ export const inviteContact = (app, sendEmail = sendEmailViaSes, inviteIdle = INV
     })
   })
 
+  if (body.message.text === LIST_CONTACTS_TEXT) {
+    await replyWithContactList({ context, say, respond, body }, ADD_CONTACTS_HEADLINE)
+  }
+
   say(`We just sent out an invite to ${contactEmail} and will let you know when it was accepted.`)
+
   appLog.info({ email: contactEmail, profile: userProfile }, 'invite sent out')
 }

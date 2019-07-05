@@ -9,25 +9,33 @@ const { text } = object
 const { section, divider } = block
 const { button } = element
 
-export const listContacts = (app) => async ({ context, say, ack }) => {
+export const LIST_CONTACTS_TEXT = 'Your contact list'
+export const LIST_CONTACTS_HEADLINE = 'This is your contact list'
+
+export const listContacts = (app) => async ({ context, say, respond, ack, body }) => {
   ack()
-  const message = await generateFullContactListMessage(context)
-  say(message)
+  await replyWithContactList({ context, say, respond, body }, LIST_CONTACTS_HEADLINE)
 }
 
-export const listContactsMode = (app) => async ({ action, ack, respond, context }) => {
+export const listContactsMode = (app) => async ({ action, ack, say, respond, context, body }) => {
   ack()
   const value = action.value
   if (value === 'close') {
     respond({
       delete_original: true
     })
-  } else if (value === 'edit') {
-    const message = await generateFullContactListMessage(context, true)
+  } else {
+    const editable = value === 'edit'
+    await replyWithContactList({ context, say, respond, body }, LIST_CONTACTS_HEADLINE, editable)
+  }
+}
+
+export const replyWithContactList = async ({ context, say, respond, body }, headline, editable) => {
+  const message = await generateFullContactListMessage(context, headline, editable)
+  if (body && body.message && body.message.text === LIST_CONTACTS_TEXT) {
     respond(message)
-  } else if (value === 'edit-stop') {
-    const message = await generateFullContactListMessage(context, false)
-    respond(message)
+  } else {
+    say(message)
   }
 }
 
@@ -68,14 +76,15 @@ export const buildContactList = async (contactEmailList) => {
   })
 }
 
-export const generateFullContactListMessage = async (context, editable = false) => {
+export const generateFullContactListMessage = async (context, headline, editable = false) => {
   const userProfile = await store.slack.profile.get([context.teamId, context.userId])
   const contactEmailList = await store.user.contacts.smembers(userProfile.email)
   const contactList = await buildContactList(contactEmailList)
   return {
+    text: LIST_CONTACTS_TEXT,
     blocks: [
       section(
-        text(':notebook_with_decorative_cover: *This is your contact list*', TEXT_FORMAT_MRKDWN),
+        text(`:notebook_with_decorative_cover: *${headline}*`, TEXT_FORMAT_MRKDWN),
         {
           accessory: editable
             ? button('list-contacts-mode', ':pencil: Stop Editing', { value: 'edit-stop' })
