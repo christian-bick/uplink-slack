@@ -1,22 +1,20 @@
-import { inviteContact } from './invite-contact'
+import { INVITE_EMAIL, INVITE_LINK, INVITE_NAME, inviteContact } from './invite-contact'
 import store from '../store'
-import { INVITE_EMAIL, INVITE_LINK, INVITE_NAME } from '../global'
 
-describe.skip('inviteContact', () => {
+describe('inviteContact', () => {
+  const userAccountId = 'user-account-id'
+
   const user = {
     teamId: 'team-id',
-    userId: 'user-id'
+    userId: 'user-id',
+    accountId: userAccountId
   }
 
   const userProfile = {
     name: 'User Name',
-    email: 'user@example.com'
   }
 
-  const contactProfile = {
-    name: 'Contact Name',
-    email: 'contact@example.com'
-  }
+  const contactEmail = 'contact@email.com'
 
   let app
   let sendEmail
@@ -25,6 +23,7 @@ describe.skip('inviteContact', () => {
   let context
   let say
   let body
+  let respond
 
   beforeEach(async () => {
     app = {}
@@ -32,24 +31,25 @@ describe.skip('inviteContact', () => {
 
     body = { message: { text: '' }}
     context = { ...user }
-    action = { value: contactProfile.email }
+    action = { value: contactEmail }
     ack = sandbox.fake()
     say = sandbox.fake()
+    respond = sandbox.fake()
 
-    await store.slack.profile.set([user.teamId, user.userId], userProfile)
+    await store.account.profile.set(userAccountId, userProfile)
   })
 
   describe('not invited yet', () => {
     it('should send out email', async () => {
-      await inviteContact(app, sendEmail)({ context, action, body, ack, say })
+      await inviteContact(app, sendEmail)({ context, action, body, ack, say, respond })
       expect(ack).to.be.calledOnce
-      expect(say).to.be.calledOnce
+      expect(respond).to.be.calledOnce
       expect(sendEmail).to.be.calledWith({
         ConfigurationSetName: 'invitations',
-        Destination: { ToAddresses: [contactProfile.email] },
+        Destination: { ToAddresses: [contactEmail] },
         Source: `"${INVITE_NAME}" <${INVITE_EMAIL}>`,
         Template: 'invite-contact-v1',
-        TemplateData: `{"sender":{"name":"${userProfile.name}","email":"${userProfile.email}"},"recipient":{"name":"there"},"inviteLink":"${INVITE_LINK}"}`
+        TemplateData: `{"sender":{"name":"${userProfile.name}"},"recipient":{"name":"there"},"inviteLink":"${INVITE_LINK}"}`
       })
     })
   })
@@ -57,10 +57,11 @@ describe.skip('inviteContact', () => {
   describe('already invited', () => {
 
     it('should not send out email when already invited', async () => {
-      await inviteContact(app, sendEmail)({ context, action, body, ack, say })
-      await inviteContact(app, sendEmail)({ context, action, body, ack, say })
+      await inviteContact(app, sendEmail)({ context, action, body, ack, say, respond })
+      await inviteContact(app, sendEmail)({ context, action, body, ack, say, respond })
       expect(ack).to.be.calledTwice
-      expect(say).to.be.calledTwice
+      expect(say).to.be.calledOnce
+      expect(respond).to.be.calledOnce
       expect(sendEmail).to.be.calledOnce
     })
   })
@@ -68,13 +69,14 @@ describe.skip('inviteContact', () => {
   describe('already registered', () => {
 
     beforeEach(async () => {
-      await store.user.registration.set(contactProfile.email, {})
+      await store.registration.set(contactEmail, {})
     })
 
     it('should not send out email when already registered', async () => {
-      await inviteContact(app, sendEmail)({ context, action, body, ack, say })
+      await inviteContact(app, sendEmail)({ context, action, body, ack, say, respond })
       expect(ack).to.be.called
       expect(say).to.be.called
+      expect(respond).to.not.be.called
       expect(sendEmail).to.not.be.called
     })
   })

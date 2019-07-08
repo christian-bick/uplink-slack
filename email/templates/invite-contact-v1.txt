@@ -6,11 +6,9 @@ Add Uplink to your own Slack and start messaging across workspaces with {{sender
 
 Visit: https://www.uplink-chat.com
 
-
-
 -----
 
-You get this email because {{sender.name}} with the email address {{sender.email}} invited you to use Uplink. {{sender.name}} has provided your email address to send out this invitation. You are not receiving this email as a subscriber to an email list. When you don't know {{sender.name}} and sense an abuse of our invitation service then please write us a message to support@uplink-chat.com.
+You get this email because {{sender.name}} invited you to use Uplink. {{sender.name}} has provided your email address to send out this invitation. When you don't know {{sender.name}} and think that something is fishy here then please write us a message to support@uplink-chat.com.
 
 Website: https://www.uplink-chat.com
 Imprint: https://www.uplink-chat.com/imprint
