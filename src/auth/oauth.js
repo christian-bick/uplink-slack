@@ -69,7 +69,7 @@ const registerUser = async (app, user) => {
   }
 
   const profile = {
-    name: slackProfile.real_name,
+    name: slackProfile.display_name || slackProfile.real_name,
     avatar: slackProfile.image_48
   }
 
