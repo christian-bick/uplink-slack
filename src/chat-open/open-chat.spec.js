@@ -84,7 +84,7 @@ describe('openChat', () => {
     it('should reply with contact-not-found message', async () => {
       await openChat(app)(params)
       expect(params.ack, 'ack').to.be.calledOnce
-      expect(params.say, 'say').to.be.calledOnceWith(buildContactNotFoundMessage(context, contactEmail, userProfile))
+      expect(params.say, 'say').to.be.calledOnceWith(buildContactNotFoundMessage(context, contactEmail))
     })
   })
 

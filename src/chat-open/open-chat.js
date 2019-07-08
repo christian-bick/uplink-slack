@@ -21,7 +21,7 @@ export const openChat = (app) => async ({ action, body, context, ack, say }) => 
         ack({ errors: [{
           name: 'email',
           error: buildNotContactSelected()
-        }]})
+        }] })
         return
       }
       ack()
@@ -76,27 +76,16 @@ export const buildNotContactSelected = () => 'Please enter an email address or s
 
 export const buildCannotConnectToYourselfMessage = () => 'Looks like this your own email address.'
 
-export const buildRegistrationNotFoundMessage = (context) => {
+export const buildContactNotFoundMessage = (context, contactEmail, inviteSent = false) => {
   return { blocks: [
     section(
-      text(`Looks like you haven't installed ${APP_NAME} yet.`),
-      {
-        accessory: button('user-install-init', 'Install', {
-          url: userAuthLink(context)
-        })
-      }
-    )
-  ] }
-}
-
-export const buildContactNotFoundMessage = (context, contactEmail) => {
-  return { blocks: [
-    section(
-      text(`:warning: *Looks like this contact is not using ${APP_NAME} yet.*`, TEXT_FORMAT_MRKDWN)
+      text(`*Looks like this contact is not using ${APP_NAME} yet.*`, TEXT_FORMAT_MRKDWN)
     ),
     divider(),
-    section(
-      text(`But you can always send an invite to ${contactEmail}.`, TEXT_FORMAT_MRKDWN),
+    inviteSent ? section(
+      text(`We just sent out an invite to ${contactEmail} and will let you know when it was accepted.`)
+    ) : section(
+      text(`Send an invite to ${contactEmail} now.`, TEXT_FORMAT_MRKDWN),
       {
         accessory: button('invite-contact', 'Invite', { value: contactEmail })
       }

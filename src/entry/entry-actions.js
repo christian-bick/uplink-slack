@@ -12,14 +12,6 @@ export const buildPrimaryActions = (context) => ({
       'emoji': true
     }
   }, {
-    'type': 'button',
-    'action_id': 'list-contacts',
-    'text': {
-      'type': 'plain_text',
-      'text': 'List Contacts',
-      'emoji': true
-    }
-  }, {
     'type': 'overflow',
     'action_id': 'entry-overflow',
     'options': [
