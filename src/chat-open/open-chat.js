@@ -4,7 +4,6 @@ import store from '../store/index'
 import { appLog } from '../logger'
 import { createLink } from './create-link'
 import { APP_NAME } from '../global'
-import { userAuthLink } from '../links'
 import { buildPrimaryActions } from '../entry/entry-actions'
 import { BotError } from '../errors'
 

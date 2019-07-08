@@ -41,7 +41,7 @@ export const buildPermissionMessage = (context) => ({
     section(
       text('Just before we can start, you need to review and grant some permissions.'),
       {
-      accessory: button('user-install-init', 'Grant Permissions', { url: userAuthLink(context)})
+        accessory: button('user-install-init', 'Grant Permissions', { url: userAuthLink(context) })
       }
     ),
     divider()
@@ -56,6 +56,6 @@ export const buildEntryMessage = (context) => ({
     ),
     divider(),
     buildPrimaryActions(context),
-    divider(),
+    divider()
   ]
 })

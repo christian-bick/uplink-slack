@@ -6,11 +6,11 @@ const onCatch = (err, args) => {
   if (args[0] !== null && typeof args[0] === 'object') {
     context = _.pick(args[0], [ 'context' ])
   }
-  appLog.error({ err, ...context } )
+  appLog.error({ err, ...context })
 }
 
 export const catchAsync = (fn) => {
-  return async function wrapper() {
+  return async function wrapper () {
     try {
       // eslint-disable-next-line prefer-rest-params
       await fn.apply(this, arguments)

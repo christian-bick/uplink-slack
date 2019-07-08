@@ -7,7 +7,6 @@ import {
   createLink
 } from './create-link'
 import store from '../store/index'
-import {openChat} from "./open-chat"
 
 describe('create-link', () => {
   describe('generateChannelName', () => {
@@ -190,14 +189,14 @@ describe('create-link', () => {
 
       it('should unarchive group when when link exists and group is archived ', async () => {
         await store.account.link.set([userAccountId, contactAccountId], existingLink)
-        app.client.conversations.info = sandbox.fake.returns({ channel: { is_archived: true }})
+        app.client.conversations.info = sandbox.fake.returns({ channel: { is_archived: true } })
         await createLink(params)
         expect(app.client.conversations.unarchive).to.be.calledOnce
       })
 
       it('should return existing link when link exsists and group is archived ', async () => {
         await store.account.link.set([userAccountId, contactAccountId], existingLink)
-        app.client.conversations.info = sandbox.fake.returns({ channel: { is_archived: true }})
+        app.client.conversations.info = sandbox.fake.returns({ channel: { is_archived: true } })
         const result = await createLink(params)
         expect(result).to.eql({
           alreadyExisted: true,
