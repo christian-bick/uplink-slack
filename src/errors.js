@@ -6,13 +6,13 @@ const { section, divider } = block
 const { button } = element
 
 export class BotError extends Error {
-  constructor(reply, context) {
+  constructor (reply, context) {
     super(reply)
     this.reply = reply
     this.context = context
   }
 
-  static buildMessage(reply, context) {
+  static buildMessage (reply, context) {
     return {
       blocks: [
         section(
@@ -30,7 +30,7 @@ export class BotError extends Error {
     }
   }
 
-  generateMessage() {
+  generateMessage () {
     return BotError.buildMessage(this.reply, this.context)
   }
 }

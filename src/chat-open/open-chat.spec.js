@@ -24,7 +24,6 @@ describe('openChat', () => {
   const contactName = 'user name'
   const contactEmail = 'contact@x.com'
   const groupId = 'group-id'
-  const userProfile = { email: userEmail, name: userName }
 
   const context = { teamId, userId }
 

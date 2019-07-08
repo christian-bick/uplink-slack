@@ -11,7 +11,7 @@ describe('inviteContact', () => {
   }
 
   const userProfile = {
-    name: 'User Name',
+    name: 'User Name'
   }
 
   const contactEmail = 'contact@email.com'
@@ -29,7 +29,7 @@ describe('inviteContact', () => {
     app = {}
     sendEmail = sandbox.fake()
 
-    body = { message: { text: '' }}
+    body = { message: { text: '' } }
     context = { ...user }
     action = { value: contactEmail }
     ack = sandbox.fake()
@@ -55,7 +55,6 @@ describe('inviteContact', () => {
   })
 
   describe('already invited', () => {
-
     it('should not send out email when already invited', async () => {
       await inviteContact(app, sendEmail)({ context, action, body, ack, say, respond })
       await inviteContact(app, sendEmail)({ context, action, body, ack, say, respond })
@@ -67,7 +66,6 @@ describe('inviteContact', () => {
   })
 
   describe('already registered', () => {
-
     beforeEach(async () => {
       await store.registration.set(contactEmail, {})
     })

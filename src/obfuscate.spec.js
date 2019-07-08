@@ -1,7 +1,6 @@
 import { obfuscateEmailAddress } from './obfuscate'
 
 describe('obfuscate email address', () => {
-
   it('should replace center 4 characters of a 10 character head', () => {
     const obfuscated = obfuscateEmailAddress('1234567890@gmail.com')
     expect(obfuscated).to.equal('123****890@g***l.com')

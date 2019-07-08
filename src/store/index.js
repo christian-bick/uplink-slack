@@ -24,6 +24,6 @@ export default {
     link: accountLink,
     profile: accountProfile,
     address: accountAddress,
-    contacts: accountContacts,
+    contacts: accountContacts
   }
 }

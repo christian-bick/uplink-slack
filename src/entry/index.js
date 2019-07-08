@@ -1,5 +1,5 @@
 import { reactToAppHomeOpened } from './entry'
-import {catchAsync} from "../errors-async"
+import { catchAsync } from '../errors-async'
 
 export default (app) => {
   app.event('app_home_opened', catchAsync(reactToAppHomeOpened(app)))

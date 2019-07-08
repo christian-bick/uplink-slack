@@ -4,8 +4,8 @@ import { promisify } from 'util'
 import { appLog } from '../logger'
 import store from '../store'
 import { block, element, object, TEXT_FORMAT_MRKDWN } from 'slack-block-kit'
-import {registrationKey} from "../redis-keys"
-import {obfuscateEmailAddress} from "../obfuscate"
+import { registrationKey } from '../redis-keys'
+import { obfuscateEmailAddress } from '../obfuscate'
 
 const { text } = object
 const { section, divider } = block
@@ -63,7 +63,7 @@ const registerUser = async (app, user) => {
 
   const existingRegistration = await store.registration.get(slackProfile.email)
 
-  const registration = existingRegistration ? existingRegistration : {
+  const registration = existingRegistration || {
     accountId: uuid(),
     createDate: Date.now()
   }
@@ -88,7 +88,7 @@ const registerUser = async (app, user) => {
   await store.account.profile.set(registration.accountId, profile)
   await store.account.address.set(registration.accountId, address)
   await store.account.medium.set(registration.accountId, medium)
-  await store.slack.user.set([user.teamId, user.userId], { ...user, accountId: registration.accountId } )
+  await store.slack.user.set([user.teamId, user.userId], { ...user, accountId: registration.accountId })
 
   oauthLog.info({ user, profile, registration, existed: !!existingRegistration }, 'user registered')
   return { profile, registration, existed: !!existingRegistration }
