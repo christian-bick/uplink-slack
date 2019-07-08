@@ -1,4 +1,4 @@
-import {supportLink, userAuthLink} from "../global"
+import { supportLink, userAuthLink } from '../links'
 
 export const buildPrimaryActions = (context) => ({
   'type': 'actions',
@@ -9,14 +9,6 @@ export const buildPrimaryActions = (context) => ({
     'text': {
       'type': 'plain_text',
       'text': 'Start a Conversation',
-      'emoji': true
-    }
-  }, {
-    'type': 'button',
-    'action_id': 'add-contacts',
-    'text': {
-      'type': 'plain_text',
-      'text': 'Add Contacts',
       'emoji': true
     }
   }, {

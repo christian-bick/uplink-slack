@@ -7,6 +7,7 @@ export default async ({ teamId, userId }) => {
     const user = await store.slack.user.get([teamId, userId])
     if (user) {
       context.userToken = user.userToken
+      context.accountId = user.accountId
     }
     context.userId = userId
   }

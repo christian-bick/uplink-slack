@@ -1,7 +1,7 @@
 import shortHash from 'short-hash'
 import { omit } from 'lodash'
+import { HASH_SALT } from './global'
 
-const HASH_SALT = process.env.HASH_SALT || ''
 const OMITTED_FIELDS = ['botToken', 'userToken', 'matches', 'token']
 
 export const obfuscateValue = (value) => {
@@ -26,4 +26,22 @@ export const obfuscatePersonalData = (obj) => {
       name: obfuscateValue(obj.name)
     }
   }
+}
+
+const obfuscateHalfOfString = (string) => {
+  const length = string.length
+  let from = length < 8 ? Math.floor(length / 3) : Math.ceil(length / 4)
+  let to = length < 8 ? Math.ceil((2 * length) / 3) : Math.floor((3 * length) / 4)
+  return `${string.slice(0, from)}${string.slice(from, to).replace(/./g, '*')}${string.slice(to, length)}`
+}
+
+export const obfuscateEmailAddress = (email) => {
+  const [ head, tail ] = email.split('@')
+  const obfuscatedHead = obfuscateHalfOfString(head)
+  const deconstructedTail = tail.split('.')
+  const tld = deconstructedTail[deconstructedTail.length - 1]
+  deconstructedTail.pop()
+  const tailWithoutTld = deconstructedTail.join('.')
+  const obfuscatedTailWithoutTld = obfuscateHalfOfString(tailWithoutTld)
+  return `${obfuscatedHead}@${obfuscatedTailWithoutTld}.${tld}`
 }

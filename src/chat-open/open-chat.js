@@ -3,7 +3,8 @@ import { block, object, element, TEXT_FORMAT_MRKDWN } from 'slack-block-kit'
 import store from '../store/index'
 import { appLog } from '../logger'
 import { createLink } from './create-link'
-import { APP_NAME, userAuthLink } from '../global'
+import { APP_NAME } from '../global'
+import { userAuthLink } from '../links'
 import { buildPrimaryActions } from '../entry/entry-actions'
 import { BotError } from '../errors'
 
@@ -14,38 +15,36 @@ const { button } = element
 export const openChat = (app) => async ({ action, body, context, ack, say }) => {
   try {
     ack()
+    let contactAccountId = body && body.submission && body.submission.accountId
+    if (!contactAccountId) {
+      const contactEmail = action && action.value ? action.value : body.submission.email
+      if (!contactEmail) {
+        say(buildNoInputMessage())
+        return
+      }
+      const contactRegistration = await store.registration.get(contactEmail)
+      if (!contactRegistration) {
+        say(buildContactNotFoundMessage(context, contactEmail))
+        return
+      }
+      contactAccountId = contactRegistration.accountId
+    }
 
-    const contactEmail = action && action.value ? action.value : body.submission.email
-
-    const userProfile = await store.slack.profile.get([context.teamId, context.userId])
-    if (userProfile.email === contactEmail) {
-      say(buildCannotConnectToYourselfMessage(contactEmail))
+    if (contactAccountId === context.accountId) {
+      say(buildCannotConnectToYourselfMessage())
       return
     }
 
-    const userRegistration = await store.user.registration.get(userProfile.email)
-    if (!userRegistration) {
-      say(buildRegistrationNotFoundMessage(context))
-      return
-    }
-
-    await store.user.contacts.sadd(userProfile.email, [ contactEmail ])
-    await store.user.contactsMirrored.sadd(contactEmail, [ userProfile.email ])
-
-    const contactRegistration = await store.user.registration.get(contactEmail)
-    if (!contactRegistration) {
-      await say(buildContactNotFoundMessage(context, contactEmail, userProfile))
-      return
-    }
+    await store.account.contacts.sadd(context.accountId, [ contactAccountId ])
 
     const linkResult = await createLink({
       app,
       context,
-      source: userRegistration,
-      sink: contactRegistration
+      sourceAccountId: context.accountId,
+      sinkAccountId: contactAccountId
     })
 
-    const contactProfile = await store.slack.profile.get([contactRegistration.teamId, contactRegistration.userId])
+    const contactProfile = await store.account.profile.get([contactAccountId])
 
     if (linkResult.alreadyExisted) {
       await app.client.chat.postMessage({
@@ -70,8 +69,8 @@ export const openChat = (app) => async ({ action, body, context, ack, say }) => 
   }
 }
 
-export const buildCannotConnectToYourselfMessage = (contactEmail) => {
-  return `Looks like this your own email address: ${contactEmail}`
+export const buildCannotConnectToYourselfMessage = () => {
+  return `Looks like this your own email address.`
 }
 
 export const buildRegistrationNotFoundMessage = (context) => {
@@ -87,10 +86,10 @@ export const buildRegistrationNotFoundMessage = (context) => {
   ] }
 }
 
-export const buildContactNotFoundMessage = (context, contactEmail, userProfile) => {
+export const buildContactNotFoundMessage = (context, contactEmail) => {
   return { blocks: [
     section(
-      text(`:warning: *Looks like your contact is not using ${APP_NAME} yet.*`, TEXT_FORMAT_MRKDWN)
+      text(`:warning: *Looks like this contact is not using ${APP_NAME} yet.*`, TEXT_FORMAT_MRKDWN)
     ),
     divider(),
     section(
@@ -113,6 +112,10 @@ export const buildGroupCreatedMessage = ({ userId }, userName) => {
   return `<@${userId}> This is your new conversation with *${userName}*. I will forward messages between the two of you within this group.\n\n
   _When sending messages, ${userName} will see your profile name and picture for this workspace._\n
   _To block ${userName}, simply archive this channel (but don't delete it)._`
+}
+
+export const buildNoInputMessage = () => {
+  return 'Please enter an email address or select an existing user.'
 }
 
 export const buildCreateLinkFailureMessage = (context) =>

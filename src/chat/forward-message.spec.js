@@ -25,26 +25,26 @@ describe('forwardMessage', () => {
   const channelId = 'channel-id'
   const userId = 'user-id'
   const teamId = 'team-id'
-  const userEmail = 'user-email'
   const userName = 'user-name'
   const userImage = 'user-image'
   const botId = 'user-bot-id'
+  const userAccountId = 'user-account-id'
 
   const parentUserId = 'parent-user-id'
 
   const contactUserId = 'contact-user-id'
   const contactTeamId = 'contact-team-id'
-  const contactEmail = 'contact-email'
   const contactChannelId = 'contact-channel-id'
   const contactBotToken = 'contact-bot-token'
   const contactUserToken = 'contact-user-token'
+  const contactAccountId = 'contact-account-id'
 
   const threadTs = 'thread-ts'
   const contactThreadTs = 'contact-thread-ts'
 
   const userSlackGroup = {
-    source: { userId, teamId, email: userEmail },
-    sink: { email: contactEmail }
+    sourceAccountId: userAccountId,
+    sinkAccountId: contactAccountId
   }
 
   const reverseLink = {
@@ -62,7 +62,7 @@ describe('forwardMessage', () => {
 
   beforeEach('prepare', () => {
     message = { channel: channelId, user: userId }
-    context = { teamId, userId, botId }
+    context = { teamId, userId, botId, accountId: userAccountId }
     app = {}
     say = sandbox.fake()
     delegate = sandbox.fake()
@@ -82,9 +82,9 @@ describe('forwardMessage', () => {
 
   describe('with slack group', () => {
     beforeEach('add slack group, slack profile and contact slack team', () => {
-      store.slack.group.set([teamId, channelId], userSlackGroup)
+      store.slack.conversation.set([teamId, channelId], userSlackGroup)
       store.slack.team.set(contactTeamId, { botToken: contactBotToken })
-      store.slack.profile.set([teamId, userId], { name: userName, image48: userImage })
+      store.account.profile.set(userAccountId, { name: userName, avatar: userImage })
     })
 
     it('should not forward message when subtype is ignored', async () => {
@@ -102,7 +102,7 @@ describe('forwardMessage', () => {
     })
 
     it('should not forward message when user is not linked', async () => {
-      params.context.userId = 'other_user'
+      params.context.accountId = 'other_user'
       await stubbedForwardMessage(params)
       expect(delegate).to.not.be.called
       expect(say).to.not.be.called
@@ -118,7 +118,7 @@ describe('forwardMessage', () => {
 
     describe('with reverse link', () => {
       beforeEach('add reverse link', () => {
-        store.link.set([contactEmail, userEmail], reverseLink)
+        store.account.link.set([contactAccountId, userAccountId], reverseLink)
       })
 
       it('should not create reverse link', async () => {
@@ -144,7 +144,7 @@ describe('forwardMessage', () => {
 
       describe('thread meassage', () => {
         beforeEach('add slack group and user', () => {
-          store.slack.group.set([contactTeamId, contactChannelId], {
+          store.slack.conversation.set([contactTeamId, contactChannelId], {
             source: { teamId: contactTeamId, userId: contactUserId }
           })
           store.slack.user.set([contactTeamId, contactUserId], {
