@@ -1,5 +1,5 @@
 import { element, object, block, TEXT_FORMAT_MRKDWN } from 'slack-block-kit'
-import {supportLink} from "./global"
+import { supportLink } from './links'
 
 const { text } = object
 const { section, divider } = block

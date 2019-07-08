@@ -1,7 +1,6 @@
 import { block, element, object, TEXT_FORMAT_MRKDWN } from 'slack-block-kit'
 
 import redis from '../redis'
-import { slackProfileKey, userInvitesKey, userRegistrationKey } from '../redis-keys'
 import store from '../store'
 import { buildPrimaryActions } from '../entry/entry-actions'
 
@@ -41,6 +40,7 @@ export const replyWithContactList = async ({ context, say, respond, body }, head
 
 export const buildContactList = async (contactEmailList) => {
   // Get contact registrations
+  /*
   const contactRegistrationKeys = contactEmailList.map(email => userRegistrationKey(email))
   const regMulti = contactRegistrationKeys.reduce((multi, key) => multi.get(key), redis.multi())
   const contactRegistrations = await regMulti.execAsync().map(JSON.parse)
@@ -74,6 +74,7 @@ export const buildContactList = async (contactEmailList) => {
       return left.email.localeCompare(right.email)
     }
   })
+  */
 }
 
 export const generateFullContactListMessage = async (context, headline, editable = false) => {

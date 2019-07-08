@@ -4,6 +4,8 @@ import { promisify } from 'util'
 import { appLog } from '../logger'
 import store from '../store'
 import { block, element, object, TEXT_FORMAT_MRKDWN } from 'slack-block-kit'
+import {registrationKey} from "../redis-keys"
+import {obfuscateEmailAddress} from "../obfuscate"
 
 const { text } = object
 const { section, divider } = block
@@ -59,29 +61,40 @@ const registerUser = async (app, user) => {
     user: user.userId
   })
 
-  const existingRegistration = await store.user.registration.get(slackProfile.email)
+  const existingRegistration = await store.registration.get(slackProfile.email)
 
-  const registration = {
-    platform: 'slack',
-    teamId: user.teamId,
-    userId: user.userId,
-    email: slackProfile.email
+  const registration = existingRegistration ? existingRegistration : {
+    accountId: uuid(),
+    createDate: Date.now()
   }
 
   const profile = {
-    email: slackProfile.email,
-    name: slackProfile.display_name || slackProfile.real_name,
-    image48: slackProfile.image_48
+    name: slackProfile.real_name,
+    avatar: slackProfile.image_48
   }
 
-  await store.user.registration.set(profile.email, registration)
-  await store.slack.user.set([user.teamId, user.userId], user)
-  await store.slack.profile.set([user.teamId, user.userId], profile)
+  const address = {
+    displayName: obfuscateEmailAddress(slackProfile.email),
+    registrationKey: registrationKey(slackProfile.email)
+  }
+
+  const medium = {
+    platform: 'slack',
+    teamId: user.teamId,
+    userId: user.userId
+  }
+
+  await store.registration.set(slackProfile.email, registration)
+  await store.account.profile.set(registration.accountId, profile)
+  await store.account.address.set(registration.accountId, address)
+  await store.account.medium.set(registration.accountId, medium)
+  await store.slack.user.set([user.teamId, user.userId], { ...user, accountId: registration.accountId } )
 
   oauthLog.info({ user, profile, registration, existed: !!existingRegistration }, 'user registered')
   return { profile, registration, existed: !!existingRegistration }
 }
 
+/*
 const sendInstallNotifications = async ({ app, profile, existed }) => {
   try {
     if (existed) {
@@ -125,6 +138,7 @@ const sendInstallNotifications = async ({ app, profile, existed }) => {
     oauthLog.error({ err, profile }, 'notification sending failed')
   }
 }
+*/
 
 export const requestForTeam = (req, resp) => {
   try {
@@ -172,7 +186,7 @@ export const requestForUser = (req, resp) => {
   }
 }
 
-export const grantForTeam = (app, verifyAuth = verifyAuthCode, verifyState = verifyStateToken, sendNotifications = sendInstallNotifications) => async (req, resp) => {
+export const grantForTeam = (app, verifyAuth = verifyAuthCode, verifyState = verifyStateToken, sendNotifications = () => {}) => async (req, resp) => {
   try {
     const { code, state: stateToken } = req.query
     const { redirectUri } = await verifyState(stateToken)
@@ -192,7 +206,7 @@ export const grantForTeam = (app, verifyAuth = verifyAuthCode, verifyState = ver
   }
 }
 
-export const grantForUser = (app, verifyAuth = verifyAuthCode, verifyState = verifyStateToken, sendNotifications = sendInstallNotifications) => async (req, resp) => {
+export const grantForUser = (app, verifyAuth = verifyAuthCode, verifyState = verifyStateToken, sendNotifications = () => {}) => async (req, resp) => {
   try {
     const { code, state: stateToken } = req.query
     const { redirectUri } = await verifyState(stateToken)

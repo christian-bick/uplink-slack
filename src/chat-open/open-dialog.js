@@ -1,9 +1,8 @@
-import store from "../store"
+import store from '../store'
 
 export const showOpenChatDialog = (app) => async ({ body, context, ack }) => {
   ack()
-  const { email: userEmail } = await store.slack.profile.get([context.teamId, context.userId])
-  const contacts = await store.user.contacts.smembers(userEmail)
+  const contacts = await store.account.contacts.smembers(context.accountId)
   if (!contacts || contacts.length < 1) {
     await app.client.dialog.open(buildOpenChatWithoutContactsDialog(context.botToken, body.trigger_id))
   } else {
@@ -39,11 +38,18 @@ export const buildOpenChatDialog = (token, triggerId) => ({
     'submit_label': 'Start',
     'elements': [
       {
-        'type': 'select',
-        'label': 'Your contact\'s email address',
+        'type': 'text',
+        'subtype': 'email',
+        'label': 'Find a contact by email',
         'name': 'email',
         'placeholder': 'john.smith@example.com',
-        'data_source': 'external'
+        'optional': true
+      }, {
+        'type': 'select',
+        'label': 'Or select an existing contact',
+        'name': 'accountId',
+        'data_source': 'external',
+        'optional': true
       }
     ]
   }

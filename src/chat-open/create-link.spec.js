@@ -64,12 +64,11 @@ describe('create-link', () => {
 
   describe('createLink', () => {
     const teamId = 'current-team-id'
-    const userId = 'current-user-id'
     const userEmail = 'current-user@x.com'
+    const userAccountId = 'user-account-id'
     const contactName = 'contact name'
     const contactEmail = 'contact@x.com'
-    const contactUserId = 'contact-user-id'
-    const contactTeamId = 'contact-team-id'
+    const contactAccountId = 'contact-account-id'
     const groupId = 'group-id'
     const groupName = 'group-name'
     const createdGroup = {
@@ -78,8 +77,7 @@ describe('create-link', () => {
     }
     const createdLink = {
       platform: 'slack',
-      type: 'group',
-      teamId: teamId,
+      teamId,
       channelId: groupId
     }
     const existingGroupId = 'existing-group-id'
@@ -90,8 +88,7 @@ describe('create-link', () => {
     }
     const existingLink = {
       platform: 'slack',
-      type: 'group',
-      teamId: teamId,
+      teamId,
       channelId: existingGroupId
     }
 
@@ -105,8 +102,7 @@ describe('create-link', () => {
       })
       app.client.conversations.invite = sandbox.fake()
       app.client.conversations.unarchive = sandbox.fake()
-      await store.slack.profile.set([contactTeamId, contactUserId], {
-        email: contactEmail,
+      await store.account.profile.set(contactAccountId, {
         name: contactName
       })
     })
@@ -114,19 +110,9 @@ describe('create-link', () => {
     beforeEach('prepare params', () => {
       params = {
         app,
-        context: { botToken: 'bot-token', userToken: 'user-token', botId: 'bot-id' },
-        source: {
-          platform: 'slack',
-          userId: userId,
-          teamId: teamId,
-          email: userEmail
-        },
-        sink: {
-          platform: 'slack',
-          userId: contactUserId,
-          teamId: contactTeamId,
-          email: contactEmail
-        }
+        context: { botToken: 'bot-token', userToken: 'user-token', botId: 'bot-id', teamId },
+        sourceAccountId: userAccountId,
+        sinkAccountId: contactAccountId
       }
     })
 
@@ -155,29 +141,23 @@ describe('create-link', () => {
 
       it('should create a link when it does not exist yet', async () => {
         await createLink(params)
-        const link = await store.link.get([userEmail, contactEmail])
+        const link = await store.account.link.get([userAccountId, contactAccountId])
         expect(link).to.eql(createdLink)
       })
 
       it('should create a slack group when link does not exist yet', async () => {
         await createLink(params)
-        const createdGroup = await store.slack.group.get([teamId, groupId])
+        const createdGroup = await store.slack.conversation.get([teamId, groupId])
         expect(createdGroup).to.eql({
           mode: 'direct-message',
-          source: {
-            teamId: teamId,
-            userId: userId,
-            email: userEmail
-          },
-          sink: {
-            email: contactEmail
-          }
+          sourceAccountId: userAccountId,
+          sinkAccountId: contactAccountId
         })
       })
 
       it('should return existing link when link and group already exist', async () => {
-        await store.link.set([userEmail, contactEmail], existingLink)
-        await store.slack.group.set([teamId, existingGroupId], existingGroup)
+        await store.account.link.set([userAccountId, contactAccountId], existingLink)
+        await store.slack.conversation.set([teamId, existingGroupId], existingGroup)
         const result = await createLink(params)
         expect(result).to.eql({
           alreadyExisted: true,
@@ -186,7 +166,7 @@ describe('create-link', () => {
       })
 
       it('should return a new link and group when link exists but group does not', async () => {
-        await store.link.set([userEmail, contactEmail], existingLink)
+        await store.account.link.set([userEmail, contactEmail], existingLink)
         app.client.conversations.info = sandbox.fake.returns(null)
         const result = await createLink(params)
         expect(result).to.eql({
@@ -196,32 +176,26 @@ describe('create-link', () => {
       })
 
       it('should create a new slack group when link exists but group does not', async () => {
-        await store.link.set([userEmail, contactEmail], existingLink)
+        await store.account.link.set([userEmail, contactEmail], existingLink)
         app.client.conversations.info = sandbox.fake.returns(null)
         await createLink(params)
-        const createdGroup = await store.slack.group.get([teamId, groupId])
+        const createdGroup = await store.slack.conversation.get([teamId, groupId])
         expect(createdGroup).to.eql({
           mode: 'direct-message',
-          source: {
-            teamId: teamId,
-            userId: userId,
-            email: userEmail
-          },
-          sink: {
-            email: contactEmail
-          }
+          sourceAccountId: userAccountId,
+          sinkAccountId: contactAccountId
         })
       })
 
       it('should unarchive group when when link exists and group is archived ', async () => {
-        await store.link.set([userEmail, contactEmail], existingLink)
+        await store.account.link.set([userAccountId, contactAccountId], existingLink)
         app.client.conversations.info = sandbox.fake.returns({ channel: { is_archived: true }})
         await createLink(params)
         expect(app.client.conversations.unarchive).to.be.calledOnce
       })
 
       it('should return existing link when link exsists and group is archived ', async () => {
-        await store.link.set([userEmail, contactEmail], existingLink)
+        await store.account.link.set([userAccountId, contactAccountId], existingLink)
         app.client.conversations.info = sandbox.fake.returns({ channel: { is_archived: true }})
         const result = await createLink(params)
         expect(result).to.eql({
@@ -262,7 +236,7 @@ describe('create-link', () => {
     describe('error scenarios', () => {
       it('should throw error when slack request fails', async () => {
         app.client.conversations.create.throws(new Error('not_allowed'))
-        await expect(createLink(params)).to.be.rejectedWith(Error, buildCannotCreateGroupInfo(contactEmail, 'not_allowed'))
+        await expect(createLink(params)).to.be.rejectedWith(Error, buildCannotCreateGroupInfo('not_allowed'))
       })
     })
   })

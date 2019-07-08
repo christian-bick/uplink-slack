@@ -5,7 +5,7 @@
   "main": "src/index.js",
   "scripts": {
     "e2e": "LOG_LEVEL=fatal REDIS_MOCK=true mocha -r esm -r dotenv/config -r test/test-setup.js -r chai/register-expect --recursive test/e2e/",
-    "ut": "LOG_LEVEL=fatal REDIS_MOCK=true mocha -r esm -r dotenv/config -r test/test-setup.js test/helpers-ut.js src/**/*.spec.js",
+    "ut": "LOG_LEVEL=fatal REDIS_MOCK=true mocha -r esm -r dotenv/config -r test/test-setup.js test/helpers-ut.js src/*.spec.js src/**/*.spec.js",
     "watch": "npm run ut  -- --watch -- --reporter=min",
     "test": "npm run ut && npm run e2e",
     "lint": "eslint \"src/**/*\" \"test/**/*\"",
@@ -28,6 +28,7 @@
     "esm": "^3.2.25",
     "express": "^4.14.0",
     "ioredis": "^4.9.5",
+    "js-sha256": "^0.9.0",
     "json2md": "^1.6.3",
     "jsonwebtoken": "^8.5.1",
     "lodash": "^4.17.11",

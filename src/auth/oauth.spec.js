@@ -14,7 +14,7 @@ import store from '../store'
 describe('oauth', () => {
   const userId = 'user-id'
   const teamId = 'team-id'
-  const userEmail = 'user-email'
+  const userEmail = 'user@email.com'
   const userName = 'user-name'
   const userImage = 'user-image'
   const userToken = 'user-token'
@@ -104,12 +104,15 @@ describe('oauth', () => {
     })
 
     const expectUserRegistered = async () => {
-      const registration = await store.user.registration.get(userEmail)
+      const registration = await store.registration.get(userEmail)
+      expect(registration.accountId).to.exist
+      expect(registration.createDate).to.exist
+      const accountProfile = await store.account.profile.get(registration.accountId)
+      expect(accountProfile).to.eql({ name: userName, avatar: userImage })
+      const accountMedium = await store.account.medium.get(registration.accountId)
+      expect(accountMedium).to.eql({ teamId, userId, platform: 'slack' })
       const slackUser = await store.slack.user.get([teamId, userId])
-      const slackProfile = await store.slack.profile.get([teamId, userId])
-      expect(registration).to.eql({ platform: 'slack', teamId, userId, email: userEmail })
-      expect(slackUser).to.eql({ teamId, userId, userToken, scope })
-      expect(slackProfile).to.eql({ email: userEmail, name: userName, image48: userImage })
+      expect(slackUser).to.eql({ teamId, userId, userToken, scope, accountId: registration.accountId })
     }
 
     const expectNotifcationSent = async () => {

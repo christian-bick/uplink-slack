@@ -1,5 +1,5 @@
 import store from '../store'
-import { userAuthLink } from '../global'
+import { userAuthLink } from '../links'
 import { buildPrimaryActions } from './entry-actions'
 import { block, element, object, TEXT_FORMAT_MRKDWN } from 'slack-block-kit'
 

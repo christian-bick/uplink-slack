@@ -31,7 +31,7 @@ export const forwardMessage = (
 
     forwardLog.debug({ message, context }, 'received message')
 
-    const userSlackGroup = await store.slack.group.get([context.teamId, message.channel])
+    const userSlackGroup = await store.slack.conversation.get([context.teamId, message.channel])
     if (!userSlackGroup) {
       forwardLog.debug('skipping forwarding (not a linked group)')
       return
@@ -45,27 +45,28 @@ export const forwardMessage = (
       say(buildNotSupportedMessage(message.subtype))
       return
     }
-    if (context.userId !== userSlackGroup.source.userId) {
-      forwardLog.debug('skipping forwarding (not a linked user)')
+    if (context.accountId !== userSlackGroup.sourceAccountId) {
+      forwardLog.debug('skipping forwarding (not a linked account)')
       return
     }
-    let reverseLink = await store.link.get([userSlackGroup.sink.email, userSlackGroup.source.email])
-    if (reverseLink) {
-      forwardLog.debug({ reverseLink }, 'found reverse link')
+    let contactLink = await store.account.link.get([userSlackGroup.sinkAccountId, userSlackGroup.sourceAccountId])
+    if (contactLink) {
+      forwardLog.debug({ reverseLink: contactLink }, 'found reverse link')
     } else {
       forwardLog.debug('attempting to create reverse link')
       const reverseLinkResult = await createReverseLink({ app, slackGroup: userSlackGroup })
-      reverseLink = reverseLinkResult.link
-      forwardLog.debug({ reverseLink }, 'reverse link created')
+      contactLink = reverseLinkResult.link
+      forwardLog.debug({ reverseLink: contactLink }, 'reverse link created')
     }
-    const contactTeam = await store.slack.team.get(reverseLink.teamId)
-    const userProfile = await store.slack.profile.get([context.teamId, context.userId])
+
+    const userProfile = await store.account.profile.get(context.accountId)
+    const contactTeam = await store.slack.team.get(contactLink.teamId)
 
     const target = {
-      username: userProfile.name || userProfile.email,
+      username: userProfile.name,
       token: contactTeam.botToken,
-      channel: reverseLink.channelId,
-      team: reverseLink.teamId
+      channel: contactLink.channelId,
+      team: contactLink.teamId
     }
 
     if (message.thread_ts) {
@@ -73,8 +74,8 @@ export const forwardMessage = (
 
       const matchingMessage = await findMatchingMessage({
         app,
-        channelId: reverseLink.channelId,
-        teamId: reverseLink.teamId,
+        channelId: contactLink.channelId,
+        teamId: contactLink.teamId,
         userId: message.parent_user_id,
         botId: context.botId,
         ts: message.thread_ts
@@ -91,14 +92,14 @@ export const forwardMessage = (
         say(FAILED_TO_FORWARD_THREAD_MESSAGE)
       }
     }
-    if (userProfile.image48) {
-      target.icon_url = userProfile.image48
+    if (userProfile.avatar) {
+      target.icon_url = userProfile.avatar
     }
     forwardLog.debug({ message, target }, 'attempting to forward message')
     const forwardDelegate = delegateForwarding(message)
     if (forwardDelegate) {
       await forwardDelegate({ app, context, message, say, target })
-      forwardLog.info({ context, message, reverseLink }, 'message forwarded')
+      forwardLog.info({ context, message, reverseLink: contactLink }, 'message forwarded')
     } else {
       forwardLog.error({ message }, 'a supported message subtype is missing implementation')
       say(FAILED_TO_FORWARD_MESSAGE)

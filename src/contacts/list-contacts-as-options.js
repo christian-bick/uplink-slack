@@ -1,6 +1,8 @@
 import store from '../store'
 import stringSimilarity from 'string-similarity'
 import { extractEmails } from './email'
+import redis from '../redis'
+import { accountProfileKey } from '../redis-keys'
 
 const rateCriteria = (criteria, emailParts) => {
   return highestRating(emailParts.map(part => ratePart(criteria, part)))
@@ -33,22 +35,16 @@ export const filterEmails = (searchString, emailList) => {
 
 export const listContactsAsOptions = (app) => async ({ body, context, ack }) => {
   const searchString = body.value
-  const { email: userEmail } = await store.slack.profile.get([context.teamId, context.userId])
-  const contacts = await store.user.contacts.smembers(userEmail)
-  const filteredContacts = filterEmails(searchString, contacts)
+  const contacts = await store.account.contacts.smembers(context.accountId)
+  const contactProfiles = await contacts.reduce((multi, accountId) => multi.get(accountProfileKey(accountId)), redis.multi()).execAsync().map(JSON.parse)
+  const zippedProfiles = contacts.map((accountId, index) => ({ ...contactProfiles[index], accountId }))
 
-  const options = filteredContacts.map(contact => ({
-    label: contact,
-    value: contact
+  const filteredProfiles = zippedProfiles.filter(profile => profile.name.includes(searchString))
+
+  const options = filteredProfiles.map(profile => ({
+    label: profile.name,
+    value: profile.accountId
   }))
-
-  const extractedEmails = extractEmails(searchString)
-  if (extractedEmails && extractedEmails[0]) {
-    options.push({
-      label: searchString,
-      value: extractedEmails[0]
-    })
-  }
 
   await ack({ options })
 }

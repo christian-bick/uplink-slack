@@ -1,27 +1,29 @@
-import userRegistration from './user-registration'
-import userContacts from './user-contacts'
-import userContactsMirrored from './user-contacts-mirrored'
-import userInvites from './user-invites'
+import registration from './registration'
+import invites from './invites'
 
-import link from './link'
+import accountProfile from './account-profile'
+import accountLink from './account-link'
+import accountAddress from './account-address'
+import accountContacts from './account-contacts'
+import accountMedium from './account-medium'
 
 import slackUser from './slack-user'
 import slackTeam from './slack-team'
-import slackGroup from './slack-group'
-import slackProfile from './slack-profile'
+import slackConversation from './slack-conversation'
 
 export default {
-  link,
+  registration,
+  invites,
   slack: {
     team: slackTeam,
     user: slackUser,
-    profile: slackProfile,
-    group: slackGroup
+    conversation: slackConversation
   },
-  user: {
-    registration: userRegistration,
-    contacts: userContacts,
-    contactsMirrored: userContactsMirrored,
-    invites: userInvites
+  account: {
+    medium: accountMedium,
+    link: accountLink,
+    profile: accountProfile,
+    address: accountAddress,
+    contacts: accountContacts,
   }
 }
