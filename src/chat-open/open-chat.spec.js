@@ -2,7 +2,7 @@ import {
   buildCannotConnectToYourselfMessage,
   buildContactNotFoundMessage,
   buildGroupAlreadyExistsMessage,
-  buildGroupCreatedMessage,
+  buildGroupCreatedMessage, buildNotContactSelected,
   openChat
 } from './open-chat'
 
@@ -56,6 +56,19 @@ describe('openChat', () => {
       ack: sandbox.fake(),
       say: sandbox.fake()
     }
+  })
+
+  describe('no contact selected', () => {
+    it('should ack with error', async () => {
+      params.body.submission.email = null
+      await openChat(app)(params)
+      expect(params.ack, 'ack').to.be.calledOnceWith({
+        errors: [{
+          name: 'email',
+          error: buildNotContactSelected()
+        }]
+      })
+    })
   })
 
   describe('current user is same as contact', () => {

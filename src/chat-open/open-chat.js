@@ -14,20 +14,25 @@ const { button } = element
 
 export const openChat = (app) => async ({ action, body, context, ack, say }) => {
   try {
-    ack()
     let contactAccountId = body && body.submission && body.submission.accountId
     if (!contactAccountId) {
       const contactEmail = action && action.value ? action.value : body.submission.email
       if (!contactEmail) {
-        say(buildNoInputMessage())
+        ack({ errors: [{
+          name: 'email',
+          error: buildNotContactSelected()
+        }]})
         return
       }
+      ack()
       const contactRegistration = await store.registration.get(contactEmail)
       if (!contactRegistration) {
         say(buildContactNotFoundMessage(context, contactEmail))
         return
       }
       contactAccountId = contactRegistration.accountId
+    } else {
+      ack()
     }
 
     if (contactAccountId === context.accountId) {
@@ -69,9 +74,9 @@ export const openChat = (app) => async ({ action, body, context, ack, say }) => 
   }
 }
 
-export const buildCannotConnectToYourselfMessage = () => {
-  return `Looks like this your own email address.`
-}
+export const buildNotContactSelected = () => 'Please enter an email address or select an existing contact'
+
+export const buildCannotConnectToYourselfMessage = () => 'Looks like this your own email address.'
 
 export const buildRegistrationNotFoundMessage = (context) => {
   return { blocks: [
