@@ -40,8 +40,6 @@ export const openChat = (app) => async ({ action, body, context, ack, say }) => 
       return
     }
 
-    await store.account.contacts.sadd(context.accountId, [ contactAccountId ])
-
     const linkResult = await createLink({
       app,
       context,

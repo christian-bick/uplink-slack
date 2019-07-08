@@ -101,6 +101,7 @@ export const createLink = async ({ app, context, sourceAccountId, sinkAccountId 
         channelId: created.channel.id
       }
       await store.account.link.set([sourceAccountId, sinkAccountId], link)
+      await store.account.contacts.sadd(sourceAccountId, [ sinkAccountId ])
 
       appLog.info({ sourceAccountId, sinkAccountId }, 'link created (using new group)')
       return LinkResult.created(link)

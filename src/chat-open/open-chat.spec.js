@@ -94,28 +94,6 @@ describe('openChat', () => {
       await store.registration.set(contactEmail, { accountId: contactAccountId })
     })
 
-    it('should add a contact entry to empty contacts', async () => {
-      await openChat(app)(params)
-      const contacts = await store.account.contacts.smembers(userAccountId)
-      expect(contacts).to.contain(contactAccountId)
-    })
-
-    it('should not create a duplicate contact entry when contact already exists', async () => {
-      await store.account.contacts.sadd(userAccountId, [ contactAccountId ])
-      await openChat(app)(params)
-      const contacts = await store.account.contacts.smembers(userAccountId)
-      expect(contacts).to.have.lengthOf(1)
-    })
-
-    it('should add a contact entry to existing contacts', async () => {
-      const existingAccountId = 'some-other-account-id'
-      await store.account.contacts.sadd(userAccountId, [ existingAccountId ])
-      await openChat(app)(params)
-      const contacts = await store.account.contacts.smembers(userAccountId)
-      expect(contacts).to.contain(contactAccountId)
-      expect(contacts).to.contain(existingAccountId)
-    })
-
     describe('group name available', () => {
       beforeEach('prepare conversations.create', () => {
         app.client.conversations.create.returns({ channel: { id: groupId, name: 'group-name' } })
