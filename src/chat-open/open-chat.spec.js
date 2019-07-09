@@ -2,7 +2,7 @@ import {
   buildCannotConnectToYourselfMessage,
   buildContactNotFoundMessage,
   buildGroupAlreadyExistsMessage,
-  buildGroupCreatedMessage, buildNotContactSelected,
+  buildGroupCreatedMessage, buildNotContactSelected, buildQuotaExceededMessage, OPEN_CHAT_QUOTA_LIMIT,
   openChat
 } from './open-chat'
 
@@ -131,6 +131,20 @@ describe('openChat', () => {
         await openChat(app)(params)
         const expectedMsg = BotError.buildMessage(buildCannotCreateGroupInfo('not_allowed'), context)
         expect(params.say, 'say').to.be.calledOnceWith(expectedMsg)
+      })
+    })
+
+    describe('quota exceeded', () => {
+      beforeEach(async () => {
+        let usage = 0
+        while (usage < OPEN_CHAT_QUOTA_LIMIT) {
+          usage = await store.usage.chats.incr(userAccountId, 5)
+        }
+      })
+
+      it('should respond with quota exceeded message', async () => {
+        await openChat(app)(params)
+        expect(params.say, 'say').to.be.calledOnceWith(buildQuotaExceededMessage())
       })
     })
   })

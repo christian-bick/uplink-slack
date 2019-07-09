@@ -11,6 +11,9 @@ const { text } = object
 const { section, divider } = block
 const { button } = element
 
+export const OPEN_CHAT_QUOTA_LIMIT = 100
+export const OPEN_CHAT_QUOTA_WINDOW = 86400 // 24h in seconds
+
 export const openChat = (app) => async ({ action, body, context, ack, say }) => {
   try {
     let contactAccountId = body && body.submission && body.submission.accountId
@@ -36,6 +39,12 @@ export const openChat = (app) => async ({ action, body, context, ack, say }) => 
 
     if (contactAccountId === context.accountId) {
       say(buildCannotConnectToYourselfMessage())
+      return
+    }
+
+    const usage = await store.usage.chats.incr(context.accountId, OPEN_CHAT_QUOTA_WINDOW)
+    if (usage > OPEN_CHAT_QUOTA_LIMIT) {
+      say(buildQuotaExceededMessage())
       return
     }
 
@@ -105,8 +114,8 @@ export const buildGroupCreatedMessage = ({ userId }, userName) => {
   _To block ${userName}, simply archive this channel (but don't delete it)._`
 }
 
-export const buildNoInputMessage = () => {
-  return 'Please enter an email address or select an existing user.'
+export const buildQuotaExceededMessage = () => {
+  return `You can only open ${OPEN_CHAT_QUOTA_LIMIT} chats per day`
 }
 
 export const buildCreateLinkFailureMessage = (context) =>

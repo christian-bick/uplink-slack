@@ -16,3 +16,4 @@ export const slackTeamKey = (teamId) => key(['slack', 'team'], [teamId])
 export const slackConversationKey = (teamId, groupId) => key(['slack', 'conversation'], [ teamId, groupId ])
 
 export const usageInvitesKey = (accountId) => key(['usage', 'invites'], [ accountId ])
+export const usageChatsKey = (accountId) => key(['usage', 'chats'], [ accountId ])

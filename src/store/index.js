@@ -12,6 +12,7 @@ import slackTeam from './slack-team'
 import slackConversation from './slack-conversation'
 
 import usageInvites from './usage-invites'
+import usageChats from "./usage-chats"
 
 export default {
   registration,
@@ -30,5 +31,6 @@ export default {
   },
   usage: {
     invites: usageInvites,
+    chats: usageChats
   }
 }

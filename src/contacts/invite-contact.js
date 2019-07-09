@@ -8,7 +8,7 @@ export const INVITE_NAME = 'Uplink Chat'
 export const INVITE_EMAIL = 'invite@uplink-chat.com'
 export const INVITE_IDLE = 86400 // 24h in seconds
 export const INVITE_QUOTA_LIMIT = 25
-export const INVITE_QUOTA_TIME = 86400 // 24h in seconds
+export const INVITE_QUOTA_WINDOW = 86400 // 24h in seconds
 
 const ses = new AWS.SES({ region: 'eu-west-1' })
 
@@ -32,7 +32,7 @@ export const inviteContact = (app, sendEmail = sendEmailViaSes, inviteIdle = INV
     return
   }
 
-  const usage = await store.usage.invites.incr(context.accountId, INVITE_QUOTA_TIME)
+  const usage = await store.usage.invites.incr(context.accountId, INVITE_QUOTA_WINDOW)
   if (usage > INVITE_QUOTA_LIMIT) {
     appLog.info({ context, email: contactEmail }, 'invite not sent out (quota exceeded)')
     say('You can only invite 25 contacts per day.')
