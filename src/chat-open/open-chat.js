@@ -45,7 +45,7 @@ export const openChat = (app) => async ({ action, body, context, ack, say }) => 
     const usage = await store.usage.chats.incr(context.accountId, OPEN_CHAT_QUOTA_WINDOW)
     if (usage > OPEN_CHAT_QUOTA_LIMIT) {
       say(buildQuotaExceededMessage())
-      appLog.info({ potentialAbuse: true, context }, 'quota limit for open chat exceeded')
+      appLog.info({ potentialAbuse: 'spam', context }, 'quota limit for open chat exceeded')
       return
     }
 

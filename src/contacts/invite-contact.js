@@ -34,7 +34,7 @@ export const inviteContact = (app, sendEmail = sendEmailViaSes, inviteIdle = INV
 
   const usage = await store.usage.invites.incr(context.accountId, INVITE_QUOTA_WINDOW)
   if (usage > INVITE_QUOTA_LIMIT) {
-    appLog.info({ potentialAbuse: true, context, email: contactEmail }, 'invite not sent out (quota exceeded)')
+    appLog.info({ potentialAbuse: 'spam', context, email: contactEmail }, 'invite not sent out (quota exceeded)')
     say('You can only invite 25 contacts per day.')
     return
   }
