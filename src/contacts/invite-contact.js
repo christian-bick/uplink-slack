@@ -7,6 +7,8 @@ export const INVITE_LINK = 'https://www.uplink-chat.com'
 export const INVITE_NAME = 'Uplink Chat'
 export const INVITE_EMAIL = 'invite@uplink-chat.com'
 export const INVITE_IDLE = 86400 // 24h in seconds
+export const INVITE_QUOTA_LIMIT = 25
+export const INVITE_QUOTA_TIME = 86400 // 24h in seconds
 
 const ses = new AWS.SES({ region: 'eu-west-1' })
 
@@ -18,15 +20,22 @@ export const inviteContact = (app, sendEmail = sendEmailViaSes, inviteIdle = INV
 
   const registration = await store.registration.get(contactEmail)
   if (registration) {
-    appLog.info({ email: contactEmail }, 'invite not sent out (existing registration)')
+    appLog.info({ context, email: contactEmail }, 'invite not sent out (existing registration)')
     say(`The email address ${contactEmail} is already registered and you can start a conversation at any time.`)
     return
   }
 
   const invite = await store.invites.get(contactEmail)
   if (invite) {
-    appLog.info({ email: contactEmail }, 'invite not sent out (existing invite)')
+    appLog.info({ context, email: contactEmail }, 'invite not sent out (existing invite)')
     say(`We already sent out an invite to ${contactEmail} lately.`)
+    return
+  }
+
+  const usage = await store.usage.invites.incr(context.accountId, INVITE_QUOTA_TIME)
+  if (usage > INVITE_QUOTA_LIMIT) {
+    appLog.info({ context, email: contactEmail }, 'invite not sent out (quota exceeded)')
+    say('You can only invite 25 contacts per day.')
     return
   }
 

@@ -14,3 +14,5 @@ export const accountLinkKey = (sourceAccountId, sinkAccountId) => key(['account'
 export const slackUserKey = (teamId, userId) => key(['slack', 'user'], [ teamId, userId ])
 export const slackTeamKey = (teamId) => key(['slack', 'team'], [teamId])
 export const slackConversationKey = (teamId, groupId) => key(['slack', 'conversation'], [ teamId, groupId ])
+
+export const usageInvitesKey = (accountId) => key(['usage', 'invites'], [ accountId ])

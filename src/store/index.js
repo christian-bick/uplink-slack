@@ -11,6 +11,8 @@ import slackUser from './slack-user'
 import slackTeam from './slack-team'
 import slackConversation from './slack-conversation'
 
+import usageInvites from './usage-invites'
+
 export default {
   registration,
   invites,
@@ -25,5 +27,8 @@ export default {
     profile: accountProfile,
     address: accountAddress,
     contacts: accountContacts
+  },
+  usage: {
+    invites: usageInvites,
   }
 }

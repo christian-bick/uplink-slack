@@ -1,4 +1,4 @@
-import { INVITE_EMAIL, INVITE_LINK, INVITE_NAME, inviteContact } from './invite-contact'
+import { INVITE_EMAIL, INVITE_LINK, INVITE_NAME, INVITE_QUOTA_LIMIT, inviteContact } from './invite-contact'
 import store from '../store'
 
 describe('inviteContact', () => {
@@ -71,6 +71,23 @@ describe('inviteContact', () => {
     })
 
     it('should not send out email when already registered', async () => {
+      await inviteContact(app, sendEmail)({ context, action, body, ack, say, respond })
+      expect(ack).to.be.called
+      expect(say).to.be.called
+      expect(respond).to.not.be.called
+      expect(sendEmail).to.not.be.called
+    })
+  })
+
+  describe('quota exceeded', () => {
+    beforeEach(async () => {
+      let usage = 0
+      while (usage < INVITE_QUOTA_LIMIT) {
+        usage = await store.usage.invites.incr(userAccountId, 5)
+      }
+    })
+
+    it('should not send out email when quota exceeded', async () => {
       await inviteContact(app, sendEmail)({ context, action, body, ack, say, respond })
       expect(ack).to.be.called
       expect(say).to.be.called
