@@ -23,8 +23,8 @@ export const inviteContact = (app, sendEmail = sendEmailViaSes, inviteIdle = INV
     return
   }
 
-  const invites = await store.invites.get(contactEmail)
-  if (invites) {
+  const invite = await store.invites.get(contactEmail)
+  if (invite) {
     appLog.info({ email: contactEmail }, 'invite not sent out (existing invite)')
     say(`We already sent out an invite to ${contactEmail} lately.`)
     return
