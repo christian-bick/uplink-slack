@@ -11,7 +11,7 @@ const { text } = object
 const { section, divider } = block
 const { button } = element
 
-export const OPEN_CHAT_QUOTA_LIMIT = 100
+export const OPEN_CHAT_QUOTA_LIMIT = 25
 export const OPEN_CHAT_QUOTA_WINDOW = 86400 // 24h in seconds
 
 export const openChat = (app) => async ({ action, body, context, ack, say }) => {
@@ -45,6 +45,7 @@ export const openChat = (app) => async ({ action, body, context, ack, say }) => 
     const usage = await store.usage.chats.incr(context.accountId, OPEN_CHAT_QUOTA_WINDOW)
     if (usage > OPEN_CHAT_QUOTA_LIMIT) {
       say(buildQuotaExceededMessage())
+      appLog.info({ potentialAbuse: true, context }, 'quota limit for open chat exceeded')
       return
     }
 
