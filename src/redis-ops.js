@@ -1,4 +1,5 @@
 import redis from './redis'
+import {usageInvitesKey} from "./redis-keys"
 
 const saveMarshal = (entity) => {
   const entityType = typeof entity
@@ -11,3 +12,16 @@ const saveMarshal = (entity) => {
 
 export const setJson = (key, entity) => redis.setAsync(key, saveMarshal(entity))
 export const getJson = (key) => redis.getAsync(key).then((JSON.parse))
+
+export const incrAndExpire = async (key, ttl) => {
+  const currentValue = await redis.getAsync(key)
+  if (!currentValue) {
+    return redis.multi()
+    .incr(usageInvitesKey(key))
+    .expire(usageInvitesKey(key), ttl)
+    .execAsync()
+    .then(result => result[0])
+  } else {
+    return redis.incr(usageInvitesKey(key))
+  }
+}
