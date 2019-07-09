@@ -1,5 +1,4 @@
 import redis from './redis'
-import {usageInvitesKey} from "./redis-keys"
 
 const saveMarshal = (entity) => {
   const entityType = typeof entity
@@ -17,11 +16,11 @@ export const incrAndExpire = async (key, ttl) => {
   const currentValue = await redis.getAsync(key)
   if (!currentValue) {
     return redis.multi()
-    .incr(usageInvitesKey(key))
-    .expire(usageInvitesKey(key), ttl)
+    .incr(key)
+    .expire(key, ttl)
     .execAsync()
     .then(result => result[0])
   } else {
-    return redis.incr(usageInvitesKey(key))
+    return redis.incrAsync(key)
   }
 }
