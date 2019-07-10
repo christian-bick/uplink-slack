@@ -51,7 +51,8 @@ export const inviteContact = (app, sendEmail = sendEmailViaSes, inviteIdle = INV
     Template: 'invite-contact-v1',
     TemplateData: JSON.stringify({
       sender: {
-        name: userProfile.name
+        name: userProfile.name,
+        email: userProfile.email || 'email unkown',
       },
       recipient: {
         name: 'there'
