@@ -1,9 +1,9 @@
 import { slackTeamKey } from '../redis-keys'
-import { getJson, setJson } from '../redis-ops'
+import { setEncryptedJson, getEncryptedJson } from '../redis-ops'
 
 const slackTeam = {
-  set: (teamId, team) => setJson(slackTeamKey(teamId), team),
-  get: (teamId) => getJson(slackTeamKey(teamId))
+  set: (teamId, team) => setEncryptedJson(slackTeamKey(teamId), team),
+  get: (teamId) => getEncryptedJson(slackTeamKey(teamId))
 }
 
 export default slackTeam
