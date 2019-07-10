@@ -24,6 +24,7 @@ const baseUri = (req) => `https://${req.hostname}`
 
 export const successUri = (req, team) => `${baseUri(req)}/oauth-success.html?teamId=${team.teamId}&botId=${team.botId}`
 export const errorUri = (req) => `${baseUri(req)}/oauth-error.html`
+export const teamAuthUri = (req) => `${baseUri(req)}/oauth/team/request`
 
 export const generateStateToken = (payload) => jwt.sign(payload, SLACK_SIGNING_SECRET, { expiresIn: '30 minutes' })
 export const verifyStateToken = async (token) => promisify(jwt.verify)(token, SLACK_SIGNING_SECRET)
@@ -152,10 +153,20 @@ export const requestForTeam = (req, resp) => {
   }
 }
 
-export const requestForUser = (req, resp) => {
+export const requestForUser = async (req, resp) => {
   try {
-    const redirectUri = `${baseUri(req)}/oauth/user/grant`
     const teamId = req.query.teamId
+
+    // When the team does not exist we redirect to install for teams
+    if (teamId) {
+      const team = await store.slack.team.get(teamId)
+      if (!team) {
+        resp.redirect(302, teamAuthUri(req))
+        return
+      }
+    }
+
+    const redirectUri = `${baseUri(req)}/oauth/user/grant`
 
     const stateToken = generateStateToken({
       verificationCode: uuid(),

@@ -6,7 +6,7 @@ import {
   requestForUser,
   grantForTeam,
   grantForUser,
-  errorUri, SLACK_CLIENT_ID
+  errorUri, SLACK_CLIENT_ID, teamAuthUri
 } from './oauth'
 import { omit } from 'lodash'
 import store from '../store'
@@ -53,7 +53,7 @@ describe('oauth', () => {
   })
 
   describe('auth requests', () => {
-    const req = { hostname: 'host.com', query: { teamId } }
+    const req = { hostname: 'host.com', query: {} }
     const resp = { }
 
     beforeEach('prepare', () => {
@@ -69,10 +69,39 @@ describe('oauth', () => {
     })
 
     describe('requestForUser', () => {
-      it('should redirect to Slack', async () => {
-        await requestForUser(req, resp)
-        expect(resp.redirect).to.be.calledOnce
-        expect(resp.redirect).to.not.be.calledWith(302, errorUri(req))
+      describe('no team param given', () => {
+        it('should redirect to Slack', async () => {
+          await requestForUser(req, resp)
+          expect(resp.redirect).to.be.calledOnce
+          expect(resp.redirect).to.not.be.calledWith(302, teamAuthUri(req))
+          expect(resp.redirect).to.not.be.calledWith(302, errorUri(req))
+        })
+      })
+
+      describe('team param given and team exists', () => {
+        beforeEach(() => {
+          req.query.teamId = teamId
+          store.slack.team.set(teamId, {})
+        })
+
+        it('should redirect to Slack', async () => {
+          await requestForUser(req, resp)
+          expect(resp.redirect).to.be.calledOnce
+          expect(resp.redirect).to.not.be.calledWith(302, teamAuthUri(req))
+          expect(resp.redirect).to.not.be.calledWith(302, errorUri(req))
+        })
+      })
+
+      describe('team param given but team does not exist', () => {
+        beforeEach(() => {
+          req.query.teamId = teamId
+        })
+
+        it('should redirect to Slack', async () => {
+          await requestForUser(req, resp)
+          expect(resp.redirect).to.be.calledOnce
+          expect(resp.redirect).to.be.calledWith(302, teamAuthUri(req))
+        })
       })
     })
   })
