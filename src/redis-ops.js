@@ -14,7 +14,7 @@ export const setJson = (key, entity) => redis.setAsync(key, saveMarshal(entity))
 export const getJson = (key) => redis.getAsync(key).then((JSON.parse))
 
 export const setEncryptedJson = (key, entity) => redis.setAsync(key, encrypt(saveMarshal(entity)))
-export const getEncryptedJson = (key, entity) => redis.getAsync(key).then(decrypt).then(JSON.parse)
+export const getEncryptedJson = (key) => redis.getAsync(key).then(value => value ? decrypt(value) : null).then(JSON.parse)
 
 export const incrAndExpire = async (key, ttl) => {
   const currentValue = await redis.getAsync(key)
