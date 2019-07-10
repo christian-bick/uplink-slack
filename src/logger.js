@@ -39,10 +39,6 @@ const obfuscateSensitiveParams = {
   err: bunyan.stdSerializers.err
 }
 
-const statusLog = bunyan.createLogger({ name: 'status', level: LOG_LEVEL })
-const appLog = bunyan.createLogger({ name: 'app', level: LOG_LEVEL, serializers: obfuscateSensitiveParams })
-
-export {
-  statusLog,
-  appLog
-}
+export const statusLog = bunyan.createLogger({ name: 'status', level: LOG_LEVEL })
+export const appLog = bunyan.createLogger({ name: 'app', level: LOG_LEVEL, serializers: obfuscateSensitiveParams })
+export const migrationLog = bunyan.createLogger({ name: 'migration', level: LOG_LEVEL })
