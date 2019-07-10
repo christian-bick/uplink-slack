@@ -4,8 +4,6 @@ import { promisify } from 'util'
 import { appLog } from '../logger'
 import store from '../store'
 import { block, element, object, TEXT_FORMAT_MRKDWN } from 'slack-block-kit'
-import { registrationKey } from '../redis-keys'
-import { obfuscateEmailAddress } from '../obfuscate'
 
 const { text } = object
 const { section, divider } = block
@@ -70,12 +68,8 @@ const registerUser = async (app, user) => {
 
   const profile = {
     name: slackProfile.display_name || slackProfile.real_name,
-    avatar: slackProfile.image_48
-  }
-
-  const address = {
-    displayName: obfuscateEmailAddress(slackProfile.email),
-    registrationKey: registrationKey(slackProfile.email)
+    avatar: slackProfile.image_48,
+    email: slackProfile.email
   }
 
   const medium = {
@@ -86,7 +80,6 @@ const registerUser = async (app, user) => {
 
   await store.registration.set(slackProfile.email, registration)
   await store.account.profile.set(registration.accountId, profile)
-  await store.account.address.set(registration.accountId, address)
   await store.account.medium.set(registration.accountId, medium)
   await store.slack.user.set([user.teamId, user.userId], { ...user, accountId: registration.accountId })
 

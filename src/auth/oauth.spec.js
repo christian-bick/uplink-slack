@@ -108,7 +108,7 @@ describe('oauth', () => {
       expect(registration.accountId).to.exist
       expect(registration.createDate).to.exist
       const accountProfile = await store.account.profile.get(registration.accountId)
-      expect(accountProfile).to.eql({ name: userName, avatar: userImage })
+      expect(accountProfile).to.eql({ name: userName, avatar: userImage, email: userEmail })
       const accountMedium = await store.account.medium.get(registration.accountId)
       expect(accountMedium).to.eql({ teamId, userId, platform: 'slack' })
       const slackUser = await store.slack.user.get([teamId, userId])

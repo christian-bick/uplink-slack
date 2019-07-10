@@ -7,7 +7,6 @@ export const invitesKey = (email) => key(['invites'], [hashed(email)])
 
 export const accountMediumKey = (accountId) => key(['account', 'medium'], [ accountId ])
 export const accountProfileKey = (accountId) => key(['account', 'profile'], [ accountId ])
-export const accountAddressKey = (accountId) => key(['account', 'address'], [ accountId ])
 export const accountContactsKey = (accountId) => key(['account', 'contacts'], [ accountId ])
 export const accountLinkKey = (sourceAccountId, sinkAccountId) => key(['account', 'link'], [sourceAccountId, sinkAccountId])
 

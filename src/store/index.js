@@ -3,7 +3,6 @@ import invites from './invites'
 
 import accountProfile from './account-profile'
 import accountLink from './account-link'
-import accountAddress from './account-address'
 import accountContacts from './account-contacts'
 import accountMedium from './account-medium'
 
@@ -26,7 +25,6 @@ export default {
     medium: accountMedium,
     link: accountLink,
     profile: accountProfile,
-    address: accountAddress,
     contacts: accountContacts
   },
   usage: {
