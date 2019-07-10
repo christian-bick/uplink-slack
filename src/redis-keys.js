@@ -1,4 +1,4 @@
-import { hashed } from './redis-hash'
+import { hashed } from './redis-crypto'
 
 const key = (prefixes, identifiers) => `${prefixes.join('-')}:${identifiers.join('-')}`
 
