@@ -9,7 +9,7 @@ function deploy {
 
     echo "Building ${image}:${tag}"
 
-    docker build --no-cache -t ${image}:${tag} .
+    docker build --build-arg version=$(git rev-parse --short HEAD) --no-cache -t ${image}:${tag} .
 
     echo "Pushing ${image}:${tag} to ${repo}"
 

@@ -1,5 +1,8 @@
 FROM node:10-alpine
 
+ARG version=0
+ENV VERSION=$version
+
 RUN mkdir -p /usr/src/app
 WORKDIR /usr/src/app
 

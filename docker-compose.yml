@@ -11,7 +11,10 @@ services:
     ports:
       - "6379:6379"
   web:
-    build: .
+    build:
+      context: .
+      args:
+        version: 'latest'
     entrypoint: npm run dev
     volumes:
       - ./:/usr/src/app

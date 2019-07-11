@@ -8,6 +8,7 @@ import auth from './auth'
 import entry from './entry'
 import authorize from './auth/authorize'
 import * as express from 'express'
+import { VERSION } from './global'
 
 const PORT = process.env.PORT
 const LOG_LEVEL = process.env.LOG_LEVEL
@@ -40,6 +41,6 @@ export const run = async (port) => {
   // Startup Slack App
   port = port || PORT || 3000
   await app.start(port)
-  statusLog.info(`app is running on port ${port}`)
+  statusLog.info(`app with version ${VERSION} is running on port ${port}`)
   return app
 }
