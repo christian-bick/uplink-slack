@@ -1,3 +1,4 @@
+/* eslint-disable no-unreachable */
 import redis from './redis'
 import { setEncryptedJson } from './redis-ops'
 import { migrationLog } from './logger'
@@ -29,6 +30,8 @@ const migrateKeys = (pattern) => {
 }
 
 export const migrate = async () => {
+  // DISABLED
+  return
   migrationLog.info('starting migration')
   const migrations = KEYS_TO_MIGRATE.map(migrateKeys)
   await Promise.all(migrations)
