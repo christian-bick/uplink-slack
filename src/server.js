@@ -13,7 +13,7 @@ const PORT = process.env.PORT
 const LOG_LEVEL = process.env.LOG_LEVEL
 const SLACK_SIGNING_SECRET = process.env.SLACK_SIGNING_SECRET
 
-const run = async (port) => {
+export const run = async (port) => {
   // Configure Slack App
   const app = new App({
     signingSecret: SLACK_SIGNING_SECRET,
@@ -42,8 +42,4 @@ const run = async (port) => {
   await app.start(port)
   statusLog.info(`app is running on port ${port}`)
   return app
-}
-
-export {
-  run
 }
