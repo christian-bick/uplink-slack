@@ -1,6 +1,6 @@
 Hello {{recipient.name}}!
 
-{{sender.name}} would like to move your email conversation to Slack.
+{{sender.name}} ({{sender.email}}) would like to move your email conversation to Slack.
 
 Add Uplink to your own Slack and start messaging across workspaces with {{sender.name}} and other contacts in less than a minute!
 
@@ -8,7 +8,7 @@ Visit: https://www.uplink-chat.com
 
 -----
 
-You get this email because {{sender.name}} invited you to use Uplink. {{sender.name}} has provided your email address to send out this invitation. When you don't know {{sender.name}} and think that something is fishy here then please write us a message to support@uplink-chat.com.
+You get this email because someone with the email address <b>{{sender.email}}</b> invited you to use Uplink. This person also provided your email address to send out this invitation. When you don't know someone with this email address and think that something is fishy here then please write to <b>support@uplink-chat.com</b>.
 
 Website: https://www.uplink-chat.com
 Imprint: https://www.uplink-chat.com/imprint
