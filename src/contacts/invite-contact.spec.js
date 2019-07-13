@@ -11,7 +11,8 @@ describe('inviteContact', () => {
   }
 
   const userProfile = {
-    name: 'User Name'
+    name: 'User Name',
+    email: 'user@email.com'
   }
 
   const contactEmail = 'contact@email.com'
@@ -49,7 +50,7 @@ describe('inviteContact', () => {
         Destination: { ToAddresses: [contactEmail] },
         Source: `"${INVITE_NAME}" <${INVITE_EMAIL}>`,
         Template: 'invite-contact-v1',
-        TemplateData: `{"sender":{"name":"${userProfile.name}"},"recipient":{"name":"there"},"inviteLink":"${INVITE_LINK}"}`
+        TemplateData: `{"sender":{"name":"${userProfile.name}","email":"${userProfile.email}"},"recipient":{"name":"there"},"inviteLink":"${INVITE_LINK}"}`
       })
     })
   })
