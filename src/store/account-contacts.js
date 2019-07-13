@@ -3,7 +3,7 @@ import redis from '../redis'
 
 const accountContacts = {
   sadd: (accountId, contactAccountList) => redis.saddAsync(accountContactsKey(accountId), ...contactAccountList),
-  srem: (accountId, contactAccountId) => redis.srem(accountContactsKey(accountId), contactAccountId),
+  srem: (accountId, contactAccountId) => redis.sremAsync(accountContactsKey(accountId), contactAccountId),
   smembers: (accountId) => redis.smembersAsync(accountContactsKey(accountId))
 }
 

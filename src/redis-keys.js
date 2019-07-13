@@ -8,6 +8,7 @@ export const invitesKey = (email) => key(['invites'], [hashed(email)])
 export const accountMediumKey = (accountId) => key(['account', 'medium'], [ accountId ])
 export const accountProfileKey = (accountId) => key(['account', 'profile'], [ accountId ])
 export const accountContactsKey = (accountId) => key(['account', 'contacts'], [ accountId ])
+export const accountBlacklistKey = (accountId) => key(['account', 'blacklist'], [ accountId ])
 export const accountLinkKey = (sourceAccountId, sinkAccountId) => key(['account', 'link'], [sourceAccountId, sinkAccountId])
 
 export const slackUserKey = (teamId, userId) => key(['slack', 'user'], [ teamId, userId ])

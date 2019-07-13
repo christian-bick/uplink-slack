@@ -8,7 +8,7 @@ import { buildPrimaryActions } from '../entry/entry-actions'
 import { BotError } from '../errors'
 
 const { text } = object
-const { section, divider } = block
+const { section, divider, actions } = block
 const { button } = element
 
 export const OPEN_CHAT_QUOTA_LIMIT = 25
@@ -68,7 +68,11 @@ export const openChat = (app) => async ({ action, body, context, ack, say }) => 
       await app.client.chat.postMessage({
         token: context.botToken,
         channel: linkResult.link.channelId,
-        text: buildGroupCreatedMessage(context, contactProfile.name)
+        ...buildGroupCreatedMessage({
+          userId: context.userId,
+          contactName: contactProfile.name,
+          contactAccountId
+        })
       })
     }
   } catch (err) {
@@ -109,10 +113,22 @@ export const buildGroupAlreadyExistsMessage = ({ userId }, userName) => {
   return `<@${userId}> This is your ongoing conversation with *${userName}*.`
 }
 
-export const buildGroupCreatedMessage = ({ userId }, userName) => {
-  return `<@${userId}> This is your new conversation with *${userName}*. I will forward messages between the two of you within this group.\n\n
-  _When sending messages, ${userName} will see your profile name and picture for this workspace._\n
-  _To block ${userName}, simply archive this channel (but don't delete it)._`
+export const buildGroupCreatedMessage = ({ userId, contactName, contactAccountId }, showBlock = false) => {
+  return {
+    blocks: [
+      section(
+        text(`<@${userId}> This is the start of your conversation with *${contactName}*.`, TEXT_FORMAT_MRKDWN)
+      ),
+      divider(),
+      section(
+        text(`_Note: When sending a message, ${contactName} will see your profile name and picture._`, TEXT_FORMAT_MRKDWN)
+      ),
+      divider(),
+      showBlock ? actions([
+        button('block-contact', 'Block', { value: contactAccountId })
+      ]) : null
+    ]
+  }
 }
 
 export const buildQuotaExceededMessage = () => {

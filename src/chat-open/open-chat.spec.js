@@ -102,8 +102,8 @@ describe('openChat', () => {
         await openChat(app)(params)
         expect(app.client.chat.postMessage).to.be.calledOnceWith({
           channel: groupId,
-          text: buildGroupCreatedMessage(context, contactName),
-          token: params.context.botToken
+          token: params.context.botToken,
+          ...buildGroupCreatedMessage({ userId, contactName, contactAccountId })
         })
       })
 
@@ -112,8 +112,8 @@ describe('openChat', () => {
         await openChat(app)(params)
         expect(app.client.chat.postMessage).to.be.calledOnceWith({
           channel: existingGroupId,
-          text: buildGroupAlreadyExistsMessage(context, contactName),
-          token: params.context.botToken
+          token: params.context.botToken,
+          text: buildGroupAlreadyExistsMessage(context, contactName)
         })
       })
     })

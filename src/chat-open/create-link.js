@@ -6,11 +6,6 @@ export const buildCannotCreateGroupInfo = (reason) => `Failed to create a group 
 
 export const buildFailedToFindFreeNameInfo = (attempts) => `Failed to find a free group name after ${attempts} attempts`
 
-export const buildReverseGroupCreatedMessage = (userId, contactName) =>
-  `<@${userId}> This is the start of your conversation with ${contactName}. I will forward messages between the two of you within this group.\n\n
-  _When sending messages, ${contactName} will see your profile name and picture for this workspace._\n
-  _To block ${contactName}, simply archive this channel (but don't delete it)._`
-
 export const generateChannelName = (name) => {
   const hyphened = name.split(' ').join('-').toLowerCase()
   return `dm-${hyphened.substr(0, 18)}`
@@ -68,7 +63,7 @@ export const createLink = async ({ app, context, sourceAccountId, sinkAccountId 
           channel: existingLink.channelId
         })
       }
-      appLog.info({ sourceAccountId, sinkAccountId }, 'link created (using existing group)')
+      appLog.info({ sourceAccountId, sinkAccountId }, 'link already existed (using existing group)')
       return LinkResult.existing(existingLink)
     }
   }
@@ -114,24 +109,4 @@ export const createLink = async ({ app, context, sourceAccountId, sinkAccountId 
     }
   }
   throw new BotError(buildFailedToFindFreeNameInfo(maxAttempts), context)
-}
-
-export const createReverseLink = async ({ app, slackGroup }) => {
-  const userProfile = await store.account.profile.get(slackGroup.sourceAccountId)
-  const contactMedium = await store.account.medium.get(slackGroup.sinkAccountId)
-  const contactSlackTeam = await store.slack.team.get(contactMedium.teamId)
-  const contactSlackUser = await store.slack.user.get([contactMedium.teamId, contactMedium.userId])
-  const context = { ...contactSlackTeam, ...contactSlackUser }
-  const linkResult = await createLink({
-    app,
-    context,
-    sourceAccountId: slackGroup.sinkAccountId,
-    sinkAccountId: slackGroup.sourceAccountId
-  })
-  await app.client.chat.postMessage({
-    token: context.botToken,
-    channel: linkResult.link.channelId,
-    text: buildReverseGroupCreatedMessage(contactMedium.userId, userProfile.name)
-  })
-  return linkResult
 }

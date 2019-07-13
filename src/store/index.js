@@ -5,6 +5,7 @@ import accountProfile from './account-profile'
 import accountLink from './account-link'
 import accountContacts from './account-contacts'
 import accountMedium from './account-medium'
+import accountBlacklist from './account-blacklist'
 
 import slackUser from './slack-user'
 import slackTeam from './slack-team'
@@ -25,7 +26,8 @@ export default {
     medium: accountMedium,
     link: accountLink,
     profile: accountProfile,
-    contacts: accountContacts
+    contacts: accountContacts,
+    blacklist: accountBlacklist
   },
   usage: {
     invites: usageInvites,

@@ -10,7 +10,7 @@ import { MESSAGE_TYPES } from './message-types'
 describe('forwardMessage', () => {
   let app
   let delegateForwarding
-  let createReverseLink
+  let openReverseChat
   let findMatchingMessage
 
   let delegate
@@ -67,9 +67,9 @@ describe('forwardMessage', () => {
     say = sandbox.fake()
     delegate = sandbox.fake()
     delegateForwarding = sandbox.fake.returns(delegate)
-    createReverseLink = sandbox.fake.returns({ link: reverseLink })
+    openReverseChat = sandbox.fake.returns({ link: reverseLink })
     findMatchingMessage = sandbox.fake.returns({ ts: contactThreadTs })
-    stubbedForwardMessage = forwardMessage(app, createReverseLink, delegateForwarding, findMatchingMessage)
+    stubbedForwardMessage = forwardMessage(app, openReverseChat, delegateForwarding, findMatchingMessage)
     params = { message, say, context }
   })
 
@@ -108,10 +108,17 @@ describe('forwardMessage', () => {
       expect(say).to.not.be.called
     })
 
+    it('should not forward message when user is blocked', async () => {
+      await store.account.blacklist.sadd(contactAccountId, [ userAccountId ])
+      await forwardMessage(app, openReverseChat, delegateForwarding)(params)
+      expect(delegate).to.not.be.called
+      expect(say).to.be.calledOnceWith(BLOCKED_MESSAGE)
+    })
+
     describe('without reverse link', () => {
       it('should forward message and create reverse link', async () => {
         await stubbedForwardMessage(params)
-        expect(createReverseLink).to.be.calledOnce
+        expect(openReverseChat).to.be.calledOnce
         expect(delegate).to.be.calledWith({ app, message, context, say, target })
       })
     })
@@ -121,9 +128,9 @@ describe('forwardMessage', () => {
         store.account.link.set([contactAccountId, userAccountId], reverseLink)
       })
 
-      it('should not create reverse link', async () => {
+      it('should always assure a healthy reverse link', async () => {
         await stubbedForwardMessage(params)
-        expect(createReverseLink).to.not.be.called
+        expect(openReverseChat).to.be.called
       })
 
       describe('standard message', () => {
@@ -188,14 +195,14 @@ describe('forwardMessage', () => {
 
         it('should send a warning when matching message cannot be found', async () => {
           params.message.thread_ts = threadTs
-          await forwardMessage(app, createReverseLink, delegateForwarding, sandbox.fake.returns(null))(params)
+          await forwardMessage(app, openReverseChat, delegateForwarding, sandbox.fake.returns(null))(params)
           expect(say).to.be.calledOnceWith(FAILED_TO_FORWARD_THREAD_MESSAGE)
         })
       })
 
       it('should send a warning when delegation fails', async () => {
         delegateForwarding = sandbox.fake.returns(null)
-        await forwardMessage(app, createReverseLink, delegateForwarding)(params)
+        await forwardMessage(app, openReverseChat, delegateForwarding)(params)
         expect(delegate).to.not.be.called
         expect(say).to.be.calledOnceWith(FAILED_TO_FORWARD_MESSAGE)
       })
@@ -203,19 +210,9 @@ describe('forwardMessage', () => {
       it('should send a warning when forwarding fails', async () => {
         delegate = sandbox.fake.throws('error')
         delegateForwarding = sandbox.fake.returns(delegate)
-        await forwardMessage(app, createReverseLink, delegateForwarding)(params)
+        await forwardMessage(app, openReverseChat, delegateForwarding)(params)
         expect(delegate).to.be.calledOnce
         expect(say).to.be.calledOnceWith(FAILED_TO_FORWARD_MESSAGE)
-      })
-
-      it('should send a blocked warning when destination channel is archived', async () => {
-        const error = new Error()
-        error.data = { error: 'is_archived' }
-        delegate = sandbox.fake.throws(error)
-        delegateForwarding = sandbox.fake.returns(delegate)
-        await forwardMessage(app, createReverseLink, delegateForwarding)(params)
-        expect(delegate).to.be.calledOnce
-        expect(say).to.be.calledOnceWith(BLOCKED_MESSAGE)
       })
     })
   })
