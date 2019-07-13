@@ -18,6 +18,13 @@ export const buildPrimaryActions = (context) => ({
       {
         'text': {
           'type': 'plain_text',
+          'text': 'Manage Blacklist',
+        },
+        'value': 'manage-blacklist',
+      },
+      {
+        'text': {
+          'type': 'plain_text',
           'text': 'Get Support',
           'emoji': true
         },

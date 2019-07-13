@@ -21,7 +21,7 @@ export const reactToAppHomeOpened = (app) => async ({ context, event, say }) => 
     if (!lastMessage || !lastMessage.bot_id || lastMessage.text !== PERMISSIONS_TEXT) {
       say(buildPermissionMessage(context))
     }
-  } else if (!lastMessage || !lastMessage.bot_id || lastMessage.text === PERMISSIONS_TEXT) {
+  } else if (!lastMessage || !lastMessage.bot_id || lastMessage.text !== ENTRY_TEXT) {
     const message = buildEntryMessage(context)
     say(message)
   }

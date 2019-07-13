@@ -1,11 +1,13 @@
 import store from '../store'
 import { appLog } from '../logger'
 
-export const blockContact = (app) => async ({ context, action, ack }) => {
+export const blockContact = (app) => async ({ context, action, ack, say }) => {
   ack()
   const contactAccountId = action.value
   await store.account.blacklist.sadd(context.accountId, [ contactAccountId ])
   await store.account.contacts.srem(context.accountId, contactAccountId)
+
+  appLog.info({ context, potentialAbuse: true, accountId: contactAccountId }, 'an account was blocked')
 
   const link = await store.account.link.get([ context.accountId, contactAccountId ])
   if (link) {
