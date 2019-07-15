@@ -2,7 +2,11 @@ import {
   buildCannotConnectToYourselfMessage,
   buildContactNotFoundMessage,
   buildGroupAlreadyExistsMessage,
-  buildGroupCreatedMessage, buildNotContactSelected, buildQuotaExceededMessage, OPEN_CHAT_QUOTA_LIMIT,
+  buildGroupCreatedMessage,
+  buildNotContactSelected,
+  buildNotInstalled,
+  buildQuotaExceededMessage,
+  OPEN_CHAT_QUOTA_LIMIT,
   openChat
 } from './open-chat'
 
@@ -40,6 +44,7 @@ describe('openChat', () => {
   beforeEach('prepare app', async () => {
     await store.account.profile.set(userAccountId, { name: userName })
     await store.registration.set(userEmail, { accountId: userAccountId })
+    await store.account.medium.set(contactAccountId, {})
     app.client.conversations.create = sandbox.stub()
     app.client.conversations.info = sandbox.fake.returns({
       channel: { id: existingGroupId, name: existingGroupName }
@@ -91,6 +96,17 @@ describe('openChat', () => {
     beforeEach('create registrations', async () => {
       await store.account.profile.set(contactAccountId, { name: contactName })
       await store.registration.set(contactEmail, { accountId: contactAccountId })
+    })
+
+    describe('app uninstalled', async () => {
+      beforeEach('remove medium', async () => {
+        await store.account.medium.del(contactAccountId)
+      })
+
+      it('should reply with not installed message', async () => {
+        await openChat(app)(params)
+        expect(params.say, 'say').to.be.calledOnceWith(buildNotInstalled())
+      })
     })
 
     describe('group name available', () => {

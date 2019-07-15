@@ -42,6 +42,12 @@ export const openChat = (app) => async ({ action, body, context, ack, say }) => 
       return
     }
 
+    const contactMedium = await store.account.medium.get(contactAccountId)
+    if (! contactMedium) {
+      say(buildNotInstalled())
+      return
+    }
+
     const usage = await store.usage.chats.incr(context.accountId, OPEN_CHAT_QUOTA_WINDOW)
     if (usage > OPEN_CHAT_QUOTA_LIMIT) {
       say(buildQuotaExceededMessage())
@@ -84,6 +90,8 @@ export const openChat = (app) => async ({ action, body, context, ack, say }) => 
     }
   }
 }
+
+export const buildNotInstalled = () => `Looks like this contact is not using ${APP_NAME} anymore`
 
 export const buildNotContactSelected = () => 'Please enter an email address or select an existing contact'
 

@@ -2,7 +2,7 @@ import {
   BLOCKED_MESSAGE,
   FAILED_TO_FORWARD_MESSAGE,
   FAILED_TO_FORWARD_THREAD_MESSAGE,
-  forwardMessage
+  forwardMessage, NOT_INSTALLED_MESSAGE
 } from './forward-message'
 import store from '../store'
 import { MESSAGE_TYPES } from './message-types'
@@ -85,6 +85,7 @@ describe('forwardMessage', () => {
       store.slack.conversation.set([teamId, channelId], userSlackGroup)
       store.slack.team.set(contactTeamId, { botToken: contactBotToken })
       store.account.profile.set(userAccountId, { name: userName, avatar: userImage })
+      store.account.medium.set(contactAccountId, { teamId: contactTeamId, userId: contactUserId })
     })
 
     it('should not forward message when subtype is ignored', async () => {
@@ -111,8 +112,15 @@ describe('forwardMessage', () => {
     it('should not forward message when user is blocked', async () => {
       await store.account.blacklist.sadd(contactAccountId, [ userAccountId ])
       await forwardMessage(app, openReverseChat, delegateForwarding)(params)
-      expect(delegate).to.not.be.called
       expect(say).to.be.calledOnceWith(BLOCKED_MESSAGE)
+      expect(delegate).to.not.be.called
+    })
+
+    it('should not forward message when user uninstalled app', async () => {
+      await store.account.medium.del(contactAccountId)
+      await forwardMessage(app, openReverseChat, delegateForwarding)(params)
+      expect(say).to.be.calledOnceWith(NOT_INSTALLED_MESSAGE)
+      expect(delegate).to.not.be.called
     })
 
     describe('without reverse link', () => {

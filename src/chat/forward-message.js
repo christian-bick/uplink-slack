@@ -5,13 +5,15 @@ import { SUPPORTED_MESSAGE_SUBTYPES, IGNORED_MESSAGE_SUBTYPES, buildNotSupported
 import { openReverseChat as slackOpenReverseChat } from '../chat-open/open-chat-reverse'
 import { delegateForwarding as slackDelegateForwarding } from './delegate-forwarding'
 import { findMatchingMessage as slackFindMatchingMessage } from './find-matching-message'
+import { APP_NAME } from '../global'
 
 export const FAILED_TO_FORWARD_FILE = ':warning: Failed to forward the last posted file'
 export const FAILED_TO_FORWARD_MESSAGE = ':warning: Failed to forward the last posted message'
 export const FAILED_TO_FORWARD_THREAD_MESSAGE = `${FAILED_TO_FORWARD_MESSAGE} because the threat cannot be 
   found on your contact's side`
 
-export const BLOCKED_MESSAGE = ':warning: You have been blocked by this user.'
+export const BLOCKED_MESSAGE = ':warning: You have been blocked by this contact.'
+export const NOT_INSTALLED_MESSAGE = `:warning: Looks your contact is not using ${APP_NAME} anymore.`
 
 const forwardLog = appLog.child({ module: 'chat', action: 'forward-message' }, true)
 
@@ -31,8 +33,8 @@ export const forwardMessage = (
 
     forwardLog.debug({ message, context }, 'received message')
 
-    const userSlackGroup = await store.slack.conversation.get([context.teamId, message.channel])
-    if (!userSlackGroup) {
+    const slackGroup = await store.slack.conversation.get([context.teamId, message.channel])
+    if (!slackGroup) {
       forwardLog.debug('skipping forwarding (not a linked group)')
       return
     }
@@ -45,22 +47,30 @@ export const forwardMessage = (
       say(buildNotSupportedMessage(message.subtype))
       return
     }
-    if (context.accountId !== userSlackGroup.sourceAccountId) {
+    if (context.accountId !== slackGroup.sourceAccountId) {
       forwardLog.debug('skipping forwarding (not a linked account)')
       return
     }
 
-    const isBLocked = await store.account.blacklist.sismember(userSlackGroup.sinkAccountId, userSlackGroup.sourceAccountId)
+    const isBLocked = await store.account.blacklist.sismember(slackGroup.sinkAccountId, slackGroup.sourceAccountId)
     if (isBLocked) {
       say(BLOCKED_MESSAGE)
       return
     }
 
-    forwardLog.debug({ sinkAccountId: userSlackGroup.sinkAccountId }, 'assuring healthy reverse link')
-    const { link: contactLink } = await openReverseChat({ app, slackGroup: userSlackGroup })
+    const contactMedium = await store.account.medium.get(slackGroup.sinkAccountId)
+    if (!contactMedium) {
+      forwardLog.debug('skipping forwarding (contact medium does not exist anymore)')
+      say(NOT_INSTALLED_MESSAGE)
+      return
+    }
 
     const userProfile = await store.account.profile.get(context.accountId)
-    const contactTeam = await store.slack.team.get(contactLink.teamId)
+
+    forwardLog.debug({ sinkAccountId: slackGroup.sinkAccountId }, 'assuring healthy reverse link')
+    const { link: contactLink } = await openReverseChat({ app, slackGroup, contactMedium, userProfile })
+
+    const contactTeam = await store.slack.team.get(contactMedium.teamId)
 
     const target = {
       username: userProfile.name,
