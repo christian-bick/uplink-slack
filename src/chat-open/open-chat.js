@@ -131,11 +131,15 @@ export const buildGroupCreatedMessage = ({ userId, contactName, contactAccountId
       section(
         text(`_Note: When sending a message, ${contactName} will see your profile name and picture._`, TEXT_FORMAT_MRKDWN)
       ),
+      section(
+        text(`_Hint: Adjust the notification settings for this channel to receive notifications._`, TEXT_FORMAT_MRKDWN)
+      ),
       divider(),
+    ].concat(
       showBlock ? actions([
         button('block-contact', 'Block', { value: contactAccountId })
-      ]) : null
-    ]
+      ]) : []
+    )
   }
 }
 
