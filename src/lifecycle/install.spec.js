@@ -36,6 +36,7 @@ describe('installUser', () => {
       expect(result.team).to.exist
       expect(result.user).to.exist
       expect(result.existed).to.exist
+      expect(result.existed).to.be.false
     })
 
     it('should return correct user', async () => {
@@ -77,12 +78,31 @@ describe('installUser', () => {
 
   describe('without passed team', () => {
     beforeEach(async () => {
-      await store.slack.team.set(teamId, team)
+      await store.slack.team.set(teamId, { ...team, teamId: 'existing' })
     })
 
     it('should retrieve team', async () => {
       const result = await installUser(app)({ user })
-      expect(result.team).to.eql(team)
+      expect(result.team).to.eql({ ...team, teamId: 'existing' })
+    })
+  })
+
+  describe('with existing registration', () => {
+
+    const accountId = 'existing-account-id'
+    let result
+
+    beforeEach(async () => {
+      await store.registration.set(email, { accountId })
+      result = await installUser(app)({ user, team })
+    })
+
+    it('should return existing account id', async () => {
+      expect(result.user.accountId).to.eql(accountId)
+    })
+
+    it('should return existed flag to be true', async () => {
+      expect(result.existed).to.be.true
     })
   })
 })
