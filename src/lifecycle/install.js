@@ -40,7 +40,7 @@ export const installUser = (app) => async ({ team, user }) => {
   await store.account.profile.set(registration.accountId, profile)
   await store.account.medium.set(registration.accountId, medium)
 
-  const restoreCommands = eventuallyRemovedKeys(user).map(key => redis.expireAsync(key, -1))
+  const restoreCommands = eventuallyRemovedKeys(user).map(key => redis.persistAsync(key))
   await Promise.all(restoreCommands)
 
   appLog.info({ team, user, medium, registration }, 'install completed')
