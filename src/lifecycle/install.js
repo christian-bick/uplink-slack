@@ -32,9 +32,10 @@ export const installUser = (app) => async ({ team, user }) => {
   if (team) {
     await store.slack.team.set(team.teamId, team)
   } else {
-    team = store.slack.team.get(user.teamId)
+    team = await store.slack.team.get(user.teamId)
   }
-  await store.slack.user.set([user.teamId, user.userId], { ...user, accountId: registration.accountId })
+  user = {...user, accountId: registration.accountId }
+  await store.slack.user.set([user.teamId, user.userId], user)
   await store.registration.set(slackProfile.email, registration)
   await store.account.profile.set(registration.accountId, profile)
   await store.account.medium.set(registration.accountId, medium)
