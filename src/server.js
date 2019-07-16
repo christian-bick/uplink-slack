@@ -6,6 +6,7 @@ import chat from './chat'
 import chatOpen from './chat-open'
 import auth from './auth'
 import entry from './entry'
+import lifecycle from './lifecycle'
 import authorize from './auth/authorize'
 import * as express from 'express'
 import { VERSION } from './global'
@@ -35,6 +36,7 @@ export const run = async (port) => {
   chat(app)
   chatOpen(app)
   contacts(app)
+  lifecycle(app)
 
   app.receiver.app.use(express.static('public'))
 
