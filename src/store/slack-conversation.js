@@ -1,9 +1,9 @@
-import { slackConversationKey } from '../redis-keys'
-import { getJson, setJson } from '../redis-ops'
+import { slackConversationsKey } from '../redis-keys'
+import { hgetJson, hsetJson } from '../redis-ops'
 
 const slackConversation = {
-  set: ([teamId, groupId], group) => setJson(slackConversationKey(teamId, groupId), group),
-  get: ([teamId, groupId]) => getJson(slackConversationKey(teamId, groupId))
+  set: ([teamId, channelId], group) => hsetJson(slackConversationsKey(teamId), channelId, group),
+  get: ([teamId, channelId]) => hgetJson(slackConversationsKey(teamId), channelId)
 }
 
 export default slackConversation

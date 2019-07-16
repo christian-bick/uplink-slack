@@ -1,9 +1,9 @@
-import { slackUserKey } from '../redis-keys'
-import { getEncryptedJson, setEncryptedJson } from '../redis-ops'
+import { slackUsersKey } from '../redis-keys'
+import { hsetEncryptedJson, hgetEncryptedJson } from '../redis-ops'
 
 const slackUser = {
-  set: ([ teamId, userId ], user) => setEncryptedJson(slackUserKey(teamId, userId), user),
-  get: ([ teamId, userId ]) => getEncryptedJson(slackUserKey(teamId, userId))
+  set: ([ teamId, userId ], user) => hsetEncryptedJson(slackUsersKey(teamId), userId, user),
+  get: ([ teamId, userId ]) => hgetEncryptedJson(slackUsersKey(teamId), userId)
 }
 
 export default slackUser

@@ -13,11 +13,11 @@ export const accountMediumKey = (accountId) => accountKey('medium', [ accountId 
 export const accountProfileKey = (accountId) => accountKey('profile', [ accountId ])
 export const accountContactsKey = (accountId) => accountKey('contacts', [ accountId ])
 export const accountBlacklistKey = (accountId) => accountKey('blacklist', [ accountId ])
-export const accountLinkKey = (sourceAccountId, sinkAccountId) => accountKey('link', [sourceAccountId, sinkAccountId])
+export const accountLinksKey = (accountId) => accountKey('links', [ accountId ])
 
-export const slackUserKey = (teamId, userId) => slackKey('user', [ teamId, userId ])
+export const slackUsersKey = (teamId) => slackKey('users', [ teamId ])
 export const slackTeamKey = (teamId) => slackKey('team', [teamId])
-export const slackConversationKey = (teamId, channelId) => slackKey('conversation', [ teamId, channelId ])
+export const slackConversationsKey = (teamId) => slackKey('conversations', [ teamId ])
 
 export const usageInvitesKey = (accountId) => usageKey('invites', [ accountId ])
 export const usageChatsKey = (accountId) => usageKey('chats', [ accountId ])

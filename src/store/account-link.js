@@ -1,9 +1,9 @@
-import { accountLinkKey } from '../redis-keys'
-import { getJson, setJson } from '../redis-ops'
+import { accountLinksKey } from '../redis-keys'
+import { hgetJson, hsetJson } from '../redis-ops'
 
 const accountLink = {
-  set: ([sourceAccountId, sinkAccountId], link) => setJson(accountLinkKey(sourceAccountId, sinkAccountId), link),
-  get: ([sourceAccountId, sinkAccountId]) => getJson(accountLinkKey(sourceAccountId, sinkAccountId))
+  set: ([sourceAccountId, sinkAccountId], link) => hsetJson(accountLinksKey(sourceAccountId), sinkAccountId, link),
+  get: ([sourceAccountId, sinkAccountId]) => hgetJson(accountLinksKey(sourceAccountId), sinkAccountId)
 }
 
 export default accountLink
