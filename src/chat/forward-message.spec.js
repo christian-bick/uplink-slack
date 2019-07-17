@@ -6,6 +6,7 @@ import {
 } from './forward-message'
 import store from '../store'
 import { MESSAGE_TYPES } from './message-types'
+import { slackMessageId } from './map-dm'
 
 describe('forwardMessage', () => {
   let app
@@ -158,11 +159,14 @@ describe('forwardMessage', () => {
       })
 
       describe('thread meassage', () => {
-        beforeEach('add slack group and user', () => {
-          store.slack.conversation.set([contactTeamId, contactChannelId], {
+        const threadMessageMappingId = slackMessageId(teamId, channelId, threadTs)
+
+        beforeEach('add slack group and user', async () => {
+          await store.mapping.dm.set(threadMessageMappingId, contactThreadTs)
+          await store.slack.conversation.set([contactTeamId, contactChannelId], {
             source: { teamId: contactTeamId, userId: contactUserId }
           })
-          store.slack.user.set([contactTeamId, contactUserId], {
+          await store.slack.user.set([contactTeamId, contactUserId], {
             userToken: contactUserToken
           })
         })
@@ -171,7 +175,6 @@ describe('forwardMessage', () => {
           params.message.thread_ts = threadTs
           params.message.parent_user_id = parentUserId
           await stubbedForwardMessage(params)
-          expect(findMatchingMessage).to.be.calledWith({ app, teamId: contactTeamId, channelId: contactChannelId, ts: threadTs, botId, userId: parentUserId })
           expect(delegate).to.be.calledWith({
             app,
             message,
@@ -202,8 +205,9 @@ describe('forwardMessage', () => {
         })
 
         it('should send a warning when matching message cannot be found', async () => {
+          await store.mapping.dm.del(threadMessageMappingId)
           params.message.thread_ts = threadTs
-          await forwardMessage(app, openReverseChat, delegateForwarding, sandbox.fake.returns(null))(params)
+          await stubbedForwardMessage(params)
           expect(say).to.be.calledOnceWith(FAILED_TO_FORWARD_THREAD_MESSAGE)
         })
       })

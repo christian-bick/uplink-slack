@@ -166,7 +166,7 @@ describe('create-link', () => {
       })
 
       it('should return a new link and group when link exists but group does not', async () => {
-        await store.account.link.set([userEmail, contactEmail], existingLink)
+        await store.account.link.set([userAccountId, contactAccountId], existingLink)
         app.client.conversations.info = sandbox.fake.returns(null)
         const result = await createLink(params)
         expect(result).to.eql({
@@ -176,7 +176,7 @@ describe('create-link', () => {
       })
 
       it('should create a new slack group when link exists but group does not', async () => {
-        await store.account.link.set([userEmail, contactEmail], existingLink)
+        await store.account.link.set([userAccountId, contactAccountId], existingLink)
         app.client.conversations.info = sandbox.fake.returns(null)
         await createLink(params)
         const createdGroup = await store.slack.conversation.get([teamId, groupId])

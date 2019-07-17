@@ -4,8 +4,8 @@ import { SUPPORTED_MESSAGE_SUBTYPES, IGNORED_MESSAGE_SUBTYPES, buildNotSupported
 
 import { openReverseChat as slackOpenReverseChat } from '../chat-open/open-chat-reverse'
 import { delegateForwarding as slackDelegateForwarding } from './delegate-forwarding'
-import { findMatchingMessage as slackFindMatchingMessage } from './find-matching-message'
 import { APP_NAME } from '../global'
+import { getMappedMessageTs } from './map-dm'
 
 export const FAILED_TO_FORWARD_FILE = ':warning: Failed to forward the last posted file'
 export const FAILED_TO_FORWARD_MESSAGE = ':warning: Failed to forward the last posted message'
@@ -21,15 +21,20 @@ export const forwardMessage = (
   app,
   openReverseChat = slackOpenReverseChat,
   delegateForwarding = slackDelegateForwarding,
-  findMatchingMessage = slackFindMatchingMessage
 ) => async ({
   context,
   message,
   say
 }) => {
   try {
-    // Complete context for message updates and deletion
-    context.userId = context.userId || (message.previous_message && message.previous_message.user)
+    // Manually complete context for message updates and deletion
+    if (!context.userId) {
+      const userId = message.previous_message && message.previous_message.user
+      if (userId) {
+        const user = await store.slack.user.get([context.teamId, userId])
+        context = { ...context, ...user }
+      }
+    }
 
     forwardLog.debug({ message, context }, 'received message')
 
@@ -81,24 +86,15 @@ export const forwardMessage = (
 
     if (message.thread_ts) {
       forwardLog.debug('attempting to find matching thread message')
-
-      const matchingMessage = await findMatchingMessage({
-        app,
-        channelId: contactLink.channelId,
-        teamId: contactLink.teamId,
-        userId: message.parent_user_id,
-        botId: context.botId,
-        ts: message.thread_ts
-      })
-
-      if (matchingMessage) {
-        forwardLog.debug('found matching thread message')
-        target.thread_ts = matchingMessage.ts
+      const mappedThreadTs = await getMappedMessageTs(context.teamId, message.channel, message.thread_ts)
+      if (mappedThreadTs) {
+        forwardLog.debug('found mapped thread message')
+        target.thread_ts = mappedThreadTs
         if (message.subtype === 'thread_broadcast') {
           target.reply_broadcast = true
         }
       } else {
-        forwardLog.info({ message, target, context }, 'unable not find matching thread message')
+        forwardLog.info({ message, target, context }, 'unable not find mapped thread message')
         say(FAILED_TO_FORWARD_THREAD_MESSAGE)
       }
     }

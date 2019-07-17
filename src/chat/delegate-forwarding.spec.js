@@ -55,7 +55,7 @@ describe('delegateForwarding', () => {
     })
 
     it('should delegate to forwardFileAsPost for mimetype=text/plain and filetype=space ', () => {
-      message.files = [{ mimetype: 'text/plain', filetype: 'space' }]
+      message.files = [{ mimetype: 'application/vnd.slack-docs' }]
       const delegate = delegateForwarding(message)
       expect(delegate).to.equal(forwardFileAsPost)
     })

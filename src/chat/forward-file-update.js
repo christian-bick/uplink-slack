@@ -1,7 +1,7 @@
-import { findMatchingMessage } from './find-matching-message'
 import store from '../store'
 import { appLog } from '../logger'
 import { delegateForwardForFile } from './delegate-forwarding'
+import {getMappedFileId, mapMessage} from './map-dm'
 
 const forwardLog = appLog.child({ module: 'chat', action: 'forward-file-updated' })
 
@@ -19,7 +19,7 @@ export const forwardFileUpdate = (app) => async ({ event, body, context }) => {
   }
 
   const channelIdList = Object.keys(groupMessageMap)
-  const slackGroupMultiGet = channelIdList.map(channelId => store.slack.group.get([context.teamId, channelId]))
+  const slackGroupMultiGet = channelIdList.map(channelId => store.slack.conversation.get([context.teamId, channelId]))
   const slackGroupList = await Promise.all(slackGroupMultiGet)
   const userSlackGroup = slackGroupList.find(candidate => !!candidate)
 
@@ -28,40 +28,28 @@ export const forwardFileUpdate = (app) => async ({ event, body, context }) => {
     return
   }
 
-  const link = await store.link.get([userSlackGroup.source.email, userSlackGroup.sink.email])
-  const reverseLink = await store.link.get([userSlackGroup.sink.email, userSlackGroup.source.email])
+  const link = await store.account.link.get([userSlackGroup.sourceAccountId, userSlackGroup.sinkAccountId])
+  const reverseLink = await store.account.link.get([userSlackGroup.sinkAccountId, userSlackGroup.sourceAccountId])
   if (!reverseLink) {
     forwardLog.error({ context, source: userSlackGroup.source, sink: userSlackGroup.sink }, 'reverse link not found when forwarding a message-update')
     return
   }
 
-  const originalMessage = groupMessageMap[link.channelId]
-  originalMessage.files = [ fileInfo.file ]
+  const fileMessage = groupMessageMap[link.channelId]
+  fileMessage.files = [ fileInfo.file ]
 
-  const matchingMessage = await findMatchingMessage({
-    app,
-    teamId: reverseLink.teamId,
-    channelId: reverseLink.channelId,
-    botId: context.botId,
-    userId: fileInfo.file.user || context.botId,
-    ts: originalMessage.ts
-  })
+  const mappedFileId = await getMappedFileId(context.teamId, event.file_id)
 
-  if (!matchingMessage) {
-    forwardLog.debug('matching message not found')
+  if (!mappedFileId) {
+    forwardLog.debug('mapped file not found')
     return
   }
 
-  if (!matchingMessage.files) {
-    forwardLog.error({ context, message: matchingMessage, source: userSlackGroup.source, sink: userSlackGroup.sink }, 'found a matching message without files')
-    return
-  }
-
-  const contactTeam = await store.slack.team.get(userSlackGroup.source.teamId)
+  const contactTeam = await store.slack.team.get(reverseLink.teamId)
 
   const delegate = delegateForwardForFile(fileInfo.file)
   await delegate({ app,
-    message: originalMessage,
+    message: fileMessage,
     context,
     target: {
       token: contactTeam.botToken,
@@ -71,6 +59,6 @@ export const forwardFileUpdate = (app) => async ({ event, body, context }) => {
 
   await app.client.files.delete({
     token: contactTeam.botToken,
-    file: matchingMessage.files[0].id
+    file: mappedFileId
   })
 }

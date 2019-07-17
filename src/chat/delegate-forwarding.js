@@ -11,11 +11,10 @@ import { MESSAGE_TYPES } from './message-types'
 
 export const delegateForwardForFile = (file) => {
   if (file.mimetype === 'text/plain') {
-    if (file.filetype === 'space') {
-      return forwardFileAsPost
-    } else {
-      return forwardFileAsSnippet
-    }
+    return forwardFileAsSnippet
+  } else if (file.mimetype === 'application/vnd.slack-docs') {
+    // FIXME: This is broken after Slack changed something with posts
+    return forwardFileAsPost
   } else {
     return forwardFileAsMultipart
   }
