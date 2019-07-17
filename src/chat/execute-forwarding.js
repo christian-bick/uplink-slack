@@ -5,7 +5,6 @@ import requestAsync from 'request-promise-native'
 import fs, { promises as fsAsync } from 'fs'
 
 import { appLog } from '../logger'
-import { convertPost } from './convert-post'
 import { mapMessage, getMappedMessageTs, mapFile, removeMessageMapping } from './map-dm'
 
 const forwardLog = appLog.child({ module: 'chat', action: 'forward-message' })
@@ -68,8 +67,7 @@ export const forwardDeletion = async ({ app, target, message }) => {
 export const forwardFileAsPost = async ({ app, message, context, target }, index = 0) => {
   const original = message.files[index]
   const content = await requestAsync.get(original.url_private, { auth: { bearer: context.botToken } })
-  const convertedContent = convertPost(content)
-  const data = { content: convertedContent }
+  const data = { content: JSON.parse(content) }
   const forwardedFile = buildFile({ message, target, fileMeta: original, data })
   const { file: forwarded } = await app.client.files.upload(forwardedFile)
   return mapFile({ team: context.teamId, ...original }, { ...target, ...forwarded })
