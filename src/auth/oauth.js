@@ -10,7 +10,7 @@ export const SLACK_CLIENT_ID = process.env.SLACK_CLIENT_ID
 const SLACK_SIGNING_SECRET = process.env.SLACK_SIGNING_SECRET
 const SLACK_CLIENT_SECRET = process.env.SLACK_CLIENT_SECRET
 
-const SLACK_USER_SCOPES = ['groups:write', 'groups:read', 'groups:history', 'users.profile:read']
+const SLACK_USER_SCOPES = ['groups:write', 'groups:read', 'users.profile:read']
 const SLACK_USER_SCOPES_ENCODED = SLACK_USER_SCOPES.join('%20')
 const SLACK_TEAM_SCOPES = ['bot', ...SLACK_USER_SCOPES]
 const SLACK_TEAM_SCOPES_ENCODED = SLACK_TEAM_SCOPES.join('%20')
