@@ -139,7 +139,6 @@ export const grantForUser = (app, verifyAuth = verifyAuthCode, verifyState = ver
 
     await sendNotifications({ app, profile, registration, email, existed })
   } catch (err) {
-    console.log(err)
     oauthLog.error(err)
     resp.redirect(302, errorUri(req))
   }
