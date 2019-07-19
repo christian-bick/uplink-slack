@@ -9,7 +9,7 @@ import { getMappedMessageTs } from './map-dm'
 
 export const FAILED_TO_FORWARD_FILE = ':warning: Failed to forward the last posted file'
 export const FAILED_TO_FORWARD_MESSAGE = ':warning: Failed to forward the last posted message'
-export const FAILED_TO_FORWARD_THREAD_MESSAGE = `${FAILED_TO_FORWARD_MESSAGE} because the threat cannot be 
+export const FAILED_TO_FORWARD_THREAD_MESSAGE = `${FAILED_TO_FORWARD_MESSAGE} because the thread cannot be 
   found on your contact's side`
 
 export const BLOCKED_MESSAGE = ':warning: You have been blocked by this contact.'
