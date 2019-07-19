@@ -65,27 +65,28 @@ export const forwardDeletion = async ({ app, target, message }) => {
 }
 
 export const forwardFileAsPost = async ({ app, message, context, target }, index = 0) => {
-  const original = message.files[index]
-  const content = await requestAsync.get(original.url_private, { auth: { bearer: context.botToken } })
-  const data = { content: JSON.parse(content) }
-  const forwardedFile = buildFile({ message, target, fileMeta: original, data })
-  const { file: forwarded } = await app.client.files.upload(forwardedFile)
-  return mapFile({ team: context.teamId, ...original }, { ...target, ...forwarded })
+  const file = message.files[index]
+  const content = await requestAsync.get(file.url_private, { auth: { bearer: context.botToken } })
+  const forwardedContent = content && content !== '' ? JSON.parse(content) : { full: '', preview: '' }
+  const data = { content: forwardedContent }
+  const fileToUpload = buildFile({ message, target, fileMeta: file, data })
+  const { file: forwardedFile } = await app.client.files.upload(fileToUpload)
+  return mapFileWithMessage({ context, target, file, message, forwardedFile })
 }
 
 export const forwardFileAsSnippet = async ({ app, context, target, message }, index = 0) => {
-  const original = message.files[index]
-  const content = await requestAsync.get(original.url_private, { auth: { bearer: context.botToken } })
+  const file = message.files[index]
+  const content = await requestAsync.get(file.url_private, { auth: { bearer: context.botToken } })
   const data = { content }
-  const forwardedFile = buildFile({ message, target, fileMeta: original, data })
-  const { file: forwarded } = await app.client.files.upload(forwardedFile)
-  return mapFile({ team: context.teamId, ...original }, { ...target, ...forwarded })
+  const fileToUpload = buildFile({ message, target, fileMeta: file, data })
+  const { file: forwardedFile } = await app.client.files.upload(fileToUpload)
+  return mapFileWithMessage({ context, target, file, message, forwardedFile })
 }
 
-export const forwardFileAsMultipart = async ({ app, context, target, message }, index = 0) => {
-  const original = message.files[index]
+export const forwardFileAsMultipart = async ({ app, context, target, message: message }, index = 0) => {
+  const file = message.files[index]
   const tmpDir = './tmp'
-  const tmpFilePath = `${tmpDir}/${uuid()}-${original.name}`
+  const tmpFilePath = `${tmpDir}/${uuid()}-${file.name}`
   forwardLog.debug('Preparing temporary directory', { dir: tmpDir })
   await fsAsync.access(tmpDir, fs.constants.W_OK).catch(() => {
     forwardLog.debug('Creating temporary directory', { dir: tmpDir })
@@ -95,17 +96,17 @@ export const forwardFileAsMultipart = async ({ app, context, target, message }, 
   await fsAsync.open(tmpFilePath, 'w', 0o666)
   try {
     forwardLog.debug('Receiving file from Slack', { file: tmpFilePath })
-    const writeStream = request.get(original.url_private, { auth: { bearer: context.botToken } }).pipe(fs.createWriteStream(tmpFilePath))
-    forwardLog.debug('Received file from Slack', { url: original.url_private })
+    const writeStream = request.get(file.url_private, { auth: { bearer: context.botToken } }).pipe(fs.createWriteStream(tmpFilePath))
+    forwardLog.debug('Received file from Slack', { url: file.url_private })
     await new Promise((resolve, reject) => {
       writeStream.on('finish', resolve)
       writeStream.on('error', reject)
     })
-    forwardLog.debug('Forwarding file to Slack', { url: original.url_private })
+    forwardLog.debug('Forwarding file to Slack', { url: file.url_private })
     const data = { file: fs.createReadStream(tmpFilePath) }
-    const forwardedFile = buildFile({ message, target, fileMeta: original, data })
-    const { file: forwarded } = await app.client.files.upload(forwardedFile)
-    return mapFile({ team: context.teamId, ...original }, { ...target, ...forwarded })
+    const fileToUpload = buildFile({ message, target, fileMeta: file, data })
+    const { file: forwardedFile } = await app.client.files.upload(fileToUpload)
+    return mapFileWithMessage({ context, target, file, message, forwardedFile })
   } catch (err) {
     throw err
   } finally {
@@ -116,4 +117,12 @@ export const forwardFileAsMultipart = async ({ app, context, target, message }, 
       forwardLog.error({ err }, 'Failed to remove temporary file')
     }
   }
+}
+
+export const mapFileWithMessage = ({ context, target, file, message, forwardedFile }) => {
+  const forwardedMessage = forwardedFile.shares.private[target.channel][0]
+  return Promise.all([
+    mapMessage({ team: context.teamId, ...message }, { ...target, ts: forwardedMessage.ts}),
+    mapFile({ team: context.teamId, ...file }, { ...target, ...forwardedFile })
+  ])
 }
