@@ -50,7 +50,7 @@ export const createLink = async ({ app, context, sourceAccountId, sinkAccountId 
       existingChannelInfo = await app.client.conversations.info({ token: context.userToken, channel: existingLink.channelId })
     } catch (err) {
       if (err.data && err.data.error === 'channel_not_found') {
-        appLog.info({ sourceAccountId, sinkAccountId }, 'link group not found (creating new group)')
+        appLog.debug({ sourceAccountId, sinkAccountId }, 'link group not found (creating new group)')
       } else {
         throw err
       }
@@ -63,7 +63,7 @@ export const createLink = async ({ app, context, sourceAccountId, sinkAccountId 
           channel: existingLink.channelId
         })
       }
-      appLog.info({ sourceAccountId, sinkAccountId }, 'link already existed (using existing group)')
+      appLog.debug({ sourceAccountId, sinkAccountId }, 'link already existed (using existing group)')
       return LinkResult.existing(existingLink)
     }
   }
