@@ -4,8 +4,8 @@
   "description": "A Slack Integration for cross platform chats",
   "main": "src/index.js",
   "scripts": {
-    "e2e": "LOG_LEVEL=fatal REDIS_MOCK=true mocha -r esm -r dotenv/config -r test/test-setup.js -r chai/register-expect --recursive test/e2e/",
-    "ut": "LOG_LEVEL=fatal REDIS_MOCK=true mocha -r esm -r dotenv/config -r test/test-setup.js test/helpers-ut.js src/*.spec.js src/**/*.spec.js",
+    "e2e": "LOG_LEVEL=fatal REDIS_MOCK=true PORT=3002 npm run dev & wait-on http://localhost:3002",
+    "ut": "LOG_LEVEL=fatal REDIS_MOCK=true mocha -r esm -r dotenv/config -r test/ut/helpers.js test/ut/hooks.js src/*.spec.js src/**/*.spec.js",
     "watch": "npm run ut  -- --watch -- --reporter=min",
     "test": "npm run ut && npm run e2e",
     "lint": "eslint \"src/**/*\" \"test/**/*\"",
@@ -48,6 +48,7 @@
     "chai": "^4.2.0",
     "chai-as-promised": "^7.1.1",
     "chai-http": "^4.3.0",
+    "cypress": "^3.4.0",
     "eslint": "^5.16.0",
     "eslint-config-standard": "^12.0.0",
     "eslint-module-utils": "^2.4.0",
@@ -60,6 +61,7 @@
     "mocha": "^6.1.4",
     "nodemon": "^1.19.1",
     "sinon": "^7.3.2",
-    "sinon-chai": "^3.3.0"
+    "sinon-chai": "^3.3.0",
+    "wait-on": "^3.3.0"
   }
 }

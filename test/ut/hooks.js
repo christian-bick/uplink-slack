@@ -1,4 +1,4 @@
-import redis from '../src/redis'
+import redis from '../../src/redis'
 
 afterEach('restore up sandbox', async () => {
   sandbox.restore()
