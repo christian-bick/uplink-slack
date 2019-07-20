@@ -11,6 +11,6 @@ COPY package-lock.json .
 COPY public/ public/
 COPY src/ src/
 
-RUN npm install
+RUN npm install --production
 
 ENTRYPOINT exec npm run start
