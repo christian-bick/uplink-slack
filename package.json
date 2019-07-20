@@ -4,13 +4,14 @@
   "description": "A Slack Integration for cross platform chats",
   "main": "src/index.js",
   "scripts": {
-    "e2e": "LOG_LEVEL=fatal REDIS_MOCK=true PORT=3002 npm run dev & wait-on http://localhost:3002",
+    "e2e": "test/e2e/run.sh",
     "ut": "LOG_LEVEL=fatal REDIS_MOCK=true mocha -r esm -r dotenv/config -r test/ut/helpers.js test/ut/hooks.js src/*.spec.js src/**/*.spec.js",
     "watch": "npm run ut  -- --watch -- --reporter=min",
     "test": "npm run ut && npm run e2e",
     "lint": "eslint \"src/**/*\" \"test/**/*\"",
     "start": "node -r esm src/index.js",
     "templates": "node -r esm email/deploy-template.js invite-contact-v1",
+    "local": "node -r esm -r dotenv/config src/index.js",
     "dev": "nodemon -r esm -r dotenv/config src/index.js | bunyan -o short --no-color"
   },
   "repository": {
