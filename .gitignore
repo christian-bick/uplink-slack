@@ -55,7 +55,10 @@ typings/
 .yarn-integrity
 
 # dotenv environment variables file
-.env
+.env*
+
+# Cypress env
+cypress.env.json
 
 # next.js build output
 .next

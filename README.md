@@ -158,7 +158,7 @@ npm run e2e
 
 End-to-end tests make use of the following test workspace:
 
-- Domain: `uplink-chat-1`
+- Domain: `uplink-slack-e2e-one.slack.com`
 - User: `christian.bick@uplink-chat.com`
 - Password: ask
 

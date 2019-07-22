@@ -7,9 +7,9 @@ services:
     entrypoint:
       redis-server --appendonly yes
     volumes:
-      - ~/.cache/redis/data
+      - ~/.cache/redis/data-beta
     ports:
-      - "6380:6379"
+      - "6379:6379"
   web:
     build:
       context: .
@@ -19,9 +19,9 @@ services:
     volumes:
       - ./:/usr/src/app
     ports:
-      - "3000:3000"
+      - "3001:3001"
     env_file:
-      - .env
+      - .env-beta
     depends_on:
       - redis
     links:
@@ -33,10 +33,10 @@ services:
     links:
       - web
     environment:
-      - NGROK_SUBDOMAIN=uplink-slack-chris
+      - NGROK_SUBDOMAIN=uplink-slack-beta
       - NGROK_REGION=eu
-      - NGROK_PORT=web:3000
+      - NGROK_PORT=web:3001
     env_file:
-      - .env
+      - .env-beta
     depends_on:
       - web

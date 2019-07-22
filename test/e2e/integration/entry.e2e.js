@@ -1,5 +1,5 @@
-describe('My First Test', function() {
-  it('Does not do much!', function() {
-    expect(true).to.equal(true)
+describe('entry', () => {
+  it('should open entry', async () => {
+    cy.visitAppHome()
   })
 })

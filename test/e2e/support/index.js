@@ -1,5 +1,5 @@
 // ***********************************************************
-// This example support/index.js is processed and
+// This support/index.js is processed and
 // loaded automatically before your test files.
 //
 // This is a great place to put global configuration and
@@ -13,8 +13,15 @@
 // https://on.cypress.io/configuration
 // ***********************************************************
 
-// Import commands.js using ES2015 syntax:
 import './commands'
+import './hooks'
 
 // Alternatively you can use CommonJS syntax:
 // require('./commands')
+
+// All cookies are preserved across sessions
+Cypress.Cookies.defaults({
+  whitelist: () => {
+    return true
+  }
+})
