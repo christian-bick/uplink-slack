@@ -11,7 +11,11 @@
 // This function is called when a project is opened or re-opened (e.g. due to
 // the project's config changing)
 
-module.exports = (on, config) => {
-  // `on` is used to hook into various events Cypress emits
-  // `config` is the resolved Cypress config
-}
+require('babel-register')
+
+process.env.ENCRYPTION_SECRET = '12345678901234567890123456789012'
+process.env.REDIS_HOST = 'localhost'
+process.env.REDIS_PORT = '6380'
+process.env.HASH_SALT= 'no-hash'
+
+module.exports = require('./main')

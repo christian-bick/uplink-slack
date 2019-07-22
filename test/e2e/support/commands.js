@@ -25,5 +25,5 @@
 // Cypress.Commands.overwrite("visit", (originalFn, url, options) => { ... })
 
 Cypress.Commands.add('visitAppHome', () => {
-  cy.visit('/messages/DLPG6FALF/')
+  cy.visit('/DLPG6FALF')
 })

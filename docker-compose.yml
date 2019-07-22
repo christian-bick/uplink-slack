@@ -7,9 +7,9 @@ services:
     entrypoint:
       redis-server --appendonly yes
     volumes:
-      - ~/.cache/redis/data
+      - ~/.cache/alpha:/redis/data
     ports:
-      - "6380:6379"
+      - "6379:6379"
   web:
     build:
       context: .

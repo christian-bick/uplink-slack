@@ -11,7 +11,8 @@ if (process.env.REDIS_MOCK === 'true') {
 Promise.promisifyAll(redis)
 
 const client = redis.createClient({
-  host: process.env.REDIS_HOST
+  host: process.env.REDIS_HOST,
+  port: process.env.REDIS_PORT || 6379,
 })
 
 export default client

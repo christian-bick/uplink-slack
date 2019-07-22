@@ -6,5 +6,6 @@
   "supportFile": "test/e2e/support/index.js",
   "pluginsFile": "test/e2e/plugins/index.js",
   "testFiles": "**/*.e2e.js",
-  "baseUrl": "https://uplink-slack-e2e-one.slack.com"
+  "baseUrl": "https://app.slack.com/client/TLEHLCEPK",
+  "chromeWebSecurity": false
 }

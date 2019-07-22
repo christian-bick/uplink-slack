@@ -5,11 +5,11 @@ services:
   redis:
     image: "redis:alpine"
     entrypoint:
-      redis-server --appendonly yes
+      redis-server --appendonly yes --port 6380
     volumes:
-      - ~/.cache/redis/data-beta
+      - ~/.cache/beta:/redis/data
     ports:
-      - "6379:6379"
+      - "6380:6380"
   web:
     build:
       context: .
