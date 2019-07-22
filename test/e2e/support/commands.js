@@ -25,5 +25,5 @@
 // Cypress.Commands.overwrite("visit", (originalFn, url, options) => { ... })
 
 Cypress.Commands.add('visitAppHome', () => {
-  cy.visit('/DLPG6FALF')
+  cy.visit(`/${Cypress.env('CURRENT_APP_HOME')}`)
 })

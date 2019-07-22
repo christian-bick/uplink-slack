@@ -19,6 +19,15 @@ import './hooks'
 // Alternatively you can use CommonJS syntax:
 // require('./commands')
 
+// pass anything here you'd normally pass to cy.server().
+Cypress.Server.defaults({
+  delay: 500,
+  force404: false,
+  whitelist: (xhr) => {
+    return true
+  }
+})
+
 // All cookies are preserved across sessions
 Cypress.Cookies.defaults({
   whitelist: () => {

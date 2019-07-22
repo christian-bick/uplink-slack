@@ -18,7 +18,7 @@ describe('App Entry', () => {
         cy.task('prepareBlacklist')
       })
 
-      it.only('should find entry in blacklist dialog and remove it', () => {
+      it('should find entry in blacklist dialog and remove it', () => {
         cy.get('[data-qa="bk_actions_block_action"] [type="ellipsis"]').last().click()
         cy.get('[data-qa="menu_item_button"]').contains('Manage Blacklist').last().click()
         cy.get('[data-qa="dialog"]')
