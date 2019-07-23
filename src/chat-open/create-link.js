@@ -2,6 +2,8 @@ import store from '../store/index'
 import { BotError } from '../errors'
 import { appLog } from '../logger'
 
+export const DM_IN_PRIVATE_CHANNELS = process.env.DM_IN_PRIVATE_CHANNELS !== 'false'
+
 export const buildCannotCreateGroupInfo = (reason) => `Failed to create a group for your conversation (${reason || 'for unknown reasons'})`
 
 export const buildFailedToFindFreeNameInfo = (attempts) => `Failed to find a free group name after ${attempts} attempts`
@@ -78,7 +80,7 @@ export const createLink = async ({ app, context, sourceAccountId, sinkAccountId 
       created = await app.client.conversations.create({
         token: context.userToken,
         name: chatNameCandidate,
-        is_private: true
+        is_private: DM_IN_PRIVATE_CHANNELS
       })
       await app.client.conversations.invite({
         token: context.userToken,

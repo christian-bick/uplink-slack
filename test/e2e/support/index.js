@@ -23,14 +23,10 @@ import './hooks'
 Cypress.Server.defaults({
   delay: 500,
   force404: false,
-  whitelist: (xhr) => {
-    return true
-  }
+  whitelist: (xhr) => {}
 })
 
 // All cookies are preserved across sessions
 Cypress.Cookies.defaults({
-  whitelist: () => {
-    return true
-  }
+  whitelist: () => {}
 })

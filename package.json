@@ -13,7 +13,7 @@
     "start": "node -r esm src/index.js",
     "templates": "node -r esm email/deploy-template.js invite-contact-v1",
     "local": "node -r esm -r dotenv/config src/index.js",
-    "dev": "nodemon -r esm -r dotenv/config src/index.js | bunyan -o short --no-color"
+    "dev": "nodemon --watch src -r esm -r dotenv/config src/index.js | bunyan -o short --no-color"
   },
   "repository": {
     "type": "git",

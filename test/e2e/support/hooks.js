@@ -1,7 +1,9 @@
 // Login when required
 before('login when not logged in yet', () => {
+  cy.task('resetSlack')
   cy.task('resetDb')
   cy.task('prepareCurrentUser')
+  cy.task('prepareContactUser')
   cy.visit('/')
   cy.get('body').then(($body) => {
     if ($body.find('#signin_form').length) {
