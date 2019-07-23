@@ -13,7 +13,7 @@ services:
       context: .
       args:
         version: 'latest'
-    entrypoint: npm run dev
+    entrypoint: npm run local
     volumes:
       - ./:/usr/src/app
     ports:
