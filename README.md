@@ -166,6 +166,8 @@ Full Test Setup (follow the steps bellow)
 To run end2end tests create another separate test app with the same settings as your local testing 
 app including the setup of an independent ngrok endpoint for this app.
 
+Activate distribution for this app to allow to be installed at multiple teams.
+
 Add a file called `.env-beta` to the project root, equivalent to the dev setup.
 
 ```
@@ -187,14 +189,23 @@ LOG_LEVEL=debug
 DM_IN_PRIVATE_CHANNELS=false
 ```
 
+Run `npm run beta` and browse to your configured ngrok endpoint to verify that your setup works.
+
+
 **Step 2: Create two independent test teams**
 
-Create two test teams on slack.com and create a cypress.env.json. Copy paste the content from below and
-replace *all fields* with *your own data*. 
+Create two test teams on *slack.com* with one user each (one user will be called *current*, the other one will 
+be called *contact*) 
 
-Create a test-tokens in *Custome Integrations* for each Slack team and use them as *_ADMIN_TOKEN. Test tokens have 
-all scopes and therefore can for example hard-delete channels which we do to always have a clean test-setup. 
+*Important:* Use a different email address for each user.
 
+Now, install and test the app on both teams while running `npm run beta`.
+
+Create a test token under *Custom Integrations* on *slack.com* for each Slack team to later use them as *_ADMIN_TOKEN. Test 
+tokens are issued with all scopes and wen can use them on all API methods independent of app scopes.
+
+Finally, add a file called `cypress.env.json` to the project root and replace *all values* with your *own data* 
+for your *current* and *contact* users:
 
 ```
 {
@@ -218,6 +229,9 @@ all scopes and therefore can for example hard-delete channels which we do to alw
 }
 
 ```
+
+*Hint:* All necessary data is logged to console during install and with the values intentionally not obfuscated 
+in development mode.
 
 #### Run E2E Tests
 

@@ -8,12 +8,13 @@
     "e2e:watch": "test/e2e/open.sh",
     "ut:run": "LOG_LEVEL=fatal REDIS_MOCK=true mocha -r esm -r dotenv/config -r test/ut/helpers.js test/ut/hooks.js src/*.spec.js src/**/*.spec.js",
     "ut:watch": "npm run ut:run  -- --watch -- --reporter=min",
-    "test": "npm run ut && npm run e2e",
+    "test": "npm run ut:run && npm run e2e:run",
     "lint": "eslint \"src/**/*\" \"test/**/*\"",
     "start": "node -r esm src/index.js",
     "templates": "node -r esm email/deploy-template.js invite-contact-v1",
     "local": "nodemon --watch src -r esm -r dotenv/config src/index.js | bunyan -o short --no-color",
-    "dev": "docker-compose up"
+    "dev": "docker-compose up",
+    "beta": "docker-compose --file docker-compose-beta.yml up"
   },
   "repository": {
     "type": "git",
