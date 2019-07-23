@@ -105,7 +105,11 @@ HOST=[your-tunnel-endpoint]
 NGROK_AUTH=[your-ngrok-auth-key]
 
 REDIS_HOST=redis
+
+ENCRYPTION_SECRET=[any-32-character-string]
 HASH_SALT=no-hash
+
+VERSION=latest
 LOG_LEVEL=debug
 ```
 
@@ -116,10 +120,10 @@ You can find the Slack credentials under `Basic Information` in your App's Setti
 Is as simple as:
 
 ```
-docker-compose up
+npm run dev
 ```
 
-This will:
+This will run docker-compose and:
 
 - set up a tunnel with ngrok
 - spawn a redis instance with persistence
@@ -134,13 +138,13 @@ Source files are linked with the node server. When source files are changed, the
 To run all unit tests:
 
 ```
-npm run ut
+npm run ut:run
 ```
 
 To run unit tests in watch mode:
 
 ```
-npm run watch
+npm run ut:watch
 ```
 
 The log level for unit-tests is set to "fatal" to not pollute test result outputs with undesired info and error logs.
@@ -150,17 +154,91 @@ tests only.
 
 ### End-to-End
 
+#### Prerequisites
+
+```
+Chrome / Chromium / Electron
+Full Test Setup (follow the steps bellow)
+```
+
+**Step 1: Create an independent test app on api.slack.com**
+  
+To run end2end tests create another separate test app with the same settings as your local testing 
+app including the setup of an independent ngrok endpoint for this app.
+
+Add a file called `.env-beta` to the project root, equivalent to the dev setup.
+
+```
+SLACK_CLIENT_ID=[your-apps-client-id]
+SLACK_CLIENT_SECRET=[your-apps-client-secret]
+SLACK_SIGNING_SECRET=[your-apps-signing-secret]
+
+HOST=[your-tunnel-endpoint]
+NGROK_AUTH=[your-ngrok-auth-key]
+
+REDIS_HOST=redis
+
+ENCRYPTION_SECRET=[any-32-character-string]
+HASH_SALT=no-hash
+
+VERSION=latest
+LOG_LEVEL=debug
+
+DM_IN_PRIVATE_CHANNELS=false
+```
+
+**Step 2: Create two independent test teams**
+
+Create two test teams on slack.com and create a cypress.env.json. Copy paste the content from below and
+replace *all fields* with *your own data*. 
+
+Create a test-tokens in *Custome Integrations* for each Slack team and use them as *_ADMIN_TOKEN. Test tokens have 
+all scopes and therefore can for example hard-delete channels which we do to always have a clean test-setup. 
+
+
+```
+{
+  "CURRENT_TEAM_ID": "TLEHLCEPK",
+  "CURRENT_TEAM_BOT_ID": "ULMLVPFAR",
+  "CURRENT_TEAM_BOT_TOKEN": "***",
+  "CURRENT_APP_HOME": "DLPG6FALF",
+  "CURRENT_EMAIL": "christian.bick@uplink-chat.com",
+  "CURRENT_PASSWORD": "***",
+  "CURRENT_USER_ID": "UL9G1KQMR",
+  "CURRENT_ADMIN_TOKEN": "***",
+
+  "CONTACT_TEAM_ID": "TLPDQKZ1T",
+  "CONTACT_TEAM_BOT_ID": "ULC1BBHHQ",
+  "CONTACT_TEAM_BOT_TOKEN": "***",
+  "CONTACT_APP_HOME": "DLRHQ1FGW",
+  "CONTACT_EMAIL": "christian.bick@bitsuppliers.com",
+  "CONTACT_PASSWORD": "***",
+  "CONTACT_USER_ID": "ULNUW7CE8",
+  "CONTACT_ADMIN_TOKEN": "***"
+}
+
+```
+
+#### Run E2E Tests
+
 To run all e2e tests:
 
 ```
-npm run e2e
+npm run e2e:run
 ```
 
-End-to-end tests make use of the following test workspace:
+To run e2e tests with browser and dashboard: 
 
-- Domain: `uplink-slack-e2e-one.slack.com`
-- User: `christian.bick@uplink-chat.com`
-- Password: ask
+```
+npm run e2e:watch
+```
+
+E2E Tests are run against the actual Slack UI and may break when Slack releases major changes on their UI components. 
+
+Both, the redis database and Slack workspaces are cleaned up before running all tests. 
+
+All required database state is seeded before a test runs. Especially when making major changes to installs and 
+user/account datastructure, the seeding might require adoption.  
 
 ## Deployment
 
