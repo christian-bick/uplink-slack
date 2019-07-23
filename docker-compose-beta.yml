@@ -2,15 +2,13 @@
 
 version: '3'
 services:
-  redis:
+  redis_beta:
     image: "redis:alpine"
     entrypoint:
-      redis-server --appendonly yes --port 6380
-    volumes:
-      - ~/.cache/beta:/redis/data
+      redis-server --appendonly yes
     ports:
-      - "6380:6380"
-  web:
+      - "6380:6379"
+  web_beta:
     build:
       context: .
       args:
@@ -19,24 +17,24 @@ services:
     volumes:
       - ./:/usr/src/app
     ports:
-      - "3001:3001"
+      - "3001:3000"
     env_file:
       - .env-beta
     depends_on:
-      - redis
+      - redis_beta
     links:
-      - redis
-  ngrok:
+      - redis_beta
+  ngrok_beta:
     image: wernight/ngrok
     ports:
-      - "4040:4040"
+      - "4041:4040"
     links:
-      - web
+      - web_beta
     environment:
       - NGROK_SUBDOMAIN=uplink-slack-beta
       - NGROK_REGION=eu
-      - NGROK_PORT=web:3001
+      - NGROK_PORT=web_beta:3000
     env_file:
       - .env-beta
     depends_on:
-      - web
+      - web_beta
