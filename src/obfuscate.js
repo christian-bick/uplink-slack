@@ -2,7 +2,7 @@ import shortHash from 'short-hash'
 import { omit } from 'lodash'
 import { HASH_SALT } from './global'
 
-const OMITTED_FIELDS = ['botToken', 'userToken', 'matches', 'token']
+const OMITTED_FIELDS = ['matches', 'token']
 
 export const obfuscateValue = (value) => {
   if (!value || HASH_SALT === 'no-hash') {
@@ -23,7 +23,9 @@ export const obfuscatePersonalData = (obj) => {
       botId: obfuscateValue(obj.botId),
       channelId: obfuscateValue(obj.channelId),
       email: obfuscateValue(obj.email),
-      name: obfuscateValue(obj.name)
+      name: obfuscateValue(obj.name),
+      botToken: obfuscateValue(obj.botToken),
+      userToken: obfuscateValue(obj.userToken)
     }
   }
 }
