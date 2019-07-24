@@ -4,7 +4,6 @@ import store from '../store/index'
 import { appLog } from '../logger'
 import { createLink } from './create-link'
 import { APP_NAME } from '../global'
-import { buildPrimaryActions } from '../entry/entry-actions'
 import { BotError } from '../errors'
 import { validateEmail } from '../email'
 
@@ -121,8 +120,6 @@ export const buildContactNotFoundMessage = (context, contactEmail, inviteSent = 
         accessory: button('invite-contact', 'Invite', { value: contactEmail })
       }
     ),
-    divider(),
-    buildPrimaryActions(context),
     divider()
   ] }
 }
