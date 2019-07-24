@@ -6,6 +6,7 @@ import { createLink } from './create-link'
 import { APP_NAME } from '../global'
 import { buildPrimaryActions } from '../entry/entry-actions'
 import { BotError } from '../errors'
+import { validateEmail } from '../email'
 
 const { text } = object
 const { section, divider, actions } = block
@@ -22,7 +23,14 @@ export const openChat = (app) => async ({ action, body, context, ack, say }) => 
       if (!contactEmail) {
         ack({ errors: [{
           name: 'email',
-          error: buildNotContactSelected()
+          error: buildNoContactSelected()
+        }] })
+        return
+      }
+      if (!validateEmail(contactEmail)) {
+        ack({ errors: [{
+          name: 'email',
+          error: buildNoValidEmail()
         }] })
         return
       }
@@ -43,7 +51,7 @@ export const openChat = (app) => async ({ action, body, context, ack, say }) => 
     }
 
     const contactMedium = await store.account.medium.get(contactAccountId)
-    if (! contactMedium) {
+    if (!contactMedium) {
       say(buildNotInstalled())
       return
     }
@@ -93,7 +101,9 @@ export const openChat = (app) => async ({ action, body, context, ack, say }) => 
 
 export const buildNotInstalled = () => `Looks like this contact is not using ${APP_NAME} anymore`
 
-export const buildNotContactSelected = () => 'Please enter an email address or select an existing contact'
+export const buildNoContactSelected = () => 'Please enter an email address or select an existing contact'
+
+export const buildNoValidEmail = () => 'Please enter a valid email address'
 
 export const buildCannotConnectToYourselfMessage = () => 'Looks like this your own email address.'
 
@@ -134,7 +144,7 @@ export const buildGroupCreatedMessage = ({ userId, contactName, contactAccountId
       section(
         text(`_Hint: Adjust the notification settings for this channel to receive notifications._`, TEXT_FORMAT_MRKDWN)
       ),
-      divider(),
+      divider()
     ].concat(
       showBlock ? actions([
         button('block-contact', 'Block', { value: contactAccountId })

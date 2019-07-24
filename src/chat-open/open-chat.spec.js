@@ -3,8 +3,8 @@ import {
   buildContactNotFoundMessage,
   buildGroupAlreadyExistsMessage,
   buildGroupCreatedMessage,
-  buildNotContactSelected,
-  buildNotInstalled,
+  buildNoContactSelected,
+  buildNotInstalled, buildNoValidEmail,
   buildQuotaExceededMessage,
   OPEN_CHAT_QUOTA_LIMIT,
   openChat
@@ -69,7 +69,20 @@ describe('openChat', () => {
       expect(params.ack, 'ack').to.be.calledOnceWith({
         errors: [{
           name: 'email',
-          error: buildNotContactSelected()
+          error: buildNoContactSelected()
+        }]
+      })
+    })
+  })
+
+  describe('invalid email address selected', () => {
+    it('should ack with error', async () => {
+      params.body.submission.email = 'invalid'
+      await openChat(app)(params)
+      expect(params.ack, 'ack').to.be.calledOnceWith({
+        errors: [{
+          name: 'email',
+          error: buildNoValidEmail()
         }]
       })
     })
