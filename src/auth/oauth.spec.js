@@ -124,9 +124,11 @@ describe('oauth', () => {
     let verifyAuth
     let verifyState
     let sendNotifications
+    let sendNotificationsInner
 
     beforeEach('prepare', () => {
-      sendNotifications = sandbox.fake()
+      sendNotificationsInner = sandbox.fake()
+      sendNotifications = sandbox.fake.returns(sendNotificationsInner)
       verifyState = sandbox.fake.returns({ redirectUri })
       app.client.users.profile.get = sandbox.fake.returns({ profile })
       resp.redirect = sandbox.fake()
@@ -146,6 +148,7 @@ describe('oauth', () => {
 
     const expectNotifcationSent = async () => {
       expect(sendNotifications).to.be.calledOnce
+      expect(sendNotificationsInner).to.be.calledOnce
     }
 
     describe('grantForTeam', () => {

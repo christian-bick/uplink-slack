@@ -119,7 +119,7 @@ export const grantForTeam = (app, verifyAuth = verifyAuthCode, verifyState = ver
     resp.redirect(302, successUri(req, team))
     oauthLog.info({ action: 'grant-team-auth', teamId: team.teamId, userId: user.userId }, 'team auth granted')
 
-    await sendNotifications({ app, profile, registration, email, existed })
+    await sendNotifications(app)({ profile, user, team, registration, email, existed })
   } catch (err) {
     oauthLog.error(err)
     resp.redirect(302, errorUri(req))
@@ -137,7 +137,7 @@ export const grantForUser = (app, verifyAuth = verifyAuthCode, verifyState = ver
     resp.redirect(302, successUri(req, team))
     oauthLog.info({ action: 'grant-user-auth', teamId: team.teamId, userId: user.userId }, 'user auth granted')
 
-    await sendNotifications({ app, profile, registration, email, existed })
+    await sendNotifications(app)({ profile, user, team, registration, email, existed })
   } catch (err) {
     oauthLog.error(err)
     resp.redirect(302, errorUri(req))

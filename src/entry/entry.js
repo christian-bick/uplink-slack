@@ -22,8 +22,7 @@ export const reactToAppHomeOpened = (app) => async ({ context, event, say }) => 
       say(buildPermissionMessage(context))
     }
   } else if (!lastMessage || !lastMessage.bot_id || lastMessage.text !== ENTRY_TEXT) {
-    const message = buildEntryMessage(context)
-    say(message)
+    say(buildEntryMessage(context))
   }
 }
 
@@ -52,7 +51,7 @@ export const buildEntryMessage = (context) => ({
   text: ENTRY_TEXT,
   blocks: [
     section(
-      text(':+1: *You are ready to go!* Start messaging contacts outside of this workspace.', TEXT_FORMAT_MRKDWN)
+      text('Start messaging contacts outside of this workspace.', TEXT_FORMAT_MRKDWN)
     ),
     divider(),
     buildPrimaryActions(context),
