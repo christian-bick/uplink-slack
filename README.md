@@ -213,7 +213,7 @@ for your *current* and *contact* users:
   "CURRENT_TEAM_BOT_ID": "ULMLVPFAR",
   "CURRENT_TEAM_BOT_TOKEN": "***",
   "CURRENT_APP_HOME": "DLPG6FALF",
-  "CURRENT_EMAIL": "christian.bick@uplink-chat.com",
+  "CURRENT_EMAIL": "***",
   "CURRENT_PASSWORD": "***",
   "CURRENT_USER_ID": "UL9G1KQMR",
   "CURRENT_ADMIN_TOKEN": "***",
@@ -222,7 +222,7 @@ for your *current* and *contact* users:
   "CONTACT_TEAM_BOT_ID": "ULC1BBHHQ",
   "CONTACT_TEAM_BOT_TOKEN": "***",
   "CONTACT_APP_HOME": "DLRHQ1FGW",
-  "CONTACT_EMAIL": "christian.bick@bitsuppliers.com",
+  "CONTACT_EMAIL": "***",
   "CONTACT_PASSWORD": "***",
   "CONTACT_USER_ID": "ULNUW7CE8",
   "CONTACT_ADMIN_TOKEN": "***"
