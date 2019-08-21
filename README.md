@@ -1,6 +1,6 @@
 # Uplink for Slack
 
-Enables messaging between users of different Slack workspaces.
+Uplink is a Slack App for direct messaging between Slack workspaces. Uplink users can discover each other via email address on any Slack workspace to start messaging right away without any administrative effort.
 
 ## Prerequisites
 
@@ -13,25 +13,27 @@ AWS CLI
 
 ## Workspace
 
-If you don't have one already, create your own private Slack workspace for local development purposes only.
+In case you don't use a dedicated Slack workspace for local development already, first thing is to set up your a private workspace for testing and debugging.
 
 ## Local Tunnel
 
-Set up a tunnel to your local machine with [ngrok](https://ngrok.com).
+For Slack events to be forwarded to our local machine, set up a tunnel with [ngrok](https://ngrok.com).
 
-Make sure that the tunnel endpoint uses a *fixed* subdomain.
+Important: Make sure that the tunnel endpoint uses a *fixed* subdomain.
 
 ## Slack Application
 
-Create a fresh Slack application on your development workspace at [api.slack.com](https://api.slack.com).
+Create a fresh Slack application on your development workspace at [api.slack.com](https://api.slack.com) and name it something like *Ulink Dev*.
 
-Continue to configure the application as stated below.
+Then continue to configure the application using the instructions below.
 
 ### Bot Users
 
-Create a bot user and name it as you like (e.g. uplink-dev).
+Create a bot user and name it give it a name (e.g. uplink-dev).
 
-### Interactive components 
+### Interactive components
+
+Configure the endpoints for interactive components:
 
 Interactivity (Request URL):
 
@@ -53,13 +55,13 @@ Enable Events (Request URL):
 https://[your-tunnel-endpoint]/slack/events
 ```
 
-Subscribe to Workspace Events:
+Subscribe to the following *Workspace Events*:
 
 ```
 app_home_opened
 ```
 
-Subscribe to Bot Events:
+Subscribe to the follwing *Bot Events*:
 
 ```
 group_left
@@ -70,15 +72,15 @@ message.im
 
 ### OAuth & Permissions 
 
-You might need to install the app on your workspace before having access to these options.
+Note: Before continuing, you might need to install the app on your development workspace before gaining access to the oauth configuration options.
 
-Redirect URLs:
+Configure *Redirect URLs*:
 
 ```
 https://[your-tunnel-endpoint]/oauth/
 ```
 
-Scopes:
+Add the following *Permission Scopes*:
 
 ```
 groups:read
@@ -89,8 +91,8 @@ users.profile:read
 
 ### Install App
 
-Install the app on your development workspace if you haven't done that yet. 
-This will grant you all necessary tokens and can be repeated as often as necessary.
+Install the app on your development workspace if you haven't done yet. 
+This will grant test tokens (bot token & user token) and can be repeated as often as necessary.
 
 ## Environment variables
 
@@ -113,7 +115,9 @@ VERSION=latest
 LOG_LEVEL=debug
 ```
 
-You can find the Slack credentials under `Basic Information` in your App's Setting on Slack.
+You can find the Slack App credentials under `Basic Information` in your App's Setting on Slack.
+
+The .env file is in .gitignore for a good reason. They are your private credentials for local testing purposes and are not supposed to be checked in at any time. On staging and production environments, secrets and credentials are supposed to be passed into the Docker container using a credential manager.
 
 ## Running a local server
 
@@ -123,17 +127,17 @@ Is as simple as:
 npm run dev
 ```
 
-This will run docker-compose and:
+This runs docker-compose which will:
 
 - set up a tunnel with ngrok
 - spawn a redis instance with persistence
 - spawn a node server
 
-Source files are linked with the node server. When source files are changed, the server is automatically restarted.
+The source files within the Docker container are automatically linked with the project source files on the host machine. Any local source code changes are immediately synchronized with the container and automatically trigger a server restart (using *nodemon*. Server restarts are executed within a fraction of a second, allowing us to see and test changes without waiting time and manual action.
 
 ## Running Tests
 
-### Unit
+### Unit Tests
 
 To run all unit tests:
 
@@ -152,7 +156,7 @@ The log level for unit-tests is set to "fatal" to not pollute test result output
 File watchers will trigger a rerun of all tests in watch mode. Watch mode uses a mocha reporter which reports failed 
 tests only.
 
-### End-to-End
+### End-to-End Tests
 
 #### Prerequisites
 
@@ -163,12 +167,12 @@ Full Test Setup (follow the steps bellow)
 
 **Step 1: Create an independent test app on api.slack.com**
   
-To run end2end tests create another separate test app with the same settings as your local testing 
-app including the setup of an independent ngrok endpoint for this app.
+To run end-to-end tests in isolation, create another separate test app with the same settings as your local testing 
+app including the setup of an independent ngrok endpoint to use with the test app.
 
-Activate distribution for this app to allow to be installed at multiple teams.
+Also, activate distribution for the test app so it can be installed on multiple workspaces. With the end-to-end tests, we want to test a realistic scenario which naturally involves two separate Slack workspaces in our case.
 
-Add a file called `.env-beta` to the project root, equivalent to the dev setup.
+Add a file called `.env-beta` to the project root and complete the placeholders equivalent to the dev setup:
 
 ```
 SLACK_CLIENT_ID=[your-apps-client-id]
@@ -201,10 +205,9 @@ be called *contact*)
 
 Now, install and test the app on both teams while running `npm run beta`.
 
-Create a test token under *Custom Integrations* on *slack.com* for each Slack team to later use them as *_ADMIN_TOKEN. Test 
-tokens are issued with all scopes and wen can use them on all API methods independent of app scopes.
+Create a test token under *Custom Integrations* on *slack.com* for each Slack team to later use them as *_ADMIN_TOKEN*. We need a dedicated admin token to prepare and clean up before and after our tests. Test tokens are different from normal app tokens in that they are issued with all scopes and that they can also be used with restricted API methods.
 
-Finally, add a file called `cypress.env.json` to the project root and replace *all values* with your *own data* 
+Finally, add a file called `cypress.env.json` to the project root and replace *all values* with your *own values* 
 for your *current* and *contact* users:
 
 ```
@@ -230,8 +233,7 @@ for your *current* and *contact* users:
 
 ```
 
-*Hint:* All necessary data is logged to console during install and with the values intentionally not obfuscated 
-in development mode.
+*Hint:* All necessary data to fill the above fields is logged to console during install in development mode (ids are obfuscated through hashing in production)
 
 #### Run E2E Tests
 
@@ -247,18 +249,18 @@ To run e2e tests with browser and dashboard:
 npm run e2e:watch
 ```
 
-E2E Tests are run against the actual Slack UI and may break when Slack releases major changes on their UI components. 
+*Note:* E2E Tests run against the actual Slack UI and may break when Slack releases major changes on their UI components. 
 
 Both, the redis database and Slack workspaces are cleaned up before running all tests. 
 
-All required database state is seeded before a test runs. Especially when making major changes to installs and 
+All required database state is seeded before a test run. Especially when making major changes to installs and 
 user/account datastructure, the seeding might require adoption.  
 
 ## Deployment
 
 ### Prerequisites
 
-Retrieve an AWS key from your favorite admin and follow the AWS documentation to set up AWS CLI.
+Retrieve an AWS key from your favorite AWS admin and follow the AWS documentation to set up AWS CLI and AWS ECS.
 
 ### Deploy
 
