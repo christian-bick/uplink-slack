@@ -13,11 +13,11 @@ AWS CLI
 
 ## Workspace
 
-In case you don't use a dedicated Slack workspace for local development already, first thing is to set up your a private workspace for testing and debugging.
+In case you don't use a dedicated Slack workspace for local development already, first thing is to set up a private workspace for testing and debugging.
 
 ## Local Tunnel
 
-For Slack events to be forwarded to our local machine, set up a tunnel with [ngrok](https://ngrok.com).
+For Slack events to be forwarded to your local machine, set up a tunnel with [ngrok](https://ngrok.com).
 
 Important: Make sure that the tunnel endpoint uses a *fixed* subdomain.
 
