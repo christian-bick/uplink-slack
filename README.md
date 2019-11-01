@@ -182,7 +182,7 @@ SLACK_SIGNING_SECRET=[your-apps-signing-secret]
 HOST=[your-tunnel-endpoint]
 NGROK_AUTH=[your-ngrok-auth-key]
 
-REDIS_HOST=redis
+REDIS_HOST=redis_beta
 
 ENCRYPTION_SECRET=[any-32-character-string]
 HASH_SALT=no-hash

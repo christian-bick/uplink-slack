@@ -4,7 +4,7 @@ before('login when not logged in yet', () => {
   cy.task('resetDb')
   cy.task('prepareCurrentUser')
   cy.task('prepareContactUser')
-  cy.visit('/')
+  cy.visit('https://uplink-e2e-one.slack.com')
   cy.get('body').then(($body) => {
     if ($body.find('#signin_form').length) {
       cy.get('#email').type(Cypress.env('CURRENT_EMAIL'))

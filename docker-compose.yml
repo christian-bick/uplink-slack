@@ -8,8 +8,6 @@ services:
       redis-server --appendonly yes
     volumes:
       - ~/.cache/redis:/data
-    ports:
-      - "6379:6379"
   web:
     build:
       context: .
@@ -18,20 +16,14 @@ services:
     entrypoint: npm run local
     volumes:
       - ./:/usr/src/app
-    ports:
-      - "3000:3000"
     env_file:
       - .env
     depends_on:
-      - redis
-    links:
       - redis
   ngrok:
     image: wernight/ngrok
     ports:
       - "4040:4040"
-    links:
-      - web
     environment:
       - NGROK_SUBDOMAIN=uplink-slack-chris
       - NGROK_REGION=eu

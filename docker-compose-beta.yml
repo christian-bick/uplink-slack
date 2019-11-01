@@ -16,20 +16,14 @@ services:
     entrypoint: npm run local
     volumes:
       - ./:/usr/src/app
-    ports:
-      - "3001:3000"
     env_file:
       - .env-beta
     depends_on:
-      - redis_beta
-    links:
       - redis_beta
   ngrok_beta:
     image: wernight/ngrok
     ports:
       - "4041:4040"
-    links:
-      - web_beta
     environment:
       - NGROK_SUBDOMAIN=uplink-slack-beta
       - NGROK_REGION=eu

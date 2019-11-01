@@ -19,7 +19,7 @@ describe('App Entry', () => {
         .click()
       cy.get(`[aria-label*="${currentDmChannel.name}"]`)
         .click()
-      cy.get('[data-qa="channel_name_header"').contains(currentDmChannel.name)
+      cy.get('[data-qa="channel_name"').contains(currentDmChannel.name)
       cy.get('[data-qa="message_input"] [contenteditable="true"]')
         .first()
         .scrollIntoView()

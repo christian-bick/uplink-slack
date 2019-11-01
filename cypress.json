@@ -7,6 +7,8 @@
   "pluginsFile": "test/e2e/plugins/index.js",
   "testFiles": "**/*.e2e.js",
   "baseUrl": "https://app.slack.com/client/TLEHLCEPK",
+  "viewportWidth": 1000,
+  "viewportHeight": 1000,
   "chromeWebSecurity": false,
   "watchForFileChanges": false
 }
