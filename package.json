@@ -38,7 +38,7 @@
     "moment": "^2.24.0",
     "moment-timezone": "^0.5.25",
     "node-uuid": "^1.4.7",
-    "redis": "^2.8.0",
+    "redis": "^3.1.1",
     "redis-mock": "^0.44.0",
     "request": "^2.88.0",
     "request-promise-native": "^1.0.7",
