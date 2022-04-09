@@ -35,7 +35,7 @@
     "json2md": "^1.6.3",
     "jsonwebtoken": "^8.5.1",
     "lodash": "^4.17.11",
-    "moment": "^2.24.0",
+    "moment": "^2.29.2",
     "moment-timezone": "^0.5.25",
     "node-uuid": "^1.4.7",
     "redis": "^2.8.0",
